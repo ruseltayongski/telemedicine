@@ -25,7 +25,7 @@ export default function Login({ status, canResetPassword }) {
         <GuestLayout>
             <Head title="Log in" />
 
-            {status && (
+            {/* {status && (
                 <div className="mb-4 text-sm font-medium text-green-600">
                     {status}
                 </div>
@@ -94,7 +94,73 @@ export default function Login({ status, canResetPassword }) {
                         Log in
                     </PrimaryButton>
                 </div>
+            </form> */}
+
+            {status && (
+                <div className="mb-3 text-success small">
+                    {status}
+                </div>
+            )}
+
+            <form onSubmit={submit}>
+                <div className="mb-3">
+                    <InputLabel htmlFor="email" value="Email" />
+                    <TextInput
+                        id="email"
+                        type="email"
+                        name="email"
+                        value={data.email}
+                        className="form-control"
+                        autoComplete="username"
+                        isFocused={true}
+                        onChange={(e) => setData('email', e.target.value)}
+                    />
+                    <InputError message={errors.email} className="text-danger small" />
+                </div>
+
+                <div className="mb-3">
+                    <InputLabel htmlFor="password" value="Password" />
+                    <TextInput
+                        id="password"
+                        type="password"
+                        name="password"
+                        value={data.password}
+                        className="form-control"
+                        autoComplete="current-password"
+                        onChange={(e) => setData('password', e.target.value)}
+                    />
+                    <InputError message={errors.password} className="text-danger small" />
+                </div>
+
+                <div className="form-check mb-3">
+                    <Checkbox
+                        id="remember"
+                        name="remember"
+                        checked={data.remember}
+                        onChange={(e) => setData('remember', e.target.checked)}
+                        className="form-check-input"
+                    />
+                    <label className="form-check-label" htmlFor="remember">
+                        Remember me
+                    </label>
+                </div>
+
+                <div className="d-flex justify-content-between align-items-center">
+                    {canResetPassword && (
+                        <Link
+                            href={route('password.request')}
+                            className="text-decoration-none text-primary small"
+                        >
+                            Forgot your password?
+                        </Link>
+                    )}
+
+                    <PrimaryButton className="btn btn-primary" disabled={processing}>
+                        Log in
+                    </PrimaryButton>
+                </div>
             </form>
+
         </GuestLayout>
     );
 }

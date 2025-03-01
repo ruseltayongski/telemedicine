@@ -176,15 +176,6 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                 </div>
             </div>
 
-            {/* <div className="preloader" ref={preloaderRef}>
-                <div className="preloader-inner">
-                    <div className="preloader-icon">
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-            </div> */}
-
             <header className="header navbar-area">
                 <div className="container">
                     <div className="row align-items-center">
@@ -211,13 +202,13 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             <div className="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent">
                             <ul id="nav" className="navbar-nav ms-auto">
                                 <li className="nav-item">
-                                <a href="index.html" className="active" aria-label="Toggle navigation">Home</a>
+                                <Link href={route('home')} className="active" aria-label="Toggle navigation">Home</Link>
                                 </li>
                                 <li className="nav-item">
-                                <a href="login.html" aria-label="Toggle navigation">Login</a>
+                                <Link href={route('login')} aria-label="Toggle navigation">Login</Link>
                                 </li>
                                 <li className="nav-item">
-                                <a href="register.html" aria-label="Toggle navigation">Register</a>
+                                <Link href={route('register')} aria-label="Toggle navigation">Register</Link>
                                 </li>
                             </ul>
                             </div>
