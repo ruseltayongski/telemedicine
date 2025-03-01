@@ -3,6 +3,79 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import React, { useEffect, useRef, useState } from "react";
 
 export default function Welcome({ auth, laravelVersion, phpVersion }) {
+    useEffect(() => {
+        // Sticky Navbar and Back to Top
+        const handleScroll = () => {
+            const headerNavbar = document.querySelector(".navbar-area");
+            const backToTop = document.querySelector(".scroll-top");
+            
+            if (headerNavbar) {
+                if (window.pageYOffset > headerNavbar.offsetTop) {
+                    headerNavbar.classList.add("sticky");
+                } else {
+                    headerNavbar.classList.remove("sticky");
+                }
+            }
+            
+            if (backToTop) {
+                if (window.scrollY > 50) {
+                    backToTop.style.display = "flex";
+                } else {
+                    backToTop.style.display = "none";
+                }
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+
+        // Initialize WOW.js
+        new WOW().init();
+
+        // Portfolio Filtering
+        const filterButtons = document.querySelectorAll(".portfolio-btn-wrapper button");
+        filterButtons.forEach(button => {
+            button.addEventListener("click", (event) => {
+                let filterValue = event.target.getAttribute("data-filter");
+                if (window.iso) {
+                    window.iso.arrange({ filter: filterValue });
+                }
+            });
+        });
+
+        // Portfolio Button Active State
+        const elements = document.getElementsByClassName("portfolio-btn");
+        for (let i = 0; i < elements.length; i++) {
+            elements[i].onclick = function () {
+                [...elements].forEach(el => el.classList.remove("active"));
+                this.classList.add("active");
+            };
+        }
+
+        // Smooth Scrolling for Menu
+        const pageLinks = document.querySelectorAll(".page-scroll");
+        pageLinks.forEach(link => {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                document.querySelector(link.getAttribute("href")).scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            });
+        });
+
+        // Mobile Menu Toggle
+        const navbarToggler = document.querySelector(".mobile-menu-btn");
+        if (navbarToggler) {
+            navbarToggler.addEventListener("click", () => {
+                navbarToggler.classList.toggle("active");
+            });
+        }
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, []);
+
     const sliderRef = useRef(null);
     useEffect(() => {
         if (sliderRef.current) {
@@ -72,21 +145,54 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         console.log("Appointment Data:", formData);
     };
 
+    const [isLoading, setIsLoading] = useState(true);
+    useEffect(() => {
+        // Use setTimeout to simulate loading time 
+        const timer = setTimeout(() => {
+        setIsLoading(false);
+        }, 500);
+        
+        // Clean up the timeout if component unmounts
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <>
             <Head title="Welcome" />
 
-            <div className="container">
-                <div className="row align-items-center">
+            <div 
+                className="preloader" 
+                style={{ 
+                    opacity: isLoading ? 1 : 0,
+                    display: isLoading ? 'block' : 'none',
+                    transition: 'opacity 0.5s ease'
+                }}
+            >
+                <div className="preloader-inner">
+                    <div className="preloader-icon">
+                    <span></span>
+                    <span></span>
+                    </div>
+                </div>
+            </div>
+
+            {/* <div className="preloader" ref={preloaderRef}>
+                <div className="preloader-inner">
+                    <div className="preloader-icon">
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div> */}
+
+            <header className="header navbar-area">
+                <div className="container">
+                    <div className="row align-items-center">
                     <div className="col-lg-12">
                         <div className="nav-inner">
                         <nav className="navbar navbar-expand-lg">
                             <a className="navbar-brand" href="index.html">
-                            <img
-                                src="assets/images/online.png"
-                                alt="Logo"
-                                style={{ width: "40px" }}
-                            />
+                            <img src="assets/images/online.png" alt="Logo" style={{ width: "40px" }} />
                             Telemedicine
                             </a>
                             <button
@@ -105,32 +211,25 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             <div className="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent">
                             <ul id="nav" className="navbar-nav ms-auto">
                                 <li className="nav-item">
-                                <a href="index.html" className="active" aria-label="Toggle navigation">
-                                    Home
-                                </a>
+                                <a href="index.html" className="active" aria-label="Toggle navigation">Home</a>
                                 </li>
                                 <li className="nav-item">
-                                <a href="login.html" aria-label="Toggle navigation">
-                                    Login
-                                </a>
+                                <a href="login.html" aria-label="Toggle navigation">Login</a>
                                 </li>
                                 <li className="nav-item">
-                                <a href="register.html" aria-label="Toggle navigation">
-                                    Register
-                                </a>
+                                <a href="register.html" aria-label="Toggle navigation">Register</a>
                                 </li>
                             </ul>
                             </div>
                             <div className="button add-list-button">
-                            <a href="#" className="btn">
-                                Book Appointment
-                            </a>
+                            <a href="#" className="btn">Book Appointment</a>
                             </div>
                         </nav>
                         </div>
                     </div>
+                    </div>
                 </div>
-            </div>
+            </header>
 
             <section className="hero-area">
                 <div className="shapes">
@@ -315,6 +414,10 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                     </div>
                 </div>
             </footer>
+
+            <a href="#" className="scroll-top">
+                <i className="lni lni-chevron-up"></i>
+            </a>
 
         </>
     );

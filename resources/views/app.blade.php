@@ -33,16 +33,16 @@
         @inertiaHead
     </head>
     <body >
-        <div class="preloader">
+        @inertia
+
+        {{-- <div class="preloader">
             <div class="preloader-inner">
                 <div class="preloader-icon">
                     <span></span>
                     <span></span>
                 </div>
             </div>
-        </div>
-
-        @inertia
+        </div> --}}
 
         {{-- <header class="header navbar-area">
             <div class="container">
@@ -320,9 +320,9 @@
             </div>
         </footer> --}}
 
-        <a href="#" class="scroll-top">
+        {{-- <a href="#" class="scroll-top">
             <i class="lni lni-chevron-up"></i>
-        </a>
+        </a> --}}
     </body>
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
@@ -332,56 +332,5 @@
     <script src="assets/js/count-up.min.js"></script>
     <script src="assets/js/imagesloaded.min.js"></script>
     <script src="assets/js/isotope.min.js"></script>
-    <script src="assets/js/main.js"></script>
-    <script type="text/javascript">
-        // $( document ).ready(function() {
-        //     //======== Hero Slider
-        //     var slider = new tns({
-        //         container: '.hero-slider',
-        //         slideBy: 'page',
-        //         autoplay: true,
-        //         autoplayButtonOutput: false,
-        //         mouseDrag: true,
-        //         gutter: 0,
-        //         items: 1,
-        //         nav: false,
-        //         controls: true,
-        //         controlsText: [
-        //             '<i class="lni lni-chevron-left"></i>',
-        //             '<i class="lni lni-chevron-right"></i>'
-        //         ],
-        //         responsive: {
-        //             1200: {
-        //                 items: 1,
-        //             },
-        //             992: {
-        //                 items: 1,
-        //             },
-        //             0: {
-        //                 items: 1,
-        //             }
-
-        //         }
-        //     });
-
-        // });
-
-        //====== counter up 
-        // var cu = new counterUp({
-        //     start: 0,
-        //     duration: 2000,
-        //     intvalues: true,
-        //     interval: 100,
-        //     append: " ",
-        // });
-        // cu.start();
-        // //========= glightbox
-        // GLightbox({
-        //     'href': 'https://www.youtube.com/watch?v=r44RKWyfcFw&fbclid=IwAR21beSJORalzmzokxDRcGfkZA1AtRTE__l5N4r09HcGS5Y6vOluyouM9EM',
-        //     'type': 'video',
-        //     'source': 'youtube', //vimeo, youtube or local
-        //     'width': 900,
-        //     'autoplayVideos': true,
-        // });
-    </script>
+    {{-- <script src="assets/js/main.js"></script> --}}
 </html>
