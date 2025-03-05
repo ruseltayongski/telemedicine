@@ -4,6 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -115,77 +116,83 @@ export default function Register() {
                     </PrimaryButton>
                 </div>
             </form> */}
-
-            <form onSubmit={submit}>
-                <div className="mb-3">
-                    <InputLabel htmlFor="name" value="Name" />
-                    <TextInput
-                        id="name"
-                        name="name"
-                        value={data.name}
-                        className="form-control"
-                        autoComplete="name"
-                        isFocused={true}
-                        onChange={(e) => setData('name', e.target.value)}
-                        required
-                    />
-                    <InputError message={errors.name} className="text-danger small" />
-                </div>
-
-                <div className="mb-3">
-                    <InputLabel htmlFor="email" value="Email" />
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="form-control"
-                        autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
-                        required
-                    />
-                    <InputError message={errors.email} className="text-danger small" />
-                </div>
-
-                <div className="mb-3">
-                    <InputLabel htmlFor="password" value="Password" />
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="form-control"
-                        autoComplete="new-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                        required
-                    />
-                    <InputError message={errors.password} className="text-danger small" />
-                </div>
-
-                <div className="mb-3">
-                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
-                    <TextInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="form-control"
-                        autoComplete="new-password"
-                        onChange={(e) => setData('password_confirmation', e.target.value)}
-                        required
-                    />
-                    <InputError message={errors.password_confirmation} className="text-danger small" />
-                </div>
-
-                <div className="d-flex justify-content-between align-items-center">
-                    <Link href={route('login')} className="text-decoration-none text-primary small">
-                        Already registered?
+             <div className="d-flex flex-column min-vh-100 align-items-center bg-light pt-3 justify-content-center">
+                <div>
+                    <Link href="/">
+                        <ApplicationLogo className="" style={{ height: '80px', width: '80px', color: '#6c757d' }} />
                     </Link>
-                    <PrimaryButton className="btn btn-primary" disabled={processing}>
-                        Register
-                    </PrimaryButton>
+                    <form onSubmit={submit}>
+                        <div className="mb-3">
+                            <InputLabel htmlFor="name" value="Name" />
+                            <TextInput
+                                id="name"
+                                name="name"
+                                value={data.name}
+                                className="form-control"
+                                autoComplete="name"
+                                isFocused={true}
+                                onChange={(e) => setData('name', e.target.value)}
+                                required
+                            />
+                            <InputError message={errors.name} className="text-danger small" />
+                        </div>
+
+                        <div className="mb-3">
+                            <InputLabel htmlFor="email" value="Email" />
+                            <TextInput
+                                id="email"
+                                type="email"
+                                name="email"
+                                value={data.email}
+                                className="form-control"
+                                autoComplete="username"
+                                onChange={(e) => setData('email', e.target.value)}
+                                required
+                            />
+                            <InputError message={errors.email} className="text-danger small" />
+                        </div>
+
+                        <div className="mb-3">
+                            <InputLabel htmlFor="password" value="Password" />
+                            <TextInput
+                                id="password"
+                                type="password"
+                                name="password"
+                                value={data.password}
+                                className="form-control"
+                                autoComplete="new-password"
+                                onChange={(e) => setData('password', e.target.value)}
+                                required
+                            />
+                            <InputError message={errors.password} className="text-danger small" />
+                        </div>
+
+                        <div className="mb-3">
+                            <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
+                            <TextInput
+                                id="password_confirmation"
+                                type="password"
+                                name="password_confirmation"
+                                value={data.password_confirmation}
+                                className="form-control"
+                                autoComplete="new-password"
+                                onChange={(e) => setData('password_confirmation', e.target.value)}
+                                required
+                            />
+                            <InputError message={errors.password_confirmation} className="text-danger small" />
+                        </div>
+
+                        <div className="d-flex justify-content-between align-items-center">
+                            <Link href={route('login')} className="text-decoration-none text-primary small">
+                                Already registered?
+                            </Link>
+                            <PrimaryButton className="btn btn-primary" disabled={processing}>
+                                Register
+                            </PrimaryButton>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
 
         </GuestLayout>
     );

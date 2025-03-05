@@ -1,29 +1,75 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import React, { useEffect, useRef, useState } from "react";
 
 export default function GuestLayout({ children }) {
-    return (
-        // <div className="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0 dark:bg-gray-900">
-        //     <div>
-        //         <Link href="/">
-        //             <ApplicationLogo className="h-20 w-20 fill-current text-gray-500" />
-        //         </Link>
-        //     </div>
+    const [scriptsLoaded, setScriptsLoaded] = useState(false);
+    useEffect(() => {
+        const assetsToLoad = [
+            { type: "css", href: "https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" },
+            { type: "css", href: "https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" },
+            { type: "css", href: "assets/css/bootstrap.min.css" },
+            { type: "css", href: "assets/css/LineIcons.2.0.css" },
+            { type: "css", href: "assets/css/animate.css" },
+            { type: "css", href: "assets/css/tiny-slider.css" },
+            { type: "css", href: "assets/css/glightbox.min.css" },
+            { type: "css", href: "assets/css/main.css" },
+        ]
 
-        //     <div className="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg dark:bg-gray-800">
-        //         {children}
-        //     </div>
-        // </div>
-        <div className="d-flex flex-column min-vh-100 align-items-center bg-light pt-3 justify-content-center">
-            <div>
-                <Link href="/">
-                    <ApplicationLogo className="" style={{ height: '80px', width: '80px', color: '#6c757d' }} />
-                </Link>
-            </div>
+        const jsToLoad = [
+            { type: "js", src: "assets/js/bootstrap.min.js" },
+            { type: "js", src: "assets/js/wow.min.js" },
+            { type: "js", src: "assets/js/tiny-slider.js" },
+            { type: "js", src: "assets/js/glightbox.min.js" },
+            { type: "js", src: "assets/js/count-up.min.js" },
+            { type: "js", src: "assets/js/imagesloaded.min.js" },
+            { type: "js", src: "assets/js/isotope.min.js" },
+        ]
 
-            <div className="mt-3 w-100 bg-white p-4 shadow-sm rounded" style={{ maxWidth: '400px' }}>
-                {children}
-            </div>
-        </div>
-    );
+        assetsToLoad.forEach(({ type, href, src }) => {
+            if (type === "css") {
+                const link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.href = href;
+                link.dataset.dynamic = "true";
+                document.head.appendChild(link);
+            }
+        });
+
+        // jsToLoad.forEach(({ type, href, src }) => {
+        //     if (type === "js") {
+        //         const script = document.createElement("script");
+        //         script.src = src;
+        //         script.async = true;
+        //         script.dataset.dynamic = "true";
+        //         document.body.appendChild(script);
+        //     }
+        // });
+
+        Promise.all(
+            jsToLoad.map(({ src }) => {
+                return new Promise((resolve) => {
+                    const script = document.createElement("script");
+                    script.src = src;
+                    script.async = true;
+                    script.dataset.dynamic = "true";
+                    script.onload = resolve;
+                    document.body.appendChild(script);
+                });
+            })
+        ).then(() => {
+            setScriptsLoaded(true); // Mark scripts as loaded
+        });
+    
+        return () => {
+            // Remove previously loaded assets to prevent conflictsasd
+            document.querySelectorAll("[data-dynamic='true']").forEach((el) => el.remove());
+        };
+    }, []);
+
+    // return (
+    //     <>   
+    //         {children}
+    //     </>
+    // );
+    return <>{scriptsLoaded ? children : null}</>;
 }

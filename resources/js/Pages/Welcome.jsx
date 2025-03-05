@@ -3,8 +3,9 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import React, { useEffect, useRef, useState } from "react";
 
 export default function Welcome({ auth, laravelVersion, phpVersion }) {
+    console.log('loaded');
     useEffect(() => {
-        // Sticky Navbar and Back to Top
+         // Sticky Navbar and Back to Top
         const handleScroll = () => {
             const headerNavbar = document.querySelector(".navbar-area");
             const backToTop = document.querySelector(".scroll-top");
@@ -27,10 +28,14 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         };
 
         window.addEventListener("scroll", handleScroll);
-
-        // Initialize WOW.js
-        new WOW().init();
-
+        // setTimeout(() => {
+        //     // Initialize WOW.js
+        //     new WOW().init();
+        // }, 100);
+        if (typeof window.WOW !== "undefined") {
+            new window.WOW().init();
+        }
+        
         // Portfolio Filtering
         const filterButtons = document.querySelectorAll(".portfolio-btn-wrapper button");
         filterButtons.forEach(button => {
@@ -78,46 +83,77 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
 
     const sliderRef = useRef(null);
     useEffect(() => {
-        if (sliderRef.current) {
-            tns({
-                container: sliderRef.current,
-                slideBy: "page",
-                autoplay: true,
-                autoplayButtonOutput: false,
-                mouseDrag: true,
-                gutter: 0,
-                items: 1,
-                nav: false,
-                controls: true,
-                controlsText: [
-                '<i class="lni lni-chevron-left"></i>',
-                '<i class="lni lni-chevron-right"></i>'
-                ],
-                responsive: {
-                    1200: { items: 1 },
-                    992: { items: 1 },
-                    0: { items: 1 }
-                }
-            });
-        }
+        setTimeout(() => {
+            if (sliderRef.current) {
+                tns({
+                    container: sliderRef.current,
+                    slideBy: "page",
+                    autoplay: true,
+                    autoplayButtonOutput: false,
+                    mouseDrag: true,
+                    gutter: 0,
+                    items: 1,
+                    nav: false,
+                    controls: true,
+                    controlsText: [
+                    '<i class="lni lni-chevron-left"></i>',
+                    '<i class="lni lni-chevron-right"></i>'
+                    ],
+                    responsive: {
+                        1200: { items: 1 },
+                        992: { items: 1 },
+                        0: { items: 1 }
+                    }
+                });
+            }
+        }, 100);
+        console.log('slider initialized')
     }, []);
+
+    // useEffect(() => {
+    //     if (window.GLightbox) {
+    //         const lightbox = window.GLightbox({
+    //             selector: ".glightbox",
+    //             touchNavigation: true,
+    //             loop: true,
+    //             autoplayVideos: true,
+    //         });
+        
+    //         return () => lightbox.destroy();
+    //     }
+    // }, []);
 
     useEffect(() => {
+        // Wait until GLightbox is available and elements exist
+        const initGLightbox = () => {
+            if (typeof window.GLightbox !== "undefined" && document.querySelector(".glightbox")) {
+                const lightbox = window.GLightbox({
+                    selector: ".glightbox",
+                    touchNavigation: true,
+                    loop: true,
+                    autoplayVideos: true,
+                });
+    
+                return () => lightbox.destroy();
+            }
+        };
+    
+        // Check if script is already loaded
         if (window.GLightbox) {
-            const lightbox = window.GLightbox({
-                selector: ".glightbox",
-                touchNavigation: true,
-                loop: true,
-                autoplayVideos: true,
-            });
-        
-            return () => lightbox.destroy(); // Cleanup on unmount
+            initGLightbox();
+        } else {
+            // Wait for script to load before initializing
+            const checkScriptLoaded = setInterval(() => {
+                if (window.GLightbox) {
+                    clearInterval(checkScriptLoaded);
+                    initGLightbox();
+                }
+            }, 100);
         }
     }, []);
-
+    
     const counters = [1250, 350, 2500, 35];
     const [counts, setCounts] = useState([0, 0, 0, 0]);
-
     useEffect(() => {
         const interval = setInterval(() => {
         setCounts((prevCounts) =>
@@ -147,17 +183,15 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
 
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
-        // Use setTimeout to simulate loading time 
         const timer = setTimeout(() => {
-        setIsLoading(false);
+            setIsLoading(false);
         }, 500);
         
-        // Clean up the timeout if component unmounts
         return () => clearTimeout(timer);
     }, []);
-
+    
     return (
-        <>
+        <GuestLayout status={status}>
             <Head title="Welcome" />
 
             <div 
@@ -182,9 +216,9 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                     <div className="col-lg-12">
                         <div className="nav-inner">
                         <nav className="navbar navbar-expand-lg">
-                            <a className="navbar-brand" href="index.html">
-                            <img src="assets/images/online.png" alt="Logo" style={{ width: "40px" }} />
-                            Telemedicine
+                            <a className="navbar-brand cursor-pointer" href={route('home')}>
+                                <img src="assets/images/online.png" alt="Logo" style={{ width: "40px" }} />
+                                Telemedicine
                             </a>
                             <button
                             className="navbar-toggler mobile-menu-btn"
@@ -202,13 +236,13 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             <div className="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent">
                             <ul id="nav" className="navbar-nav ms-auto">
                                 <li className="nav-item">
-                                <Link href={route('home')} className="active" aria-label="Toggle navigation">Home</Link>
+                                    <Link href={route('home')} className="active" aria-label="Toggle navigation">Home</Link>
                                 </li>
                                 <li className="nav-item">
-                                <Link href={route('login')} aria-label="Toggle navigation">Login</Link>
+                                    <Link href={route('login')} aria-label="Toggle navigation">Login</Link>
                                 </li>
                                 <li className="nav-item">
-                                <Link href={route('register')} aria-label="Toggle navigation">Register</Link>
+                                    <Link href={route('register')} aria-label="Toggle navigation">Register</Link>
                                 </li>
                             </ul>
                             </div>
@@ -409,7 +443,6 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
             <a href="#" className="scroll-top">
                 <i className="lni lni-chevron-up"></i>
             </a>
-
-        </>
+        </GuestLayout>
     );
 }
