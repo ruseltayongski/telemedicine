@@ -15,7 +15,7 @@ class AppointmentSeeder extends Seeder
      */
     public function run()
     {
-        $doctor = User::where('role_id', 3)->first(); // Find a doctor
+        $doctor = User::where('role_id', 2)->first(); // Find a doctor
 
         if ($doctor) {
             Appointment::insert([
@@ -24,6 +24,7 @@ class AppointmentSeeder extends Seeder
                     'description' => 'Routine health checkup.',
                     'start_time' => Carbon::now()->addDays(1)->format('Y-m-d H:i:s'),
                     'end_time' => Carbon::now()->addDays(1)->addHour()->format('Y-m-d H:i:s'),
+                    'slot' => 20,
                     'doctor_id' => $doctor->id,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -33,6 +34,7 @@ class AppointmentSeeder extends Seeder
                     'description' => 'Teeth and gum assessment.',
                     'start_time' => Carbon::now()->addDays(2)->format('Y-m-d H:i:s'),
                     'end_time' => Carbon::now()->addDays(2)->addHour()->format('Y-m-d H:i:s'),
+                    'slot' => 20,
                     'doctor_id' => $doctor->id,
                     'created_at' => now(),
                     'updated_at' => now(),

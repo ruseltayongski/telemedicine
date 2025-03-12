@@ -3,6 +3,7 @@ import { Head, Link, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 export default function Index({ appointments, search }) {
+    const user = usePage().props.auth.user;
     const [searchTerm, setSearchTerm] = useState(search || '');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -13,6 +14,8 @@ export default function Index({ appointments, search }) {
         description: '',
         start_time: '',
         end_time: '',
+        slot: 1,
+        doctor_id: user.id
     });
 
     // Handle search
@@ -27,10 +30,12 @@ export default function Index({ appointments, search }) {
             onSuccess: () => {
                 setIsCreateModalOpen(false);
                 setFormData({
+                    ...formData,
                     title: '',
                     description: '',
                     start_time: '',
                     end_time: '',
+                    slot: 1
                 });
             },
         });
@@ -40,10 +45,12 @@ export default function Index({ appointments, search }) {
     const handleEdit = (appointment) => {
         setSelectedAppointment(appointment);
         setFormData({
+            ...formData,
             title: appointment.title,
             description: appointment.description,
             start_time: appointment.start_time,
             end_time: appointment.end_time,
+            slot: appointment.slot
         });
         setIsEditModalOpen(true);
     };
@@ -76,27 +83,27 @@ export default function Index({ appointments, search }) {
         >
             <Head title="Appointments" />
 
-            {/* Search Form */}
-            <form onSubmit={handleSearch} className="mb-3">
-                <div className="input-group">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                {/* Search Form */}
+                <form onSubmit={handleSearch} className="d-flex w-50 w-md-100 me-md-2">
                     <input
                         type="text"
-                        className="form-control"
+                        className="form-control me-2"
                         placeholder="Search appointments..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <button type="submit" className="btn btn-primary">Search</button>
-                </div>
-            </form>
+                </form>
 
-            {/* Create Appointment Button */}
-            <button
-                className="btn btn-success mb-3"
-                onClick={() => setIsCreateModalOpen(true)}
-            >
-                Create Appointment
-            </button>
+                {/* Create Appointment Button */}
+                <button
+                    className="btn btn-success"
+                    onClick={() => setIsCreateModalOpen(true)}
+                >
+                    Create Appointment
+                </button>
+            </div>
 
             {/* Appointments Table */}
             <table className="table table-bordered">
@@ -105,6 +112,7 @@ export default function Index({ appointments, search }) {
                         <th>Title</th>
                         <th>Start Time</th>
                         <th>End Time</th>
+                        <th>Slot</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -114,6 +122,7 @@ export default function Index({ appointments, search }) {
                             <td>{appointment.title}</td>
                             <td>{appointment.start_time}</td>
                             <td>{appointment.end_time}</td>
+                            <td>{appointment.slot}</td>
                             <td>
                                 <button
                                     className="btn btn-primary btn-sm me-2"
@@ -134,7 +143,7 @@ export default function Index({ appointments, search }) {
             </table>
 
             {/* Pagination */}
-            <div className="d-flex justify-content-center">
+            <div className="d-flex justify-content-end mt-4 mb-4">
                 {appointments.links.map((link, index) => (
                     <Link
                         key={index}
@@ -193,6 +202,15 @@ export default function Index({ appointments, search }) {
                                         onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                                     />
                                 </div>
+                                <div className="mb-3">
+                                    <label className="form-label">Slot</label>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        value={formData.slot}
+                                        onChange={(e) => setFormData({ ...formData, slot: e.target.value })}
+                                    />
+                                </div>
                                 <button type="submit" className="btn btn-primary">Save</button>
                             </form>
                         </div>
@@ -244,6 +262,15 @@ export default function Index({ appointments, search }) {
                                         className="form-control"
                                         value={formData.end_time}
                                         onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label">Slot</label>
+                                    <input
+                                        type="datetime-local"
+                                        className="form-control"
+                                        value={formData.end_tslotime}
+                                        onChange={(e) => setFormData({ ...formData, slot: e.target.value })}
                                     />
                                 </div>
                                 <button type="submit" className="btn btn-primary">Update</button>

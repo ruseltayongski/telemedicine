@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Dr. John Doe',
-                'email' => 'johndoe@gmail.com',
+                'email' => 'doctor@gmail.com',
                 'password' => Hash::make('password'),
                 'role_id' => 2, // Example role for doctor
                 'email_verified_at' => now(),
@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Jane Smith',
-                'email' => 'janesmith@gmail.com',
+                'email' => 'patient@gmail.com',
                 'password' => Hash::make('password'),
                 'role_id' => 3, // Example role for patient
                 'email_verified_at' => now(),

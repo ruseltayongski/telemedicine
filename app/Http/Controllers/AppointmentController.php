@@ -18,7 +18,7 @@ class AppointmentController extends Controller
             $query->where('title', 'like', "%{$search}%");
         }
 
-        $appointments = $query->paginate(1);
+        $appointments = $query->paginate(20);
         return Inertia::render('Appointments/Index', [
             'appointments' => $appointments,
             'search' => $request->input('search'),

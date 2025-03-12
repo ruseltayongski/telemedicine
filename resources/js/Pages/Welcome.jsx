@@ -1,86 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import React, { useEffect, useRef, useState } from "react";
 
 export default function Welcome({ auth, laravelVersion, phpVersion }) {
-    console.log('loaded');
-    useEffect(() => {
-         // Sticky Navbar and Back to Top
-        const handleScroll = () => {
-            const headerNavbar = document.querySelector(".navbar-area");
-            const backToTop = document.querySelector(".scroll-top");
-            
-            if (headerNavbar) {
-                if (window.pageYOffset > headerNavbar.offsetTop) {
-                    headerNavbar.classList.add("sticky");
-                } else {
-                    headerNavbar.classList.remove("sticky");
-                }
-            }
-            
-            if (backToTop) {
-                if (window.scrollY > 50) {
-                    backToTop.style.display = "flex";
-                } else {
-                    backToTop.style.display = "none";
-                }
-            }
-        };
-
-        window.addEventListener("scroll", handleScroll);
-        // setTimeout(() => {
-        //     // Initialize WOW.js
-        //     new WOW().init();
-        // }, 100);
-        if (typeof window.WOW !== "undefined") {
-            new window.WOW().init();
-        }
-        
-        // Portfolio Filtering
-        const filterButtons = document.querySelectorAll(".portfolio-btn-wrapper button");
-        filterButtons.forEach(button => {
-            button.addEventListener("click", (event) => {
-                let filterValue = event.target.getAttribute("data-filter");
-                if (window.iso) {
-                    window.iso.arrange({ filter: filterValue });
-                }
-            });
-        });
-
-        // Portfolio Button Active State
-        const elements = document.getElementsByClassName("portfolio-btn");
-        for (let i = 0; i < elements.length; i++) {
-            elements[i].onclick = function () {
-                [...elements].forEach(el => el.classList.remove("active"));
-                this.classList.add("active");
-            };
-        }
-
-        // Smooth Scrolling for Menu
-        const pageLinks = document.querySelectorAll(".page-scroll");
-        pageLinks.forEach(link => {
-            link.addEventListener("click", (e) => {
-                e.preventDefault();
-                document.querySelector(link.getAttribute("href")).scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                });
-            });
-        });
-
-        // Mobile Menu Toggle
-        const navbarToggler = document.querySelector(".mobile-menu-btn");
-        if (navbarToggler) {
-            navbarToggler.addEventListener("click", () => {
-                navbarToggler.classList.toggle("active");
-            });
-        }
-
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
-    }, []);
-
     const sliderRef = useRef(null);
     useEffect(() => {
         setTimeout(() => {
@@ -107,7 +29,6 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                 });
             }
         }, 100);
-        console.log('slider initialized')
     }, []);
 
     // useEffect(() => {
@@ -154,17 +75,17 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     
     const counters = [1250, 350, 2500, 35];
     const [counts, setCounts] = useState([0, 0, 0, 0]);
-    useEffect(() => {
-        const interval = setInterval(() => {
-        setCounts((prevCounts) =>
-            prevCounts.map((count, index) =>
-            count < counters[index] ? count + Math.ceil(counters[index] / 50) : counters[index]
-            )
-        );
-        }, 50);
+    // useEffect(() => {
+    //     const interval = setInterval(() => {
+    //     setCounts((prevCounts) =>
+    //         prevCounts.map((count, index) =>
+    //         count < counters[index] ? count + Math.ceil(counters[index] / 50) : counters[index]
+    //         )
+    //     );
+    //     }, 50);
 
-        return () => clearInterval(interval);
-    }, []);
+    //     return () => clearInterval(interval);
+    // }, []);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -180,81 +101,10 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         e.preventDefault();
         console.log("Appointment Data:", formData);
     };
-
-    const [isLoading, setIsLoading] = useState(true);
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 500);
-        
-        return () => clearTimeout(timer);
-    }, []);
     
     return (
-        <GuestLayout status={status}>
+        <GuestLayout>
             <Head title="Welcome" />
-
-            <div 
-                className="preloader" 
-                style={{ 
-                    opacity: isLoading ? 1 : 0,
-                    display: isLoading ? 'block' : 'none',
-                    transition: 'opacity 0.5s ease'
-                }}
-            >
-                <div className="preloader-inner">
-                    <div className="preloader-icon">
-                    <span></span>
-                    <span></span>
-                    </div>
-                </div>
-            </div>
-
-            <header className="header navbar-area">
-                <div className="container">
-                    <div className="row align-items-center">
-                    <div className="col-lg-12">
-                        <div className="nav-inner">
-                        <nav className="navbar navbar-expand-lg">
-                            <a className="navbar-brand cursor-pointer" href={route('home')}>
-                                <img src="assets/images/online.png" alt="Logo" style={{ width: "40px" }} />
-                                Telemedicine
-                            </a>
-                            <button
-                            className="navbar-toggler mobile-menu-btn"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#navbarSupportedContent"
-                            aria-controls="navbarSupportedContent"
-                            aria-expanded="false"
-                            aria-label="Toggle navigation"
-                            >
-                            <span className="toggler-icon"></span>
-                            <span className="toggler-icon"></span>
-                            <span className="toggler-icon"></span>
-                            </button>
-                            <div className="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent">
-                            <ul id="nav" className="navbar-nav ms-auto">
-                                <li className="nav-item">
-                                    <Link href={route('home')} className="active" aria-label="Toggle navigation">Home</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link href={route('login')} aria-label="Toggle navigation">Login</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link href={route('register')} aria-label="Toggle navigation">Register</Link>
-                                </li>
-                            </ul>
-                            </div>
-                            <div className="button add-list-button">
-                            <a href="#" className="btn">Book Appointment</a>
-                            </div>
-                        </nav>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-            </header>
 
             <section className="hero-area">
                 <div className="shapes">
@@ -416,33 +266,6 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                     </div>
                 </div>
             </section>
-
-            <footer className="footer overlay">    
-                <div className="footer-bottom">
-                    <div className="container">
-                        <div className="inner">
-                        <div className="row">
-                            <div className="col-lg-6 col-md-6 col-12">
-                            <div className="content">
-                                <p className="copyright-text">Designed and Developed by <a href="https://graygrids.com/" rel="nofollow" target="_blank">Rusel Tayong</a></p>
-                            </div>
-                            </div>
-                            <div className="col-lg-6 col-md-6 col-12">
-                            <ul className="extra-link">
-                                <li><a href="#">Terms & Conditions</a></li>
-                                <li><a href="#">FAQ</a></li>
-                                <li><a href="#">Privacy Policy</a></li>
-                            </ul>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-
-            <a href="#" className="scroll-top">
-                <i className="lni lni-chevron-up"></i>
-            </a>
         </GuestLayout>
     );
 }

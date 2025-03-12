@@ -11,6 +11,7 @@ export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
     useEffect(() => {
+        document.querySelectorAll("[data-dynamic_guest='true']").forEach((el) => el.remove());
         // Check if scripts are already loaded to prevent duplicate loading
         if (document.querySelector("[data-dynamic='true']")) {
             setScriptsLoaded(true);
@@ -234,7 +235,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <span>Dashboard</span>
                                         </Link>
                                     </li>
-                                    <li 
+                                    {/* <li 
                                         className="sidebar-item has-sub"
                                         ref={el => sidebarItemsRef.current[0] = el}
                                     >
@@ -263,41 +264,8 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <li className="submenu-item">
                                                 <a href="component-breadcrumb.html">Breadcrumb</a>
                                             </li>
-                                            <li className="submenu-item">
-                                                <a href="component-button.html">Button</a>
-                                            </li>
-                                            <li className="submenu-item">
-                                                <a href="component-card.html">Card</a>
-                                            </li>
-                                            <li className="submenu-item">
-                                                <a href="component-carousel.html">Carousel</a>
-                                            </li>
-                                            <li className="submenu-item">
-                                                <a href="component-dropdown.html">Dropdown</a>
-                                            </li>
-                                            <li className="submenu-item">
-                                                <a href="component-list-group.html">List Group</a>
-                                            </li>
-                                            <li className="submenu-item">
-                                                <a href="component-modal.html">Modal</a>
-                                            </li>
-                                            <li className="submenu-item">
-                                                <a href="component-navs.html">Navs</a>
-                                            </li>
-                                            <li className="submenu-item">
-                                                <a href="component-pagination.html">Pagination</a>
-                                            </li>
-                                            <li className="submenu-item">
-                                                <a href="component-progress.html">Progress</a>
-                                            </li>
-                                            <li className="submenu-item">
-                                                <a href="component-spinner.html">Spinner</a>
-                                            </li>
-                                            <li className="submenu-item">
-                                                <a href="component-tooltip.html">Tooltip</a>
-                                            </li>
                                         </ul>
-                                    </li>
+                                    </li> */}
                                     <li className={`sidebar-item ${isActive('appointments.index') ? 'active' : ''}`}>
                                         <Link href={route('appointments.index')} className='sidebar-link'>
                                             <i className="bi bi-grid-1x2-fill"></i>
@@ -337,12 +305,12 @@ export default function AuthenticatedLayout({ header, children }) {
                         <footer>
                             <div className="footer clearfix mb-0 text-muted">
                             <div className="float-start">
-                                <p>2021 &copy; Mazer</p>
+                                <p>2025 &copy; DOH</p>
                             </div>
                             <div className="float-end">
                                 <p>
                                 Crafted with <span className="text-danger"><i className="bi bi-heart"></i></span> by
-                                <a href="http://ahmadsaugi.com"> A. Saugi</a>
+                                <a href="http://ahmadsaugi.com"> R. Tayong</a>
                                 </p>
                             </div>
                             </div>
