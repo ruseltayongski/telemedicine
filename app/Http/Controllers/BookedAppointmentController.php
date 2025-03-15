@@ -3,20 +3,134 @@
 namespace App\Http\Controllers;
 
 use App\Models\BookedAppointment;
+use App\Models\Appointment;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 
 class BookedAppointmentController extends Controller
 {
-    public function index(Request $request): Response
+    public function bookedAppointments(Request $request): Response
     {
+        $user = auth()->user();
         $bookedAppointments = BookedAppointment::with(['appointment', 'patient'])
+            ->where('patient_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->paginate(1);
+            ->paginate(10);
 
         return Inertia::render('BookedAppointments/Index', [
             'bookedAppointments' => $bookedAppointments
         ]);
     }
+
+    public function calendar(Request $request): Response
+    {
+        $appointments = Appointment::with('booked_appointments')->get();
+        return Inertia::render('Appointments/Calendar', [
+            'appointments' => $appointments
+        ]);
+    }
+
+    public function book(Request $request)
+    {
+        $appointment = Appointment::find($request->id);
+
+        if (!$appointment) {
+            return Redirect::back()->withErrors(['error' => 'Appointment slot not available']);
+        }
+
+        $existingBooking = BookedAppointment::where('appointment_id', $appointment->id)
+            ->where('patient_id', Auth::id())
+            ->first();
+
+        if ($existingBooking) {
+            return Redirect::back()->withErrors(['error' => 'You have already booked this appointment']);
+        }
+
+        // Create a new booked appointment
+        BookedAppointment::create([
+            'appointment_id' => $appointment->id,
+            'patient_id' => Auth::id(),
+            'status' => 'pending',
+        ]);
+
+        return Redirect::back()->with('success', 'Appointment successfully booked!');
+    }
+
+    public function manageBooking()
+    {
+        // Get the authenticated doctor
+        $doctor = Auth::user();
+
+        // Make sure the user is a doctor (assuming role_id 2 is for doctors)
+        if ($doctor->role_id !== 2) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized access');
+        }
+
+        // Get all appointments that belong to the doctor
+        $pendingBookings = BookedAppointment::with(['appointment', 'patient'])
+            ->whereHas('appointment', function($query) use ($doctor) {
+                $query->where('doctor_id', $doctor->id);
+            })
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get all confirmed appointments
+        $confirmedBookings = BookedAppointment::with(['appointment', 'patient'])
+            ->whereHas('appointment', function($query) use ($doctor) {
+                $query->where('doctor_id', $doctor->id);
+            })
+            ->where('status', 'confirmed')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get all rejected appointments
+        $rejectedBookings = BookedAppointment::with(['appointment', 'patient'])
+            ->whereHas('appointment', function($query) use ($doctor) {
+                $query->where('doctor_id', $doctor->id);
+            })
+            ->where('status', 'rejected')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('Doctor/ManageBookings', [
+            'pendingBookings' => $pendingBookings,
+            'confirmedBookings' => $confirmedBookings,
+            'rejectedBookings' => $rejectedBookings
+        ]);
+    }
+
+    /**
+     * Update the booking status (confirm or reject)
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:confirmed,rejected'
+        ]);
+
+        // Get the booking
+        $booking = BookedAppointment::findOrFail($id);
+        
+        // Check if the booking belongs to the doctor
+        $doctor = Auth::user();
+        $appointmentBelongsToDoctor = $booking->appointment->doctor_id === $doctor->id;
+        
+        if (!$appointmentBelongsToDoctor) {
+            return response()->json(['message' => 'Unauthorized action'], 403);
+        }
+
+        // Update the status
+        $booking->status = $request->status;
+        $booking->save();
+
+        return response()->json([
+            'message' => 'Booking status updated successfully',
+            'booking' => $booking
+        ]);
+    }
+
 }

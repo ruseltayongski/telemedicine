@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import React, { useEffect, useRef, useState } from "react";
 
@@ -101,6 +101,10 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         e.preventDefault();
         console.log("Appointment Data:", formData);
     };
+
+    const bookAppointment = () => {
+        router.get(route('calendar'));
+    };
     
     return (
         <GuestLayout>
@@ -134,7 +138,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                     <h2>{slide.title}</h2>
                                     <p>{slide.text}</p>
                                     <div className="button">
-                                        <a href="appointment.html" className="btn">Book Appointment</a>
+                                        <a href="#" onClick={bookAppointment} className="btn">Book Appointment</a>
                                         <a href="about-us.html" className="btn">About Us</a>
                                     </div>
                                     </div>

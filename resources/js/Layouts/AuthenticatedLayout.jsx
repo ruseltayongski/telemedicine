@@ -209,7 +209,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <div className="d-flex justify-content-between">
                                 <div className="logo">
                                     <Link href={route('home')} style={{ fontSize: "1.4rem" }}>
-                                        Rusel T. Tayong
+                                        {user.name}
                                     </Link>
                                 </div>
                                 <div className="toggler">
@@ -270,6 +270,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                         <Link href={route('appointments.index')} className='sidebar-link'>
                                             <i className="bi bi-grid-1x2-fill"></i>
                                             <span>Manage Appointment</span>
+                                        </Link>
+                                    </li>
+                                    <li className={`sidebar-item ${isActive('doctor.manage.booking') ? 'active' : ''}`}>
+                                        <Link href={route('doctor.manage.booking')} className='sidebar-link'>
+                                            <i className="bi bi-grid-1x2-fill"></i>
+                                            <span>Manage Booking</span>
                                         </Link>
                                     </li>
                                     <li className="sidebar-item">

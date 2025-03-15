@@ -39,7 +39,7 @@ export default function BookedAppointments({bookedAppointments}) {
                             <div className="col-lg-8 col-12">
                                 <div className="form-main">
                                     <div className="form-title">
-                                        <h2>Feel free to contact us for any query.</h2>
+                                        <h2>Transaction List</h2>
                                     </div>
                                     <div className="overflow-x-auto">
                                         <table className="min-w-full border border-gray-300">
@@ -50,6 +50,7 @@ export default function BookedAppointments({bookedAppointments}) {
                                                     <th className="border px-4 py-2">Appointment Title</th>
                                                     <th className="border px-4 py-2">Status</th>
                                                     <th className="border px-4 py-2">Booked Date</th>
+                                                    <th className="border px-4 py-2">Link</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -60,42 +61,21 @@ export default function BookedAppointments({bookedAppointments}) {
                                                         <td className="border px-4 py-2">{booking.appointment.title}</td>
                                                         <td className="border px-4 py-2">{booking.status}</td>
                                                         <td className="border px-4 py-2">{new Date(booking.created_at).toLocaleDateString()}</td>
+                                                        <td className="border px-4 py-2">
+                                                            {booking.status === "confirmed" ? (
+                                                                <Link href={route('video-call')} className="text-blue-500 hover:underline">
+                                                                    Click here to join call
+                                                                </Link>
+                                                            ) : (
+                                                                <span className="text-gray-500">Not available</span>
+                                                            )}
+                                                        </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
                                     </div>
                         
-                                    {/* Pagination */}
-                                    {/* <div className="d-flex justify-content-end mt-4 mb-4">
-                                        {bookedAppointments.links.map((link, index) => (
-                                            <button
-                                                key={index}
-                                                onClick={() => link.url && router.visit(link.url, { preserveScroll: true })}
-                                                className={`px-3 py-2 mx-1 border rounded ${
-                                                    link.active ? 'bg-primary text-white' : 'bg-white'
-                                                }`}
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                                disabled={!link.url} // Disable buttons for "..." or inactive links
-                                            />
-                                        ))}
-                                    </div> */}
-                                    {/* <div className="d-flex flex-column align-items-end mt-4 mb-4" style={{ minHeight: "40vh" }}>
-                                        <div className="mt-auto">
-                                            {bookedAppointments.links.map((link, index) => (
-                                                <button
-                                                    key={index}
-                                                    onClick={() => link.url && router.visit(link.url, { preserveScroll: true })}
-                                                    className={`px-3 py-2 mx-1 border rounded ${
-                                                        link.active ? 'bg-primary text-white' : 'bg-white'
-                                                    }`}
-                                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                                    disabled={!link.url} // Disable buttons for "..." or inactive links
-                                                />
-                                            ))}
-                                        </div>
-                                    </div> */}
-
                                     <div className="d-flex flex-column align-items-end mt-4 mb-4" style={{ minHeight: "40vh" }}>
                                         <div className="mt-auto">
                                             {bookedAppointments.links.map((link, index) => (

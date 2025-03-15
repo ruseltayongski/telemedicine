@@ -161,6 +161,10 @@ export default function GuestLayout({ children }) {
     const handleLogout = () => {
         router.post(route('logout'));
     };
+
+    const bookAppointment = () => {
+        router.get(route('calendar'));
+    };
     
     return <>{
         scriptsLoaded 
@@ -262,7 +266,7 @@ export default function GuestLayout({ children }) {
                                         </ul>
                                         </div>
                                         <div className="button add-list-button">
-                                            <a href="#" className="btn cursor-pointer">Book Appointment</a>
+                                            <a href="#" className="btn cursor-pointer" onClick={bookAppointment}>Book Appointment</a>
                                         </div>
                                     </nav>
                                 </div>

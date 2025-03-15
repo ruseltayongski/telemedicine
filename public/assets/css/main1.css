@@ -6779,3 +6779,41 @@ blockquote .shape {
 .footer .footer-bottom .extra-link li a:hover {
   text-decoration: underline;
 }
+
+/* // Calendar */
+.fc .fc-button-primary {
+  background-color: #3366CC;
+  border-color: #3366CC;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background-color: rgba(51, 102, 204, 0.15);
+}
+
+.fc-event.important {
+  background-color: #F44336;
+  border-color: #F44336;
+}
+
+.fc-event.success {
+  background-color: #4CAF50;
+  border-color: #4CAF50;
+}
+
+.fc-event.info {
+  background-color: #2196F3;
+  border-color: #2196F3;
+}
+
+.fc-event.default {
+  background-color: #9E9E9E;
+  border-color: #9E9E9E;
+}
+
+.fc-event-title {
+  color: white;
+}
+
+.fc-event-time {
+  color: white;
+}
