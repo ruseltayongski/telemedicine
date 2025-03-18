@@ -1,93 +1,6 @@
-import React, { useState } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Head, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-
-const BookingCard = ({ booking, onStatusUpdate }) => {
-    const [isLoading, setIsLoading] = useState(false);
-
-    const updateStatus = async (status) => {
-        setIsLoading(true);
-        try {
-            const response = await axios.put(`/doctor/bookings/${booking.id}/status`, {
-                status
-            });
-            onStatusUpdate(booking.id, status);
-        } catch (error) {
-            console.error('Error updating booking status:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Format appointment date and time
-    const appointmentDate = new Date(booking.appointment.date).toLocaleDateString();
-    const startTime = booking.appointment.start_time;
-    const endTime = booking.appointment.end_time;
-
-    // Get appropriate badge color based on status
-    const getBadgeClass = () => {
-        switch(booking.status) {
-            case 'confirmed':
-                return 'bg-success';
-            case 'rejected':
-                return 'bg-danger';
-            default:
-                return 'bg-warning';
-        }
-    };
-
-    return (
-        <div className="card mb-3 shadow-sm">
-            <div className="card-body">
-                <div className="row">
-                    <div className="col-md-8">
-                        <h5 className="card-title">Patient: {booking.patient.name}</h5>
-                        <p className="card-text mb-1">
-                            <i className="bi bi-calendar me-2"></i>Date: {appointmentDate}
-                        </p>
-                        <p className="card-text mb-1">
-                            <i className="bi bi-clock me-2"></i>Time: {startTime} - {endTime}
-                        </p>
-                        <p className="card-text">
-                            Status: <span className={`badge ${getBadgeClass()} text-uppercase`}>{booking.status}</span>
-                        </p>
-                    </div>
-                    
-                    {booking.status === 'pending' && (
-                        <div className="col-md-4 d-flex align-items-center justify-content-end">
-                            <div className="btn-group">
-                                <button
-                                    onClick={() => updateStatus('confirmed')}
-                                    disabled={isLoading}
-                                    className="btn btn-success me-2"
-                                >
-                                    {isLoading ? (
-                                        <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                                    ) : (
-                                        <i className="bi bi-check-circle me-1"></i>
-                                    )}
-                                    Confirm
-                                </button>
-                                <button
-                                    onClick={() => updateStatus('rejected')}
-                                    disabled={isLoading}
-                                    className="btn btn-danger"
-                                >
-                                    {isLoading ? (
-                                        <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                                    ) : (
-                                        <i className="bi bi-x-circle me-1"></i>
-                                    )}
-                                    Reject
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
 
 export default function ManageBookings() {
     const { pendingBookings, confirmedBookings, rejectedBookings } = usePage().props;
@@ -97,19 +10,34 @@ export default function ManageBookings() {
         rejected: rejectedBookings
     });
     const [activeTab, setActiveTab] = useState('pending');
+    const [isLoading, setIsLoading] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+    const [pendingStatus, setPendingStatus] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [selectedBooking, setSelectedBooking] = useState(null);
+
+    const { flash } = usePage().props;
+    useEffect(() => {
+        console.log(flash);
+        if (flash && flash.success) {
+            setSuccessMessage(flash.success);
+            setShowSuccessDialog(true);
+            
+            const timer = setTimeout(() => {
+                setShowSuccessDialog(false);
+            }, 3000);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
 
     const handleStatusUpdate = (bookingId, newStatus) => {
-        // Find the booking that was updated
         const updatedBooking = bookings.pending.find(booking => booking.id === bookingId);
         
         if (updatedBooking) {
-            // Remove from pending
             const newPending = bookings.pending.filter(booking => booking.id !== bookingId);
-            
-            // Update the booking status
             updatedBooking.status = newStatus;
-            
-            // Add to appropriate list
             const newStatusList = newStatus === 'confirmed' ? 'confirmed' : 'rejected';
             
             setBookings({
@@ -118,6 +46,102 @@ export default function ManageBookings() {
                 [newStatusList]: [...bookings[newStatusList], updatedBooking]
             });
         }
+    };
+
+    const updateStatus = (status) => {
+        setIsLoading(true);
+        
+        router.put(`/doctor-bookings/${selectedBooking.id}/status`, {
+            status
+        }, {
+            preserveScroll: true,
+            // preserveState: false,
+            onSuccess: () => {
+                handleStatusUpdate(selectedBooking.id, status);
+                setShowConfirmDialog(false);
+            },
+            onError: (errors) => {
+                console.error('Error updating booking status:', errors);
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            }
+        });
+    };
+
+    const confirmStatusUpdate = (booking, status) => {
+        setSelectedBooking(booking);
+        setPendingStatus(status);
+        setShowConfirmDialog(true);
+    };
+
+    const getBadgeClass = (status) => {
+        switch(status) {
+            case 'confirmed':
+                return 'bg-success';
+            case 'rejected':
+                return 'bg-danger';
+            default:
+                return 'bg-warning';
+        }
+    };
+
+    const renderBookingCard = (booking) => {
+        const appointmentDate = new Date(booking.appointment.date).toLocaleDateString();
+        const startTime = booking.appointment.start_time;
+        const endTime = booking.appointment.end_time;
+
+        return (
+            <div className="card mb-3 shadow-sm" key={booking.id}>
+                <div className="card-body">
+                    <div className="row">
+                        <div className="col-md-8">
+                            <h5 className="card-title">Patient: {booking.patient.name}</h5>
+                            <p className="card-text mb-1">
+                                <i className="bi bi-calendar me-2"></i>Date: {appointmentDate}
+                            </p>
+                            <p className="card-text mb-1">
+                                <i className="bi bi-clock me-2"></i>Time: {startTime} - {endTime}
+                            </p>
+                            <p className="card-text">
+                                Status: <span className={`badge ${getBadgeClass(booking.status)} text-uppercase`}>{booking.status}</span>
+                            </p>
+                        </div>
+                        
+                        {booking.status === 'pending' && (
+                            <div className="col-md-4 d-flex align-items-center justify-content-end">
+                                <div className="btn-group">
+                                    <button
+                                        onClick={() => confirmStatusUpdate(booking, 'confirmed')}
+                                        disabled={isLoading}
+                                        className="btn btn-success me-2"
+                                    >
+                                        {isLoading ? (
+                                            <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                        ) : (
+                                            <i className="bi bi-check-circle me-1"></i>
+                                        )}
+                                        Confirm
+                                    </button>
+                                    <button
+                                        onClick={() => confirmStatusUpdate(booking, 'rejected')}
+                                        disabled={isLoading}
+                                        className="btn btn-danger"
+                                    >
+                                        {isLoading ? (
+                                            <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                        ) : (
+                                            <i className="bi bi-x-circle me-1"></i>
+                                        )}
+                                        Reject
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -206,13 +230,7 @@ export default function ManageBookings() {
                                         tabIndex="0"
                                     >
                                         {bookings.pending.length > 0 ? (
-                                            bookings.pending.map(booking => (
-                                                <BookingCard 
-                                                    key={booking.id} 
-                                                    booking={booking} 
-                                                    onStatusUpdate={handleStatusUpdate} 
-                                                />
-                                            ))
+                                            bookings.pending.map(booking => renderBookingCard(booking))
                                         ) : (
                                             <div className="text-center py-5 text-muted">
                                                 <i className="bi bi-inbox fs-1 d-block mb-2"></i>
@@ -230,12 +248,7 @@ export default function ManageBookings() {
                                         tabIndex="0"
                                     >
                                         {bookings.confirmed.length > 0 ? (
-                                            bookings.confirmed.map(booking => (
-                                                <BookingCard 
-                                                    key={booking.id} 
-                                                    booking={booking} 
-                                                />
-                                            ))
+                                            bookings.confirmed.map(booking => renderBookingCard(booking))
                                         ) : (
                                             <div className="text-center py-5 text-muted">
                                                 <i className="bi bi-calendar-check fs-1 d-block mb-2"></i>
@@ -253,12 +266,7 @@ export default function ManageBookings() {
                                         tabIndex="0"
                                     >
                                         {bookings.rejected.length > 0 ? (
-                                            bookings.rejected.map(booking => (
-                                                <BookingCard 
-                                                    key={booking.id} 
-                                                    booking={booking} 
-                                                />
-                                            ))
+                                            bookings.rejected.map(booking => renderBookingCard(booking))
                                         ) : (
                                             <div className="text-center py-5 text-muted">
                                                 <i className="bi bi-calendar-x fs-1 d-block mb-2"></i>
@@ -272,6 +280,60 @@ export default function ManageBookings() {
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {showConfirmDialog && (
+                <div className="modal fade show" style={{ display: 'block' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Confirm Action</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowConfirmDialog(false)} disabled={isLoading}></button>
+                            </div>
+                            <div className="modal-body">
+                                Are you sure you want to {pendingStatus === 'confirmed' ? 'confirm' : 'reject'} this booking?
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmDialog(false)} disabled={isLoading}>Cancel</button>
+                                <button 
+                                    type="button" 
+                                    className={`btn ${pendingStatus === 'confirmed' ? 'btn-success' : 'btn-danger'}`}
+                                    onClick={() => updateStatus(pendingStatus)}
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? (
+                                        <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                    ) : null}
+                                    {pendingStatus === 'confirmed' ? 'Confirm' : 'Reject'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Toast/Alert */}
+            {showSuccessDialog && (
+                <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 1050 }}>
+                    <div className="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div className="toast-header">
+                            <strong className="me-auto">Success</strong>
+                            <button type="button" className="btn-close" onClick={() => setShowSuccessDialog(false)}></button>
+                        </div>
+                        <div className="toast-body">
+                            <div className="d-flex">
+                                <i className="bi bi-check-circle-fill text-success me-2"></i>
+                                <span>{successMessage}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Modal Backdrop */}
+            {showConfirmDialog && (
+                <div className="modal-backdrop fade show"></div>
+            )}
         </AuthenticatedLayout>
     );
 }

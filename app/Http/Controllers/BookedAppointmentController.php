@@ -99,7 +99,11 @@ class BookedAppointmentController extends Controller
         return Inertia::render('Doctor/ManageBookings', [
             'pendingBookings' => $pendingBookings,
             'confirmedBookings' => $confirmedBookings,
-            'rejectedBookings' => $rejectedBookings
+            'rejectedBookings' => $rejectedBookings,
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error'),
+            ],
         ]);
     }
 
@@ -120,17 +124,16 @@ class BookedAppointmentController extends Controller
         $appointmentBelongsToDoctor = $booking->appointment->doctor_id === $doctor->id;
         
         if (!$appointmentBelongsToDoctor) {
-            return response()->json(['message' => 'Unauthorized action'], 403);
+            return back()->with('error', 'Unauthorized action');
         }
 
         // Update the status
         $booking->status = $request->status;
-        $booking->save();
+        //$booking->save();
 
-        return response()->json([
-            'message' => 'Booking status updated successfully',
-            'booking' => $booking
-        ]);
+        session()->flash('success', 'Booking status updated successfully!');
+    
+        return redirect()->back();
     }
 
 }
