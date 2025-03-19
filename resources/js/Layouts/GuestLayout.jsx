@@ -185,7 +185,7 @@ export default function GuestLayout({ children }) {
                     </div>
                 </div>
             </div> */}
-            {!isLoginPage('login') && (
+            {!isLoginPage('login') && !isLoginPage('register') && !isLoginPage('verification.notice') && (
                 <header className="header navbar-area">
                     <div className="container">
                         <div className="row align-items-center">

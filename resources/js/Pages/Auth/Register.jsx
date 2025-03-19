@@ -116,11 +116,14 @@ export default function Register() {
                     </PrimaryButton>
                 </div>
             </form> */}
-             <div className="d-flex flex-column min-vh-100 align-items-center bg-light pt-3 justify-content-center">
-                <div>
-                    <Link href="/">
-                        <ApplicationLogo className="" style={{ height: '80px', width: '80px', color: '#6c757d' }} />
-                    </Link>
+            <div className="d-flex flex-column min-vh-100 align-items-center bg-light pt-3 justify-content-center">
+                <div className="mt-3 w-100 bg-white p-4 shadow-sm rounded" style={{ maxWidth: '400px' }}>
+                <a className="navbar-brand d-flex align-items-center justify-content-center cursor-pointer" 
+                    href={route('home')} 
+                    style={{ color: "#006838", fontWeight: "600" }}>
+                    <img src="assets/images/online.png" alt="Logo" style={{ width: "40px", marginRight: "8px" }} />
+                    Telemedicine
+                </a>
                     <form onSubmit={submit}>
                         <div className="mb-3">
                             <InputLabel htmlFor="name" value="Name" />

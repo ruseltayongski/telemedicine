@@ -22,7 +22,23 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+// Route::middleware('auth')->group(function () {
+//     Route::get('/email/verify', function () {
+//         return Inertia::render('Auth/VerifyEmail');
+//     })->name('verification.notice');
+    
+//     Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+//         $request->fulfill();
+//         return redirect('/dashboard');
+//     })->middleware(['signed'])->name('verification.verify');
+    
+//     Route::post('/email/verification-notification', function (Request $request) {
+//         $request->user()->sendEmailVerificationNotification();
+//         return back()->with('message', 'Verification link sent!');
+//     })->middleware(['throttle:6,1'])->name('verification.send');
+// });
+
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

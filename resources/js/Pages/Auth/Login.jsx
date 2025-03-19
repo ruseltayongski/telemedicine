@@ -49,11 +49,15 @@ export default function Login({ status, canResetPassword }) {
             />    */}
 
             <div className="d-flex flex-column min-vh-100 align-items-center bg-light pt-3 justify-content-center">
-                <div>
+                {/* <div>
                     <Link href="/">
                         <ApplicationLogo className="" style={{ height: '80px', width: '80px', color: '#6c757d' }} />
                     </Link>
-                </div>
+                </div> */}
+                <a className="navbar-brand cursor-pointer" href={route('home')} style={{ color: "#006838", fontWeight: "600" }}>
+                    <img src="assets/images/online.png" alt="Logo" style={{ width: "40px" }} />
+                    Telemedicine
+                </a>
 
                 <div className="mt-3 w-100 bg-white p-4 shadow-sm rounded" style={{ maxWidth: '400px' }}>
                     
@@ -63,7 +67,7 @@ export default function Login({ status, canResetPassword }) {
                         </div>
                     )}
 
-                    <form onSubmit={submit}>
+                    {/* <form onSubmit={submit}>
                         <div className="mb-3">
                             <InputLabel htmlFor="email" value="Email" />
                             <TextInput
@@ -115,10 +119,70 @@ export default function Login({ status, canResetPassword }) {
                                     Forgot your password?
                                 </Link>
                             )}
-
                             <PrimaryButton className="btn btn-primary" disabled={processing}>
                                 Log in
                             </PrimaryButton>
+                        </div>
+                    </form> */}
+                    <form onSubmit={submit}>
+                        <div className="mb-3">
+                            <InputLabel htmlFor="email" value="Email" />
+                            <TextInput
+                                id="email"
+                                type="email"
+                                name="email"
+                                value={data.email}
+                                className="form-control"
+                                autoComplete="username"
+                                isFocused={true}
+                                onChange={(e) => setData('email', e.target.value)}
+                            />
+                            <InputError message={errors.email} className="text-danger small" />
+                        </div>
+
+                        <div className="mb-3">
+                            <InputLabel htmlFor="password" value="Password" />
+                            <TextInput
+                                id="password"
+                                type="password"
+                                name="password"
+                                value={data.password}
+                                className="form-control"
+                                autoComplete="current-password"
+                                onChange={(e) => setData('password', e.target.value)}
+                            />
+                            <InputError message={errors.password} className="text-danger small" />
+                        </div>
+
+                        <div className="form-check mb-3">
+                            <Checkbox
+                                id="remember"
+                                name="remember"
+                                checked={data.remember}
+                                onChange={(e) => setData('remember', e.target.checked)}
+                                className="form-check-input"
+                            />
+                            <label className="form-check-label" htmlFor="remember">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <div className="d-flex justify-content-between align-items-center">
+                            {canResetPassword && (
+                                <Link href={route('password.request')} className="text-decoration-none text-primary small">
+                                    Forgot your password?
+                                </Link>
+                            )}
+                            <PrimaryButton className="btn btn-primary" disabled={processing}>
+                                Log in
+                            </PrimaryButton>
+                        </div>
+
+                        <div className="mt-3 text-center">
+                            <span className="small">Don't have an account? </span>
+                            <Link href={route('register')} style={{ marginLeft: '3px' }} className="text-decoration-none text-primary small">
+                                Sign up
+                            </Link>
                         </div>
                     </form>
 
