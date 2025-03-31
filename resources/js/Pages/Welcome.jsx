@@ -2,8 +2,12 @@ import { Head, Link, usePage, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import React, { useEffect, useRef, useState } from "react";
 
-export default function Welcome({ auth, laravelVersion, phpVersion }) {
+export default function Welcome({ auth, laravelVersion, phpVersion, specializations }) {
     const sliderRef = useRef(null);
+    const [facilities, setFacilities] = useState([]);
+    const [doctors, setDoctors] = useState([]);
+    const [loadingFacilities, setLoadingFacilities] = useState(false);
+    const [loadingDoctors, setLoadingDoctors] = useState(false);
     useEffect(() => {
         setTimeout(() => {
             if (sliderRef.current) {
@@ -109,47 +113,52 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     return (
         <GuestLayout>
             <Head title="Welcome" />
-
             <section className="hero-area">
                 <div className="shapes">
                     <img src="assets/images/hero/05.svg" className="shape1" alt="#" />
                     <img src="assets/images/hero/01.svg" className="shape2" alt="#" />
                 </div>
                 <div className="hero-slider" ref={sliderRef}>
-                    {[{
-                        title: "Find A Doctor & Book Appointment",
-                        text: "Telemedicine tackles key healthcare challenges by providing virtual access to medical care, reducing wait times, and offering cost-effective alternatives.",
-                        img: "assets/images/hero/02.png"
-                    }, {
-                        title: "No need to go to the hospital to conduct a consultation",
-                        text: "It connects patients with specialists",
-                        img: "assets/images/hero/slider-2.png"
-                    }, {
-                        title: "Superior solutions that help you to shine.",
-                        text: "Offers user-friendly platforms, making healthcare more accessible and efficient.",
-                        img: "assets/images/hero/slider-3.png"
-                    }].map((slide, index) => (
-                        <div className="single-slider" key={index}>
+                    {[
+                        {
+                            title: "Find A Doctor & Book Appointment",
+                            text: "Telemedicine tackles key healthcare challenges by providing virtual access to medical care, reducing wait times, and offering cost-effective alternatives.",
+                            img: "assets/images/hero/02.png"
+                        }
+                        // , 
+                        // {
+                        //     title: "No need to go to the hospital to conduct a consultation",
+                        //     text: "It connects patients with specialists",
+                        //     img: "assets/images/hero/slider-2.png"
+                        // }
+                        // , 
+                        // {
+                        //     title: "Superior solutions that help you to shine.",
+                        //     text: "Offers user-friendly platforms, making healthcare more accessible and efficient.",
+                        //     img: "assets/images/hero/slider-3.png"
+                        // }
+                    ].map((slide, index) => (
+                        <div className="single-slider" key={index} style={{ height: "50vh" }}>
                             <div className="container">
-                            <div className="row">
-                                <div className="col-lg-6 col-md-12 col-12">
-                                <div className="hero-text wow fadeInLeft" data-wow-delay=".3s">
-                                    <div className="section-heading">
-                                    <h2>{slide.title}</h2>
-                                    <p>{slide.text}</p>
-                                    <div className="button">
-                                        <a href="#" onClick={bookAppointment} className="btn">Book Appointment</a>
-                                        <a href="about-us.html" className="btn">About Us</a>
+                                <div className="row">
+                                    <div className="col-lg-6 col-md-12 col-12">
+                                        <div className="hero-text wow fadeInLeft" data-wow-delay=".3s">
+                                            <div className="section-heading">
+                                                <h2>{slide.title}</h2>
+                                                <p>{slide.text}</p>
+                                                <div className="button">
+                                                    <a href="#" onClick={bookAppointment} className="btn">Book Appointment</a>
+                                                    <a href="about-us.html" className="btn">About Us</a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+                                    <div className="col-lg-6 col-md-12 col-12">
+                                        <div className="hero-image">
+                                            <img src={slide.img} alt="#"/>
+                                        </div>
                                     </div>
                                 </div>
-                                </div>
-                                <div className="col-lg-6 col-md-12 col-12">
-                                <div className="hero-image">
-                                    <img src={slide.img} alt="#" />
-                                </div>
-                                </div>
-                            </div>
                             </div>
                         </div>
                     ))}
@@ -164,7 +173,8 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                         <div className="appointment-title">
                             <span>Appointment</span>
                             <h2>Book An Appointment</h2>
-                            <p>Please feel welcome to contact our friendly reception staff with any general or medical enquiry. Our doctors will receive or return any urgent calls.</p>
+                            {/* <p>Please feel welcome to contact our friendly reception staff with any general or medical enquiry. Our doctors will receive or return any urgent calls.</p> */}
+                            <p>Select your preferred specialization, hospital, and doctor to book an appointment.</p>
                         </div>
                         </div>
                     </div>
