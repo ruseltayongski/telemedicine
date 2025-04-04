@@ -39,9 +39,9 @@ class UserSeeder extends Seeder
             ],
         ]);
 
-        $specializations = ['Cardiologist', 'Dermatologist', 'Neurologist', 'Pediatrician', 'Surgeon', 'Oncologist', 'Psychiatrist', 'Orthopedic Surgeon', 'Radiologist', 'Urologist'];
-        
         $facilityIds = DB::table('facility')->pluck('id')->toArray();
+
+        $specializationIds = DB::table('specializations')->pluck('id')->toArray();
 
         for ($i = 1; $i <= 50; $i++) {
             DB::table('users')->insert([
@@ -49,7 +49,7 @@ class UserSeeder extends Seeder
                 'email' => 'doctor' . $i . '@gmail.com',
                 'password' => Hash::make('password'),
                 'role_id' => 2,
-                'specialization' => $specializations[array_rand($specializations)],
+                'specialization_id' => $specializationIds[array_rand($specializationIds)],
                 'facility_id' => $facilityIds[array_rand($facilityIds)],
                 'email_verified_at' => now(),
                 'created_at' => now(),

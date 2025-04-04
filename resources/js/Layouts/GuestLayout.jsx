@@ -265,9 +265,9 @@ export default function GuestLayout({ children }) {
                                             </li> */}
                                         </ul>
                                         </div>
-                                        <div className="button add-list-button">
+                                        {/* <div className="button add-list-button">
                                             <a href="#" className="btn cursor-pointer" onClick={bookAppointment}>Book Appointment</a>
-                                        </div>
+                                        </div> */}
                                     </nav>
                                 </div>
                             </div>

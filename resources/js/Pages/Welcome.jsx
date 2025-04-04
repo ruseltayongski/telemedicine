@@ -2,10 +2,13 @@ import { Head, Link, usePage, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import React, { useEffect, useRef, useState } from "react";
 
-export default function Welcome({ auth, laravelVersion, phpVersion, specializations }) {
+export default function Welcome({ canLogin, canRegister, auth, laravelVersion, phpVersion }) {
+    console.log(canLogin);
+    console.log(canRegister);
+    console.log(auth);
+    console.log(laravelVersion);
+    console.log(phpVersion);
     const sliderRef = useRef(null);
-    const [facilities, setFacilities] = useState([]);
-    const [doctors, setDoctors] = useState([]);
     const [loadingFacilities, setLoadingFacilities] = useState(false);
     const [loadingDoctors, setLoadingDoctors] = useState(false);
     useEffect(() => {
@@ -101,13 +104,31 @@ export default function Welcome({ auth, laravelVersion, phpVersion, specializati
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log("Appointment Data:", formData);
-    };
 
     const bookAppointment = () => {
         router.get(route('calendar'));
+    };
+
+
+    const { specializations, facilities, doctors } = usePage().props;
+
+    const [selectedType, setSelectedType] = useState('');
+    const [filteredFacilities, setFilteredFacilities] = useState([]);
+    const [selectedFacility, setSelectedFacility] = useState('');
+    const [filteredDoctors, setFilteredDoctors] = useState([]);
+
+    useEffect(() => {
+        setFilteredFacilities(facilities.filter(facility => facility.type === selectedType));
+        setSelectedFacility('');
+    }, [selectedType]);
+
+    useEffect(() => {
+        setFilteredDoctors(doctors.filter(doctor => doctor.facility_id === selectedFacility));
+    }, [selectedFacility]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log("Form submitted");
     };
     
     return (
@@ -125,37 +146,43 @@ export default function Welcome({ auth, laravelVersion, phpVersion, specializati
                             text: "Telemedicine tackles key healthcare challenges by providing virtual access to medical care, reducing wait times, and offering cost-effective alternatives.",
                             img: "assets/images/hero/02.png"
                         }
-                        // , 
-                        // {
-                        //     title: "No need to go to the hospital to conduct a consultation",
-                        //     text: "It connects patients with specialists",
-                        //     img: "assets/images/hero/slider-2.png"
-                        // }
-                        // , 
-                        // {
-                        //     title: "Superior solutions that help you to shine.",
-                        //     text: "Offers user-friendly platforms, making healthcare more accessible and efficient.",
-                        //     img: "assets/images/hero/slider-3.png"
-                        // }
+                        , 
+                        {
+                            title: "No need to go to the hospital to conduct a consultation",
+                            text: "It connects patients with specialists",
+                            img: "assets/images/hero/slider-2.png"
+                        }
+                        , 
+                        {
+                            title: "Superior solutions that help you to shine.",
+                            text: "Offers user-friendly platforms, making healthcare more accessible and efficient.",
+                            img: "assets/images/hero/slider-3.png"
+                        }
                     ].map((slide, index) => (
-                        <div className="single-slider" key={index} style={{ height: "50vh" }}>
+                        <div className="single-slider" key={index} style={{ 
+                            height: "50vh",
+                        }}>
                             <div className="container">
                                 <div className="row">
                                     <div className="col-lg-6 col-md-12 col-12">
                                         <div className="hero-text wow fadeInLeft" data-wow-delay=".3s">
-                                            <div className="section-heading">
+                                            <div className="section-heading" style={{ marginTop: '-100px' }}>
                                                 <h2>{slide.title}</h2>
                                                 <p>{slide.text}</p>
-                                                <div className="button">
+                                                {/* <div className="button">
                                                     <a href="#" onClick={bookAppointment} className="btn">Book Appointment</a>
                                                     <a href="about-us.html" className="btn">About Us</a>
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </div>
                                     </div>
                                     <div className="col-lg-6 col-md-12 col-12">
-                                        <div className="hero-image">
-                                            <img src={slide.img} alt="#"/>
+                                        <div className="hero-image" style={{ 
+                                            top: "1px",
+                                            transform: "scale(0.5)",
+                                        }}>
+                                            <img src={slide.img} alt="#"
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -168,51 +195,90 @@ export default function Welcome({ auth, laravelVersion, phpVersion, specializati
             <section className="appointment">
                 <div className="container">
                     <div className="appointment-form">
-                    <div className="row">
-                        <div className="col-lg-6 col-12">
-                        <div className="appointment-title">
-                            <span>Appointment</span>
-                            <h2>Book An Appointment</h2>
-                            {/* <p>Please feel welcome to contact our friendly reception staff with any general or medical enquiry. Our doctors will receive or return any urgent calls.</p> */}
-                            <p>Select your preferred specialization, hospital, and doctor to book an appointment.</p>
-                        </div>
-                        </div>
-                    </div>
-                    <form onSubmit={handleSubmit}>
                         <div className="row">
-                        <div className="col-lg-3 col-md-6 col-12 p-0">
-                            <div className="appointment-input">
-                            <label htmlFor="name"><i className="lni lni-user"></i></label>
-                            <input type="text" name="name" id="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
+                            <div className="col-lg-6 col-12">
+                            <div className="appointment-title">
+                                <span>Appointment</span>
+                                <h2>Book An Appointment</h2>
+                                <p>Select your preferred specialization, hospital, and doctor to book an appointment.</p>
+                            </div>
                             </div>
                         </div>
-                        <div className="col-lg-3 col-md-6 col-12 p-0">
-                            <div className="appointment-input">
-                            <label htmlFor="email"><i className="lni lni-envelope"></i></label>
-                            <input type="email" name="email" id="email" placeholder="Your Email" value={formData.email} onChange={handleChange} required />
+                        <form onSubmit={handleSubmit}>
+                            <div className="row">
+                                {/* <div className="col-lg-3 col-md-6 col-12 p-0">
+                                    <div className="appointment-input">
+                                    <label htmlFor="name"><i className="lni lni-user"></i></label>
+                                    <input type="text" name="name" id="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
+                                    </div>
+                                </div> */}
+                                {/* <div className="col-lg-3 col-md-6 col-12 p-0">
+                                    <div className="appointment-input">
+                                    <label htmlFor="email"><i className="lni lni-envelope"></i></label>
+                                    <input type="email" name="email" id="email" placeholder="Your Email" value={formData.email} onChange={handleChange} required />
+                                    </div>
+                                </div> */}
+                                <div className="col-lg col-md-6 col-12 p-0">
+                                    <div className="appointment-input">
+                                        <label htmlFor="specialization"><i className="lni lni-notepad"></i></label>
+                                        <select name="specialization" id="specialization" required>
+                                            <option value="">Select Specialization</option>
+                                            {specializations.map(spec => (
+                                                <option key={spec.id} value={spec.id}>{spec.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-lg col-md-6 col-12 p-0">
+                                    <div className="appointment-input">
+                                        <label htmlFor="hospital_type"><i className="lni lni-hospital"></i></label>
+                                        <select 
+                                            name="hospital_type" 
+                                            id="hospital_type" 
+                                            required 
+                                            onChange={(e) => setSelectedType(e.target.value)}
+                                        >
+                                            <option value="">Select Hospital Type</option>
+                                            <option value="government">Government</option>
+                                            <option value="private">Private</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-lg col-md-6 col-12 p-0">
+                                    <div className="appointment-input">
+                                        <label htmlFor="hospital"><i className="lni lni-hospital"></i></label>
+                                        <select 
+                                            name="hospital" 
+                                            id="hospital" 
+                                            required 
+                                            onChange={(e) => setSelectedFacility(Number(e.target.value))}
+                                        >
+                                            <option value="">Select Hospital Name</option>
+                                            {filteredFacilities.map(facility => (
+                                                <option key={facility.id} value={facility.id}>{facility.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-lg col-md-6 col-12 p-0">
+                                    <div className="appointment-input">
+                                        <label htmlFor="doctor"><i className="lni lni-user"></i></label>
+                                        <select name="doctor" id="doctor" required>
+                                            <option value="">Select Doctor</option>
+                                            {filteredDoctors.map(doctor => (
+                                                <option key={doctor.id} value={doctor.id}>{doctor.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-lg col-md-6 col-12 custom-padding">
+                                    <div className="appointment-btn button">
+                                        <button className="btn" type="submit">Get Appointment</button>
+                                    </div>
+                                </div>
+
                             </div>
-                        </div>
-                        <div className="col-lg-3 col-md-6 col-12 p-0">
-                            <div className="appointment-input">
-                            <label htmlFor="department"><i className="lni lni-notepad"></i></label>
-                            <select name="department" id="department" value={formData.department} onChange={handleChange} required>
-                                <option value="" disabled>Select Department</option>
-                                <option value="General Surgery">General Surgery</option>
-                                <option value="Gastroenterology">Gastroenterology</option>
-                                <option value="Nutrition & Dietetics">Nutrition & Dietetics</option>
-                                <option value="Cardiology">Cardiology</option>
-                                <option value="Neurology">Neurology</option>
-                                <option value="Pediatric">Pediatric</option>
-                            </select>
-                            </div>
-                        </div>
-                        <div className="col-lg-3 col-md-6 col-12 custom-padding">
-                            <div className="appointment-btn button">
-                            <button className="btn" type="submit">Get Appointment</button>
-                            </div>
-                        </div>
-                        </div>
-                    </form>
+                        </form>
                     </div>
                 </div>
             </section>
