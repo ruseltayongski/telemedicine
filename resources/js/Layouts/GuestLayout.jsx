@@ -216,7 +216,7 @@ export default function GuestLayout({ children }) {
                                             </li>
                                             {user && (
                                                 <li className="nav-item">
-                                                    <Link href={route('booked.appointments.index')} className={`sidebar-item ${isActive('booked.appointments.index') ? 'active' : ''}`} aria-label="Toggle navigation">Booked Appointments</Link>
+                                                    <Link href={route('booked.appointments.index')} className={`sidebar-item ${isActive('booked.appointments.index') ? 'active' : ''}`} aria-label="Toggle navigation">Activity</Link>
                                                 </li>
                                             )}
                                             {/* <li className="nav-item">

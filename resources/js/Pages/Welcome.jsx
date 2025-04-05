@@ -3,11 +3,6 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import React, { useEffect, useRef, useState } from "react";
 
 export default function Welcome({ canLogin, canRegister, auth, laravelVersion, phpVersion }) {
-    console.log(canLogin);
-    console.log(canRegister);
-    console.log(auth);
-    console.log(laravelVersion);
-    console.log(phpVersion);
     const sliderRef = useRef(null);
     const [loadingFacilities, setLoadingFacilities] = useState(false);
     const [loadingDoctors, setLoadingDoctors] = useState(false);
@@ -109,28 +104,56 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
         router.get(route('calendar'));
     };
 
+    const { specializations, facilities, doctors, selected } = usePage().props;
 
-    const { specializations, facilities, doctors } = usePage().props;
+    const [selectedSpecialization, setSelectedSpecialization] = useState(selected?.specialization ?? '');
+    const [selectedType, setSelectedType] = useState(selected?.hospital_type ?? '');
+    const [selectedFacility, setSelectedFacility] = useState(selected?.hospital ?? '');
+    const [selectedDoctor, setSelectedDoctor] = useState(selected?.doctor ?? '');
 
-    const [selectedType, setSelectedType] = useState('');
     const [filteredFacilities, setFilteredFacilities] = useState([]);
-    const [selectedFacility, setSelectedFacility] = useState('');
     const [filteredDoctors, setFilteredDoctors] = useState([]);
 
     useEffect(() => {
-        setFilteredFacilities(facilities.filter(facility => facility.type === selectedType));
-        setSelectedFacility('');
-    }, [selectedType]);
+        const filtered = facilities.filter(facility => {
+            const hasDoctorForSpecialization = doctors.some(doctor => doctor.facility_id === facility.id && doctor.specialization_id === Number(selectedSpecialization));
+
+            return facility.type === selectedType && hasDoctorForSpecialization;
+        });
+        setFilteredFacilities(filtered);
+
+        if (!filtered.find(f => f.id === selectedFacility)) {
+            setSelectedFacility('');
+        }
+    }, [selectedType, selectedSpecialization, facilities, doctors]);
 
     useEffect(() => {
-        setFilteredDoctors(doctors.filter(doctor => doctor.facility_id === selectedFacility));
-    }, [selectedFacility]);
+        const filtered = doctors.filter(doctor => {
+            return (
+                (!selectedFacility || doctor.facility_id === Number(selectedFacility)) &&
+                (!selectedSpecialization || doctor.specialization_id === Number(selectedSpecialization))
+            );
+        });
+        setFilteredDoctors(filtered);
+
+        if (!filtered.find(d => d.id === selectedDoctor)) {
+            setSelectedDoctor('');
+        }
+    }, [selectedFacility, selectedSpecialization, doctors]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Form submitted");
+        if(auth.user) {
+            router.get(route('calendar'), {
+                facility: selectedFacility,
+                doctor: selectedDoctor,
+            });            
+        }
+        else {
+            router.get(route('login'));
+        }    
     };
-    
+
     return (
         <GuestLayout>
             <Head title="Welcome" />
@@ -221,7 +244,13 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                                 <div className="col-lg col-md-6 col-12 p-0">
                                     <div className="appointment-input">
                                         <label htmlFor="specialization"><i className="lni lni-notepad"></i></label>
-                                        <select name="specialization" id="specialization" required>
+                                        <select
+                                            name="specialization"
+                                            id="specialization"
+                                            value={selectedSpecialization}
+                                            onChange={(e) => setSelectedSpecialization(e.target.value)}
+                                            {...(auth.user === null ? {} : { required: true })}
+                                        >
                                             <option value="">Select Specialization</option>
                                             {specializations.map(spec => (
                                                 <option key={spec.id} value={spec.id}>{spec.name}</option>
@@ -235,7 +264,7 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                                         <select 
                                             name="hospital_type" 
                                             id="hospital_type" 
-                                            required 
+                                            {...(auth.user === null ? {} : { required: true })} 
                                             onChange={(e) => setSelectedType(e.target.value)}
                                         >
                                             <option value="">Select Hospital Type</option>
@@ -250,7 +279,7 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                                         <select 
                                             name="hospital" 
                                             id="hospital" 
-                                            required 
+                                            {...(auth.user === null ? {} : { required: true })} 
                                             onChange={(e) => setSelectedFacility(Number(e.target.value))}
                                         >
                                             <option value="">Select Hospital Name</option>
@@ -263,7 +292,12 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                                 <div className="col-lg col-md-6 col-12 p-0">
                                     <div className="appointment-input">
                                         <label htmlFor="doctor"><i className="lni lni-user"></i></label>
-                                        <select name="doctor" id="doctor" required>
+                                        <select 
+                                            name="doctor" 
+                                            id="doctor" 
+                                            {...(auth.user === null ? {} : { required: true })}
+                                            onChange={(e) => setSelectedDoctor(Number(e.target.value))}
+                                        >
                                             <option value="">Select Doctor</option>
                                             {filteredDoctors.map(doctor => (
                                                 <option key={doctor.id} value={doctor.id}>{doctor.name}</option>

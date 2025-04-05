@@ -9,6 +9,7 @@ use Inertia\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Log;
 
 class BookedAppointmentController extends Controller
 {
@@ -26,10 +27,29 @@ class BookedAppointmentController extends Controller
     }
 
     public function calendar(Request $request): Response
+    //public function calendar(Request $request)
     {
-        $appointments = Appointment::with('booked_appointments')->get();
+        $query = Appointment::with(['user']);
+
+        if ($request->filled('facility')) {
+            $query = $query->whereHas('user', function ($q) use ($request) {
+                $q->where('facility_id', $request->query('facility'));
+            });
+        }
+
+        if ($request->filled('doctor')) {
+            $query = $query->whereHas('user', function ($q) use ($request) {
+                $q->where('id', $request->query('doctor'));
+            });
+        }
+
+        $appointments = $query->get();
         return Inertia::render('Appointments/Calendar', [
-            'appointments' => $appointments
+            'appointments' => $appointments,
+            'selected' => [
+                'facility' => $request->query('facility'),
+                'doctor' => $request->query('doctor'),
+            ],
         ]);
     }
 
@@ -54,6 +74,7 @@ class BookedAppointmentController extends Controller
             'appointment_id' => $appointment->id,
             'patient_id' => Auth::id(),
             'status' => 'pending',
+            'selected_time' => date('H:i:s', strtotime($request->selected_time))
         ]);
 
         return Redirect::back()->with('success', 'Appointment successfully booked!');

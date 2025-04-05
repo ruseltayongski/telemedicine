@@ -36,6 +36,7 @@
         "@fullcalendar/react": "^6.1.15",
         "@fullcalendar/timegrid": "^6.1.15",
         "agora-rtc-react": "^2.3.0",
-        "agora-rtc-sdk-ng": "^4.23.2"
+        "agora-rtc-sdk-ng": "^4.23.2",
+        "sweetalert2": "^11.17.2"
     }
 }

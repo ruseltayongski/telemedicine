@@ -6782,8 +6782,10 @@ blockquote .shape {
 
 /* // Calendar */
 .fc .fc-button-primary {
-  background-color: #3366CC;
-  border-color: #3366CC;
+  /* background-color: #3366CC;
+  border-color: #3366CC; */
+  background-color: #006838;
+  border-color: #006838;
 }
 
 .fc .fc-daygrid-day.fc-day-today {
@@ -6812,8 +6814,22 @@ blockquote .shape {
 
 .fc-event-title {
   color: white;
+  height: 20px;
+  padding-top: 2px;
 }
 
 .fc-event-time {
   color: white;
+}
+
+.fc-col-header-cell-cushion{
+  color: #006838;
+}
+
+.fc-daygrid-day-number{
+  color: #006838;
+}
+
+.fc-event {
+  background-color: #006838 !important;
 }

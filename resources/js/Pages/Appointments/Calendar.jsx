@@ -1,6 +1,7 @@
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import React, { useEffect, useRef, useState } from "react";
+import Swal from 'sweetalert2'
 
 // Import the necessary FullCalendar components
 import FullCalendar from '@fullcalendar/react';
@@ -72,7 +73,8 @@ export default function Calendar({ appointments }) {
     // Handle appointment booking confirmation
     const handleBookAppointment = () => {
         if (!selectedEvent) return;
-    
+        
+        selectedEvent.selected_time = selectedTime;
         setLoading(true);
     
         router.post(route("appointments.book"), selectedEvent, {
@@ -81,12 +83,23 @@ export default function Calendar({ appointments }) {
                 console.log(response);
                 setLoading(false);
                 setIsModalOpen(false);
-                alert("Appointment successfully booked!");
+                //alert("Appointment successfully booked!");
+                Swal.fire({
+                    title: "Success!",
+                    text: "Your appointment has been successfully booked. We look forward to seeing you!",
+                    icon: "success"
+                });
             },
             onError: (errors) => {
-                console.log(errors);
+                //console.log(errors);
                 setLoading(false);
-                alert(errors.error || "Failed to book appointment.");
+                setIsModalOpen(false);
+                // alert(errors.error || "Failed to book appointment.");
+                Swal.fire({
+                    title: "Appointment Already Booked",
+                    text: "You have already booked this appointment. Please check your schedule for details.",
+                    icon: "error"
+                });
             },
         });
     };
@@ -151,7 +164,51 @@ export default function Calendar({ appointments }) {
             </>
         );
     };
-    
+
+    const [selectedTime, setSelectedTime] = useState('');
+    const [timeOptions, setTimeOptions] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(() => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return tomorrow.toISOString().split('T')[0];
+    });
+    const generateTimeSlots = () => {
+        const slots = [];
+        const now = new Date();
+        const today = new Date();
+        const selected = new Date(selectedDate);
+        selected.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+      
+        let start = new Date(selectedDate);
+        if (selected.getTime() === today.getTime()) {
+          start = new Date(now.getTime() + 40 * 60000);
+        } else {
+          start.setHours(0, 0, 0, 0);
+        }
+      
+        const end = new Date(selectedDate);
+        end.setHours(23, 59, 59);
+      
+        while (start <= end) {
+          const formattedTime = start.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          });
+      
+          slots.push(formattedTime);
+          start = new Date(start.getTime() + 30 * 60000);
+        }
+      
+        setTimeOptions(slots);
+        setSelectedTime(slots[0] || '');
+    };
+
+    useEffect(() => {
+        generateTimeSlots();
+    }, [selectedDate]);
+
     return (
         <GuestLayout>
             <Head title="Book Appointment" />
@@ -225,30 +282,38 @@ export default function Calendar({ appointments }) {
                 </div>
             </section>
             <div className="container mt-5">
-                {/* Bootstrap Modal */}
                 <div className={`modal fade ${isModalOpen ? "show d-block" : ""}`} tabIndex="-1">
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                            <h5 className="modal-title">Confirm Booking</h5>
-                            <button type="button" className="btn-close" onClick={() => setIsModalOpen(false)}></button>
+                                <h5 className="modal-title">Confirm Booking</h5>
+                                <button type="button" className="btn-close" onClick={() => setIsModalOpen(false)}></button>
                             </div>
                             <div className="modal-body">
-                            <p>Do you want to book this appointment?</p>
+                                <p>Please select time for your appointment.</p>
+                                <select
+                                    className="form-select mt-2"
+                                    value={selectedTime}
+                                    onChange={(e) => setSelectedTime(e.target.value)}
+                                >
+                                    {timeOptions.map((time, index) => (
+                                        <option key={index} value={time}>
+                                            {time}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="modal-footer">
-                            <button className="btn btn-primary" onClick={handleBookAppointment} disabled={loading}>
-                                {loading ? "Booking..." : "Confirm"}
-                            </button>
-                            <button className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
-                                Cancel
-                            </button>
+                                <button className="btn btn-primary" onClick={handleBookAppointment} disabled={loading}>
+                                    {loading ? "Booking..." : "Confirm"}
+                                </button>
+                                <button className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
+                                    Cancel
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                {/* Bootstrap Backdrop */}
                 {isModalOpen && <div className="modal-backdrop fade show"></div>}
             </div>
         </GuestLayout>

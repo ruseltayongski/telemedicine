@@ -3,9 +3,11 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Appointment;
-use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Appointment;
+use App\Models\Specialization;
 
 class AppointmentSeeder extends Seeder
 {
@@ -14,32 +16,53 @@ class AppointmentSeeder extends Seeder
      */
     public function run()
     {
-        $doctor = User::where('role_id', 2)->first(); // Find a doctor
+        $doctors = User::where('role_id', 2)->get(); // Get all doctors
 
-        if ($doctor) {
-            $appointments = [];
-            $titles = [
-                'General Checkup', 'Dental Consultation', 'Eye Examination', 'Cardiology Consultation',
-                'Dermatology Checkup', 'Orthopedic Assessment', 'Neurology Consultation', 'Pediatrics Visit',
-                'ENT Checkup', 'Gynecology Consultation', 'Physical Therapy', 'Psychiatry Session',
-                'Vaccination', 'Nutrition Counseling', 'Chiropractic Care', 'Speech Therapy',
-                'Diabetes Management', 'Allergy Test', 'Skin Treatment', 'Annual Physical Exam'
-            ];
+        $titleMap = [
+            'Cardiologist' => 'Cardiology Consultation',
+            'Dermatologist' => 'Dermatology Checkup',
+            'Neurologist' => 'Neurology Consultation',
+            'Pediatrician' => 'Pediatrics Visit',
+            'Orthopedic Surgeon' => 'Orthopedic Assessment',
+            'Psychiatrist' => 'Psychiatry Session',
+            'Ophthalmologist' => 'Eye Examination',
+            'General Surgeon' => 'General Checkup',
+            'Endocrinologist' => 'Diabetes Management',
+            'Oncologist' => 'Cancer Screening'
+        ];
 
-            for ($i = 0; $i < 20; $i++) {
+        $appointments = [];
+        $dayOffset = 1;
+
+        foreach ($doctors as $doctor) {
+            $specialization = Specialization::find($doctor->specialization_id);
+
+            if (!$specialization) {
+                continue; // Skip if doctor has no specialization
+            }
+
+            $title = $titleMap[$specialization->name] ?? 'General Checkup';
+
+            // Create 10 appointments for each doctor
+            for ($i = 0; $i < 10; $i++) {
+                if($dayOffset == 30) {
+                    $dayOffset = 1;
+                }
                 $appointments[] = [
-                    'title' => $titles[$i],
-                    'description' => $titles[$i] . ' session.',
-                    'start_time' => Carbon::now()->addDays($i + 1)->format('Y-m-d H:i:s'),
-                    'end_time' => Carbon::now()->addDays($i + 1)->addHour()->format('Y-m-d H:i:s'),
+                    'title' => $title.' '.($i + 1),
+                    'description' => $title . ' session.',
+                    'start_time' => Carbon::now()->addDays($dayOffset)->format('Y-m-d H:i:s'),
+                    'end_time' => Carbon::now()->addDays($dayOffset)->addHour()->format('Y-m-d H:i:s'),
                     'slot' => rand(10, 30),
                     'doctor_id' => $doctor->id,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-            }
 
-            Appointment::insert($appointments);
+                $dayOffset++;
+            }
         }
+
+        Appointment::insert($appointments);
     }
 }

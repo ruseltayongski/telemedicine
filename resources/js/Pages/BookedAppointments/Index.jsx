@@ -60,7 +60,24 @@ export default function BookedAppointments({bookedAppointments}) {
                                                         <td className="border px-4 py-2">{booking.patient.name}</td>
                                                         <td className="border px-4 py-2">{booking.appointment.title}</td>
                                                         <td className="border px-4 py-2">{booking.status}</td>
-                                                        <td className="border px-4 py-2">{new Date(booking.created_at).toLocaleDateString()}</td>
+                                                        <td className="border px-4 py-2">
+                                                            <span style={{ fontSize: '12px' }}>
+                                                                {new Date(booking.created_at).toLocaleDateString('en-US', {
+                                                                    year: 'numeric',
+                                                                    month: 'long',
+                                                                    day: 'numeric',
+                                                                })} 
+                                                            </span>
+                                                            <small className="text-gray-500 d-block" style={{ fontSize: '9px' }}>
+                                                                (
+                                                                    {new Date(booking.created_at).toLocaleTimeString('en-US', {
+                                                                        hour: 'numeric',
+                                                                        minute: '2-digit',
+                                                                        hour12: true,
+                                                                    })}
+                                                                )
+                                                            </small>
+                                                        </td>
                                                         <td className="border px-4 py-2">
                                                             {booking.status === "confirmed" ? (
                                                                 <Link href={route('video-call')} className="text-blue-500 hover:underline">
