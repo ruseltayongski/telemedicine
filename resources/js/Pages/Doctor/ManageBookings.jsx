@@ -1,34 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Swal from 'sweetalert2'
 
 export default function ManageBookings() {
-    const { pendingBookings, confirmedBookings, rejectedBookings } = usePage().props;
+    const { pendingBookings, confirmedBookings, cancelledBookings } = usePage().props;
     const [bookings, setBookings] = useState({
         pending: pendingBookings,
         confirmed: confirmedBookings,
-        rejected: rejectedBookings
+        cancelled: cancelledBookings
     });
     const [activeTab, setActiveTab] = useState('pending');
     const [isLoading, setIsLoading] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-    const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     const [pendingStatus, setPendingStatus] = useState(null);
-    const [successMessage, setSuccessMessage] = useState('');
     const [selectedBooking, setSelectedBooking] = useState(null);
+    const [selectedStatus, setSelectedStatus] = useState(null);
 
     const { flash } = usePage().props;
     useEffect(() => {
         console.log(flash);
         if (flash && flash.success) {
-            setSuccessMessage(flash.success);
-            setShowSuccessDialog(true);
-            
-            const timer = setTimeout(() => {
-                setShowSuccessDialog(false);
-            }, 3000);
-            
-            return () => clearTimeout(timer);
+            if(selectedStatus === 'confirmed') {
+                Swal.fire({
+                    title: "Success!",
+                    text: flash.success,
+                    icon: "success"
+                });
+            } else {
+                Swal.fire({
+                    title: "Booking Cancelled",
+                    text: flash.error || "The booking request has been cancelled.",
+                    icon: "error"
+                });
+            }
         }
     }, [flash]);
 
@@ -38,7 +43,7 @@ export default function ManageBookings() {
         if (updatedBooking) {
             const newPending = bookings.pending.filter(booking => booking.id !== bookingId);
             updatedBooking.status = newStatus;
-            const newStatusList = newStatus === 'confirmed' ? 'confirmed' : 'rejected';
+            const newStatusList = newStatus === 'confirmed' ? 'confirmed' : 'cancelled';
             
             setBookings({
                 ...bookings,
@@ -70,6 +75,7 @@ export default function ManageBookings() {
     };
 
     const confirmStatusUpdate = (booking, status) => {
+        setSelectedStatus(status);
         setSelectedBooking(booking);
         setPendingStatus(status);
         setShowConfirmDialog(true);
@@ -79,32 +85,43 @@ export default function ManageBookings() {
         switch(status) {
             case 'confirmed':
                 return 'bg-success';
-            case 'rejected':
+            case 'cancelled':
                 return 'bg-danger';
             default:
                 return 'bg-warning';
         }
     };
 
-    const renderBookingCard = (booking) => {
-        const appointmentDate = new Date(booking.appointment.date).toLocaleDateString();
-        const startTime = booking.appointment.start_time;
-        const endTime = booking.appointment.end_time;
+    function formatDate(isoDate) {
+        const date = new Date(isoDate);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
+    }
 
+    function formatTime(isoDate) {
+        const date = new Date(isoDate);
+        const options = { hour: '2-digit', minute: '2-digit', hour12: true };
+        return date.toLocaleTimeString('en-US', options);
+      }
+
+    const renderBookingCard = (booking) => {
         return (
             <div className="card mb-3 shadow-sm" key={booking.id}>
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-8">
-                            <h5 className="card-title">Patient: {booking.patient.name}</h5>
-                            <p className="card-text mb-1">
-                                <i className="bi bi-calendar me-2"></i>Date: {appointmentDate}
+                            <h5 className="card-title mb-3">Patient: {booking.patient.name}</h5>
+                            <p className="card-text mb-2">
+                                <i className="bi bi-calendar me-2"></i>Date: {formatDate(booking.appointment.start_time)}
                             </p>
-                            <p className="card-text mb-1">
-                                <i className="bi bi-clock me-2"></i>Time: {startTime} - {endTime}
+                            <p className="card-text mb-2">
+                                <i className="bi bi-clock me-2"></i>Time: {formatTime(booking.appointment.start_time)}
                             </p>
-                            <p className="card-text">
-                                Status: <span className={`badge ${getBadgeClass(booking.status)} text-uppercase`}>{booking.status}</span>
+                            <p className="card-text mb-2">
+                                <i className="bi bi-journal me-2"></i>Remarks: {booking.remarks}
+                            </p>
+                            <p className="card-text mb-3">
+                                Status: <span className={`badge ${getBadgeClass(booking.status)} text-uppercase ms-2`}>{booking.status}</span>
                             </p>
                         </div>
                         
@@ -124,7 +141,7 @@ export default function ManageBookings() {
                                         Confirm
                                     </button>
                                     <button
-                                        onClick={() => confirmStatusUpdate(booking, 'rejected')}
+                                        onClick={() => confirmStatusUpdate(booking, 'cancelled')}
                                         disabled={isLoading}
                                         className="btn btn-danger"
                                     >
@@ -133,7 +150,7 @@ export default function ManageBookings() {
                                         ) : (
                                             <i className="bi bi-x-circle me-1"></i>
                                         )}
-                                        Reject
+                                        Cancel
                                     </button>
                                 </div>
                             </div>
@@ -200,20 +217,20 @@ export default function ManageBookings() {
                                     </li>
                                     <li className="nav-item" role="presentation">
                                         <button 
-                                            className={`nav-link ${activeTab === 'rejected' ? 'active text-danger' : ''}`}
-                                            onClick={() => setActiveTab('rejected')}
-                                            id="rejected-tab" 
+                                            className={`nav-link ${activeTab === 'cancelled' ? 'active text-danger' : ''}`}
+                                            onClick={() => setActiveTab('cancelled')}
+                                            id="cancelled-tab" 
                                             data-bs-toggle="tab" 
-                                            data-bs-target="#rejected-tab-pane" 
+                                            data-bs-target="#cancelled-tab-pane" 
                                             type="button" 
                                             role="tab" 
-                                            aria-controls="rejected-tab-pane" 
-                                            aria-selected={activeTab === 'rejected'}
+                                            aria-controls="cancelled-tab-pane" 
+                                            aria-selected={activeTab === 'cancelled'}
                                         >
                                             <i className="bi bi-x-circle me-2"></i>
-                                            Rejected
+                                            Cancelled
                                             <span className="badge bg-danger ms-2 rounded-pill">
-                                                {bookings.rejected.length}
+                                                {bookings.cancelled.length}
                                             </span>
                                         </button>
                                     </li>
@@ -257,20 +274,20 @@ export default function ManageBookings() {
                                         )}
                                     </div>
                                     
-                                    {/* Rejected Bookings Tab */}
+                                    {/* Cancelled Bookings Tab */}
                                     <div 
-                                        className={`tab-pane fade ${activeTab === 'rejected' ? 'show active' : ''}`}
-                                        id="rejected-tab-pane" 
+                                        className={`tab-pane fade ${activeTab === 'cancelled' ? 'show active' : ''}`}
+                                        id="cancelled-tab-pane" 
                                         role="tabpanel" 
-                                        aria-labelledby="rejected-tab" 
+                                        aria-labelledby="cancelled-tab" 
                                         tabIndex="0"
                                     >
-                                        {bookings.rejected.length > 0 ? (
-                                            bookings.rejected.map(booking => renderBookingCard(booking))
+                                        {bookings.cancelled.length > 0 ? (
+                                            bookings.cancelled.map(booking => renderBookingCard(booking))
                                         ) : (
                                             <div className="text-center py-5 text-muted">
                                                 <i className="bi bi-calendar-x fs-1 d-block mb-2"></i>
-                                                <p>No rejected bookings</p>
+                                                <p>No cancelled bookings</p>
                                             </div>
                                         )}
                                     </div>
@@ -291,7 +308,7 @@ export default function ManageBookings() {
                                 <button type="button" className="btn-close" onClick={() => setShowConfirmDialog(false)} disabled={isLoading}></button>
                             </div>
                             <div className="modal-body">
-                                Are you sure you want to {pendingStatus === 'confirmed' ? 'confirm' : 'reject'} this booking?
+                                Are you sure you want to {pendingStatus === 'confirmed' ? 'confirm' : 'cancelled'} this booking?
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmDialog(false)} disabled={isLoading}>Cancel</button>
@@ -304,7 +321,7 @@ export default function ManageBookings() {
                                     {isLoading ? (
                                         <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                                     ) : null}
-                                    {pendingStatus === 'confirmed' ? 'Confirm' : 'Reject'}
+                                    {pendingStatus === 'confirmed' ? 'Confirm' : 'Submit'}
                                 </button>
                             </div>
                         </div>
@@ -312,24 +329,6 @@ export default function ManageBookings() {
                 </div>
             )}
 
-            {/* Success Toast/Alert */}
-            {showSuccessDialog && (
-                <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 1050 }}>
-                    <div className="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div className="toast-header">
-                            <strong className="me-auto">Success</strong>
-                            <button type="button" className="btn-close" onClick={() => setShowSuccessDialog(false)}></button>
-                        </div>
-                        <div className="toast-body">
-                            <div className="d-flex">
-                                <i className="bi bi-check-circle-fill text-success me-2"></i>
-                                <span>{successMessage}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-            
             {/* Modal Backdrop */}
             {showConfirmDialog && (
                 <div className="modal-backdrop fade show"></div>

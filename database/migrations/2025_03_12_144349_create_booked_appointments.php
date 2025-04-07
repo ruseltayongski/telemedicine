@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('appointment_id');
             $table->unsignedBigInteger('patient_id');
-            $table->enum('status', ['pending', 'confirmed', 'canceled', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'rejected'])->default('pending');
             $table->time('selected_time')->nullable();
+            $table->text('remarks')->nullable();
             $table->timestamps();
 
             $table->foreign('appointment_id')->references('id')->on('appointments')->onDelete('cascade');

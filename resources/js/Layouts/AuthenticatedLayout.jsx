@@ -9,6 +9,7 @@ export default function AuthenticatedLayout({ header, children }) {
     const { url } = usePage();
     const isActive = (routeName) => url.startsWith(route(routeName, {}, false));
     const user = usePage().props.auth.user;
+    console.log(user);
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
     useEffect(() => {
         document.querySelectorAll("[data-dynamic_guest='true']").forEach((el) => el.remove());
@@ -207,10 +208,46 @@ export default function AuthenticatedLayout({ header, children }) {
                         <div className="sidebar-wrapper active">
                             <div className="sidebar-header">
                                 <div className="d-flex justify-content-between">
-                                <div className="logo">
+                                {/* <div className="logo">
                                     <Link href={route('home')} style={{ fontSize: "1.4rem" }}>
                                         {user.name}
                                     </Link>
+                                </div> */}
+                                <div className="logo" style={{ lineHeight: 1.4 }}>
+                                    <Link
+                                        href={route('home')}
+                                        style={{
+                                        fontSize: '1.5rem',
+                                        fontWeight: '600',
+                                        color: '#3b5bdb', // A calm blue
+                                        display: 'block',
+                                        textDecoration: 'none',
+                                        }}
+                                    >
+                                        {user.name}
+                                    </Link>
+                                    <span
+                                        style={{
+                                        fontSize: '1.1rem',
+                                        color: '#444',
+                                        fontWeight: '500',
+                                        display: 'block',
+                                        marginTop: '0.2rem',
+                                        }}
+                                    >
+                                        {user.facility.name}
+                                    </span>
+                                    <span
+                                        style={{
+                                        fontSize: '1rem',
+                                        color: '#666',
+                                        fontWeight: '400',
+                                        display: 'block',
+                                        marginTop: '0.1rem',
+                                        }}
+                                    >
+                                        {user.specialization.name}
+                                    </span>
                                 </div>
                                 <div className="toggler">
                                     <a 
@@ -226,7 +263,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </div>
                                 </div>
                             </div>
-                            <div className='sidebar-menu'>
+                            <div className='sidebar-menu' style={{ marginTop: '-20px' }}>
                                 <ul className='menu'>
                                     <li className="sidebar-title">Menu</li>
                                     <li className={`sidebar-item ${isActive('dashboard') ? 'active' : ''}`}>

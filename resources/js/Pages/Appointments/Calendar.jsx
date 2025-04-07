@@ -40,32 +40,35 @@ export default function Calendar({ appointments }) {
     //         allDay: false,
     //         className: 'important'
     //     },
-    //     {
-    //         title: 'Lunch',
-    //         start: new Date(y, m, d, 12, 0),
-    //         end: new Date(y, m, d, 14, 0),
-    //         allDay: false,
-    //         className: 'important'
-    //     },
-    //     {
-    //         title: 'Click for Google',
-    //         start: new Date(y, m, 28),
-    //         end: new Date(y, m, 29),
-    //         url: 'https://ccp.cloudaccess.net/aff.php?aff=5188',
-    //         className: 'success'
-    //     }
+    //     // {
+    //     //     title: 'Lunch',
+    //     //     start: new Date(y, m, d, 12, 0),
+    //     //     end: new Date(y, m, d, 14, 0),
+    //     //     allDay: false,
+    //     //     className: 'important'
+    //     // },
+    //     // {
+    //     //     title: 'Click for Google',
+    //     //     start: new Date(y, m, 28),
+    //     //     end: new Date(y, m, 29),
+    //     //     url: 'https://ccp.cloudaccess.net/aff.php?aff=5188',
+    //     //     className: 'success'
+    //     // }
     // ];
 
-    let events = appointments.map((appointment, index) => ({
-        id: appointment.id, // Ensure a unique ID
-        title: appointment.title || "Untitled Event",
-        start: new Date(appointment.start_time.replace(" ", "T")), // Convert to valid Date format
-        end: new Date(appointment.end_time.replace(" ", "T")), // Convert to valid Date format
-        allDay: false, // Assuming events are not all-day
-        className: "info",
-    }));
+    let events = appointments.map((appointment, index) => {     
+        return {
+            id: appointment.id,
+            title: appointment.title || "Untitled Event",
+            start: appointment.start_time,
+            allDay: true,
+            className: "info",
+        };
+    });
 
     const handleDateSelect = (selectInfo) => {
+        setRemarks("");
+        setSelectedDate(selectInfo.event.start);
         setSelectedEvent({id: selectInfo.event.id});
         setIsModalOpen(true);
     };
@@ -75,6 +78,7 @@ export default function Calendar({ appointments }) {
         if (!selectedEvent) return;
         
         selectedEvent.selected_time = selectedTime;
+        selectedEvent.remarks = remarks;
         setLoading(true);
     
         router.post(route("appointments.book"), selectedEvent, {
@@ -83,7 +87,6 @@ export default function Calendar({ appointments }) {
                 console.log(response);
                 setLoading(false);
                 setIsModalOpen(false);
-                //alert("Appointment successfully booked!");
                 Swal.fire({
                     title: "Success!",
                     text: "Your appointment has been successfully booked. We look forward to seeing you!",
@@ -91,10 +94,8 @@ export default function Calendar({ appointments }) {
                 });
             },
             onError: (errors) => {
-                //console.log(errors);
                 setLoading(false);
                 setIsModalOpen(false);
-                // alert(errors.error || "Failed to book appointment.");
                 Swal.fire({
                     title: "Appointment Already Booked",
                     text: "You have already booked this appointment. Please check your schedule for details.",
@@ -137,8 +138,8 @@ export default function Calendar({ appointments }) {
     const renderEventContent = (eventInfo) => {
         const timeMatch = eventInfo.event.title.match(/^(\d+p)\s+(.+)$/);
         let title = eventInfo.event.title;
-        const maxLength = 20; // Adjust this value based on your needs
-    
+        const maxLength = 20;
+        const isLong = title.length > maxLength;
         if (timeMatch) {
             const [, timePrefix, actualTitle] = timeMatch;
             title = actualTitle;
@@ -154,24 +155,31 @@ export default function Calendar({ appointments }) {
             );
         }
         
-        // If no time prefix is found, just return the title
         return (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <div className="fc-daygrid-event-dot"></div>
-                <div className="fc-event-title" style={{ fontSize: title.length > maxLength ? '0.8em' : '1em' }}>
+                <div
+                    className="fc-event-title"
+                    style={{
+                        fontSize: isLong ? '0.8em' : '1em',
+                        marginTop: isLong ? '5px' : '0px',
+                    }}
+                >
                     {title}
                 </div>
-            </>
+            </div>
         );
     };
 
     const [selectedTime, setSelectedTime] = useState('');
+    const [remarks, setRemarks] = useState("");
     const [timeOptions, setTimeOptions] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(() => {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        return tomorrow.toISOString().split('T')[0];
-    });
+    // const [selectedDate, setSelectedDate] = useState(() => {
+    //     const tomorrow = new Date();
+    //     tomorrow.setDate(tomorrow.getDate() + 1);
+    //     return tomorrow.toISOString().split('T')[0];
+    // });
+    const [selectedDate, setSelectedDate] = useState('');
     const generateTimeSlots = () => {
         const slots = [];
         const now = new Date();
@@ -266,7 +274,7 @@ export default function Calendar({ appointments }) {
                                                 selectable={true}
                                                 selectMirror={true}
                                                 dayMaxEvents={true}
-                                                firstDay={1} // Monday
+                                                // firstDay={1} // Monday
                                                 events={events}
                                                 //select={handleDateSelect}
                                                 eventClick={handleDateSelect}
@@ -302,6 +310,15 @@ export default function Calendar({ appointments }) {
                                         </option>
                                     ))}
                                 </select>
+                                {/* Remarks Field */}
+                                <label className="mt-3">Remarks (optional)</label>
+                                <textarea
+                                    className="form-control"
+                                    value={remarks}
+                                    onChange={(e) => setRemarks(e.target.value)}
+                                    rows="3"
+                                    placeholder="Enter any remarks or notes for the doctor..."
+                                ></textarea>
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-primary" onClick={handleBookAppointment} disabled={loading}>

@@ -6815,7 +6815,7 @@ blockquote .shape {
 .fc-event-title {
   color: white;
   height: 20px;
-  padding-top: 2px;
+  margin-top: 1px;
 }
 
 .fc-event-time {

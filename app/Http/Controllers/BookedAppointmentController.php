@@ -20,7 +20,7 @@ class BookedAppointmentController extends Controller
             ->where('patient_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-
+        
         return Inertia::render('BookedAppointments/Index', [
             'bookedAppointments' => $bookedAppointments
         ]);
@@ -74,7 +74,8 @@ class BookedAppointmentController extends Controller
             'appointment_id' => $appointment->id,
             'patient_id' => Auth::id(),
             'status' => 'pending',
-            'selected_time' => date('H:i:s', strtotime($request->selected_time))
+            'selected_time' => date('H:i:s', strtotime($request->selected_time)),
+            'remarks' => $request->remarks,
         ]);
 
         return Redirect::back()->with('success', 'Appointment successfully booked!');
@@ -109,18 +110,18 @@ class BookedAppointmentController extends Controller
             ->get();
         
         // Get all rejected appointments
-        $rejectedBookings = BookedAppointment::with(['appointment', 'patient'])
+        $cancelledBookings = BookedAppointment::with(['appointment', 'patient'])
             ->whereHas('appointment', function($query) use ($doctor) {
                 $query->where('doctor_id', $doctor->id);
             })
-            ->where('status', 'rejected')
+            ->where('status', 'cancelled')
             ->orderBy('created_at', 'desc')
             ->get();
 
         return Inertia::render('Doctor/ManageBookings', [
             'pendingBookings' => $pendingBookings,
             'confirmedBookings' => $confirmedBookings,
-            'rejectedBookings' => $rejectedBookings,
+            'cancelledBookings' => $cancelledBookings,
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),
@@ -150,7 +151,7 @@ class BookedAppointmentController extends Controller
 
         // Update the status
         $booking->status = $request->status;
-        //$booking->save();
+        $booking->save();
 
         session()->flash('success', 'Booking status updated successfully!');
     

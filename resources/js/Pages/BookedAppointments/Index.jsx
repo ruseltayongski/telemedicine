@@ -39,7 +39,7 @@ export default function BookedAppointments({bookedAppointments}) {
                             <div className="col-lg-8 col-12">
                                 <div className="form-main">
                                     <div className="form-title">
-                                        <h2>Transaction List</h2>
+                                        <h2>Activity List</h2>
                                     </div>
                                     <div className="overflow-x-auto">
                                         <table className="min-w-full border border-gray-300">
@@ -48,6 +48,7 @@ export default function BookedAppointments({bookedAppointments}) {
                                                     <th className="border px-4 py-2">ID</th>
                                                     <th className="border px-4 py-2">Patient Name</th>
                                                     <th className="border px-4 py-2">Appointment Title</th>
+                                                    <th className="border px-4 py-2">Remarks</th>
                                                     <th className="border px-4 py-2">Status</th>
                                                     <th className="border px-4 py-2">Booked Date</th>
                                                     <th className="border px-4 py-2">Link</th>
@@ -59,23 +60,22 @@ export default function BookedAppointments({bookedAppointments}) {
                                                         <td className="border px-4 py-2">{booking.id}</td>
                                                         <td className="border px-4 py-2">{booking.patient.name}</td>
                                                         <td className="border px-4 py-2">{booking.appointment.title}</td>
+                                                        <td className="border px-4 py-2">{booking.remarks}</td>
                                                         <td className="border px-4 py-2">{booking.status}</td>
                                                         <td className="border px-4 py-2">
                                                             <span style={{ fontSize: '12px' }}>
-                                                                {new Date(booking.created_at).toLocaleDateString('en-US', {
+                                                                {new Date(booking.appointment.start_time).toLocaleDateString('en-US', {
                                                                     year: 'numeric',
                                                                     month: 'long',
                                                                     day: 'numeric',
                                                                 })} 
                                                             </span>
                                                             <small className="text-gray-500 d-block" style={{ fontSize: '9px' }}>
-                                                                (
-                                                                    {new Date(booking.created_at).toLocaleTimeString('en-US', {
-                                                                        hour: 'numeric',
-                                                                        minute: '2-digit',
-                                                                        hour12: true,
-                                                                    })}
-                                                                )
+                                                                {new Date(`1970-01-01T${booking.selected_time}Z`).toLocaleTimeString([], {
+                                                                    hour: 'numeric',
+                                                                    minute: '2-digit',
+                                                                    hour12: true
+                                                                })}
                                                             </small>
                                                         </td>
                                                         <td className="border px-4 py-2">
