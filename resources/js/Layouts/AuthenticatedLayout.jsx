@@ -9,7 +9,6 @@ export default function AuthenticatedLayout({ header, children }) {
     const { url } = usePage();
     const isActive = (routeName) => url.startsWith(route(routeName, {}, false));
     const user = usePage().props.auth.user;
-    console.log(user);
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
     useEffect(() => {
         document.querySelectorAll("[data-dynamic_guest='true']").forEach((el) => el.remove());

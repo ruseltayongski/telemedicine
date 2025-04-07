@@ -135,7 +135,7 @@ class BookedAppointmentController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:confirmed,rejected'
+            'status' => 'required|in:confirmed,cancelled'
         ]);
 
         // Get the booking
@@ -151,7 +151,7 @@ class BookedAppointmentController extends Controller
 
         // Update the status
         $booking->status = $request->status;
-        $booking->save();
+        //$booking->save();
 
         session()->flash('success', 'Booking status updated successfully!');
     

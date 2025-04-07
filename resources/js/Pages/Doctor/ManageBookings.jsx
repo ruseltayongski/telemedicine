@@ -92,17 +92,19 @@ export default function ManageBookings() {
         }
     };
 
-    function formatDate(isoDate) {
+    const formatDate = (isoDate) => {
         const date = new Date(isoDate);
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return date.toLocaleDateString('en-US', options);
     }
 
-    function formatTime(isoDate) {
-        const date = new Date(isoDate);
+    const formatTime = (timeString) => {
+        const today = new Date().toISOString().split('T')[0];
+        const date = new Date(`${today}T${timeString}`);
+    
         const options = { hour: '2-digit', minute: '2-digit', hour12: true };
         return date.toLocaleTimeString('en-US', options);
-      }
+    }    
 
     const renderBookingCard = (booking) => {
         return (
@@ -115,7 +117,7 @@ export default function ManageBookings() {
                                 <i className="bi bi-calendar me-2"></i>Date: {formatDate(booking.appointment.start_time)}
                             </p>
                             <p className="card-text mb-2">
-                                <i className="bi bi-clock me-2"></i>Time: {formatTime(booking.appointment.start_time)}
+                                <i className="bi bi-clock me-2"></i>Time: {formatTime(booking.selected_time)}
                             </p>
                             <p className="card-text mb-2">
                                 <i className="bi bi-journal me-2"></i>Remarks: {booking.remarks}
@@ -131,7 +133,7 @@ export default function ManageBookings() {
                                     <button
                                         onClick={() => confirmStatusUpdate(booking, 'confirmed')}
                                         disabled={isLoading}
-                                        className="btn btn-success me-2"
+                                        className="btn btn-success me-2 d-flex align-items-center"
                                     >
                                         {isLoading ? (
                                             <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
@@ -143,7 +145,7 @@ export default function ManageBookings() {
                                     <button
                                         onClick={() => confirmStatusUpdate(booking, 'cancelled')}
                                         disabled={isLoading}
-                                        className="btn btn-danger"
+                                        className="btn btn-danger d-flex align-items-center"
                                     >
                                         {isLoading ? (
                                             <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
