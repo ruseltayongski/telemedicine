@@ -125,6 +125,18 @@ export default function ManageBookings() {
                             <p className="card-text mb-3">
                                 Status: <span className={`badge ${getBadgeClass(booking.status)} text-uppercase ms-2`}>{booking.status}</span>
                             </p>
+                            {booking.status === 'confirmed' && (
+                                <p style={{ marginBottom: '-15px' }}>
+                                    <a 
+                                        href={`/video-call?booking_id=${booking.id}&patient_id=${booking.patient.id}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="btn btn-sm btn-primary"
+                                    >
+                                        Join Video Call
+                                    </a>
+                                </p>
+                            )}
                         </div>
                         
                         {booking.status === 'pending' && (

@@ -80,9 +80,27 @@ export default function BookedAppointments({bookedAppointments}) {
                                                         </td>
                                                         <td className="border px-4 py-2">
                                                             {booking.status === "confirmed" ? (
-                                                                <Link href={route('video-call')} className="text-blue-500 hover:underline">
-                                                                    Click here to join call
-                                                                </Link>
+                                                                <form 
+                                                                    action={route('video-call')} 
+                                                                    method="GET" 
+                                                                    target="_blank" 
+                                                                    className="d-inline"
+                                                                    onSubmit={(e) => {
+                                                                    }}
+                                                                >
+                                                                    <input type="hidden" name="booking_id" value={booking.id} />
+                                                                    <input type="hidden" name="patient_id" value={booking.patient_id} />
+                                                                    <a 
+                                                                        href="#" 
+                                                                        className="text-primary text-decoration-none"
+                                                                        onClick={(e) => {
+                                                                            e.preventDefault();
+                                                                            e.target.closest('form').submit();
+                                                                        }}
+                                                                    >
+                                                                        Click here to join call
+                                                                    </a>
+                                                                </form>
                                                             ) : (
                                                                 <span className="text-gray-500">Not available</span>
                                                             )}

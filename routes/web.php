@@ -20,6 +20,7 @@ use App\Models\User;
 //     ]);
 // })->name('home');
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/test-api', [HomeController::class, 'testApi'])->name('test-api');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -49,10 +50,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/booked-appointments', [BookedAppointmentController::class, 'bookedAppointments'])->name('booked.appointments.index');
     Route::get('/calendar', [BookedAppointmentController::class, 'calendar'])->name('calendar');
     Route::post('/appointments/book', [BookedAppointmentController::class, 'book'])->name('appointments.book');
-    Route::get('/video-call', [VideoCallController::class, 'index'])->name('video-call');
     
     Route::get('/doctor-bookings', [BookedAppointmentController::class, 'manageBooking'])->name('doctor.manage.booking');
     Route::put('/doctor-bookings/{id}/status', [BookedAppointmentController::class, 'updateStatus'])->name('doctor.bookings.update-status');
 });
+
+Route::match(['POST','GET'],'/video-call', [VideoCallController::class, 'index'])->name('video-call');
 
 require __DIR__.'/auth.php';

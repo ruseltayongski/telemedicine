@@ -504,6 +504,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
         if (document.fullscreenElement) {
             document.exitFullscreen();
         }
+        window.close();
     };
     
     return (

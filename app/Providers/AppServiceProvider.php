@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Console\Scheduling\Schedule;
+use App\Console\Commands\SendAppointmentReminder;   
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,6 +15,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
+        $this->app->singleton(SendAppointmentReminder::class);
     }
 
     /**
@@ -21,5 +24,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+        $this->app->booted(function () {
+            $schedule = app(Schedule::class);
+
+            $schedule->command(SendAppointmentReminder::class)->everyMinute();
+        });
     }
 }
