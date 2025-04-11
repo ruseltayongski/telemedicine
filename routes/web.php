@@ -9,6 +9,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\BookedAppointmentController;
 use App\Http\Controllers\VideoCallController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Models\User;
 
 // Route::get('/', function () {
@@ -56,5 +57,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::match(['POST','GET'],'/video-call', [VideoCallController::class, 'index'])->name('video-call');
+
+Route::middleware('guest')->group(function () {
+    Route::post('login/request-otp', [AuthenticatedSessionController::class, 'requestOtp'])
+        ->name('login.request-otp');
+    
+    Route::post('login/verify-otp', [AuthenticatedSessionController::class, 'verifyOtp'])
+        ->name('login.verify-otp');
+});
 
 require __DIR__.'/auth.php';

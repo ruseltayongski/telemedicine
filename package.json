@@ -35,6 +35,8 @@
         "@fullcalendar/interaction": "^6.1.15",
         "@fullcalendar/react": "^6.1.15",
         "@fullcalendar/timegrid": "^6.1.15",
+        "@mediapipe/camera_utils": "^0.3.1675466862",
+        "@mediapipe/face_detection": "^0.4.1646425229",
         "agora-rtc-react": "^2.3.0",
         "agora-rtc-sdk-ng": "^4.23.2",
         "sweetalert2": "^11.17.2"

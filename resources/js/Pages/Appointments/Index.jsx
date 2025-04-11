@@ -32,7 +32,7 @@ export default function Index({ appointments, search }) {
                 setFormData({
                     ...formData,
                     title: '',
-                    description: '',
+                    // description: '',
                     start_time: '',
                     end_time: '',
                     slot: 1
@@ -47,7 +47,7 @@ export default function Index({ appointments, search }) {
         setFormData({
             ...formData,
             title: appointment.title,
-            description: appointment.description,
+            // description: appointment.description,
             start_time: appointment.start_time,
             end_time: appointment.end_time,
             slot: appointment.slot
@@ -175,7 +175,7 @@ export default function Index({ appointments, search }) {
                                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                     />
                                 </div>
-                                <div className="mb-3">
+                                {/* <div className="mb-3">
                                     <label className="form-label">Description</label>
                                     <input
                                         type="text"
@@ -183,7 +183,7 @@ export default function Index({ appointments, search }) {
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     />
-                                </div>
+                                </div> */}
                                 <div className="mb-3">
                                     <label className="form-label">Start Time</label>
                                     <input

@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Appointment;
+use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
     // Index (with pagination)
     public function index(Request $request)
     {
+        $user = auth()->user();
         $query = Appointment::query();
 
         if ($request->has('search')) {
@@ -18,7 +20,7 @@ class AppointmentController extends Controller
             $query->where('title', 'like', "%{$search}%");
         }
 
-        $appointments = $query->paginate(20);
+        $appointments = $query->where('doctor_id',$user->id)->paginate(20);
         return Inertia::render('Appointments/Index', [
             'appointments' => $appointments,
             'search' => $request->input('search'),

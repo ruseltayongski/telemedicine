@@ -1,299 +1,8 @@
-// import React, { useState, useEffect, useRef } from 'react';
-// import AgoraRTC from 'agora-rtc-sdk-ng';
-
-// const AgoraVideoCall = ({ channelName, appId, token, uid }) => {
-//     token = null;
-//     // State variables
-//     const [isJoined, setIsJoined] = useState(false);
-//     const [remoteUsers, setRemoteUsers] = useState([]);
-//     const [localTracks, setLocalTracks] = useState({
-//         audioTrack: null,
-//         videoTrack: null
-//     });
-//     const [muted, setMuted] = useState(false);
-//     const [videoDisabled, setVideoDisabled] = useState(false);
-//     const [callDuration, setCallDuration] = useState(0);
-//     const [remoteUserName, setRemoteUserName] = useState("User");
-    
-//     // Refs
-//     const clientRef = useRef(null);
-//     const timerRef = useRef(null);
-    
-//     // Initialize on component mount
-//     useEffect(() => {
-//         // Create and initialize the client
-//         clientRef.current = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-        
-//         // Setup event listeners
-//         const handleUserPublished = async (user, mediaType) => {
-//             await clientRef.current.subscribe(user, mediaType);
-            
-//             // Update remote users when a new user publishes
-//             if (mediaType === 'video') {
-//                 setRemoteUsers(prevUsers => {
-//                     // Remove the user if they're already in the list to avoid duplicates
-//                     const filteredUsers = prevUsers.filter(u => u.uid !== user.uid);
-//                     return [...filteredUsers, user];
-//                 });
-//             }
-            
-//             // Play audio automatically
-//             if (mediaType === 'audio' && user.audioTrack) {
-//                 user.audioTrack.play();
-//             }
-//         };
-        
-//         const handleUserUnpublished = (user, mediaType) => {
-//             // Remove user from remote users when they unpublish video
-//             if (mediaType === 'video') {
-//                 setRemoteUsers(prevUsers => prevUsers.filter(u => u.uid !== user.uid));
-//             }
-//         };
-        
-//         const handleUserLeft = (user) => {
-//             // Remove user from remote users when they leave
-//             setRemoteUsers(prevUsers => prevUsers.filter(u => u.uid !== user.uid));
-//         };
-        
-//         // Register event listeners
-//         clientRef.current.on('user-published', handleUserPublished);
-//         clientRef.current.on('user-unpublished', handleUserUnpublished);
-//         clientRef.current.on('user-left', handleUserLeft);
-        
-//         // Join the channel when appId and channelName are available
-//         const joinChannel = async () => {
-//             if (!appId || !channelName) return;
-            
-//             try {
-//                 // Join the channel
-//                 await clientRef.current.join(appId, channelName, token || null, uid || null);
-                
-//                 // Create and publish local tracks
-//                 const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-//                 const videoTrack = await AgoraRTC.createCameraVideoTrack();
-                
-//                 setLocalTracks({
-//                     audioTrack,
-//                     videoTrack
-//                 });
-                
-//                 // Publish local tracks
-//                 await clientRef.current.publish([audioTrack, videoTrack]);
-                
-//                 setIsJoined(true);
-                
-//                 // Start call duration timer
-//                 startCallTimer();
-//             } catch (error) {
-//                 console.error('Error joining channel:', error);
-//             }
-//         };
-        
-//         joinChannel();
-        
-//         // Cleanup function
-//         return () => {
-//             // Close local tracks
-//             if (localTracks.audioTrack) {
-//                 localTracks.audioTrack.close();
-//             }
-//             if (localTracks.videoTrack) {
-//                 localTracks.videoTrack.close();
-//             }
-            
-//             // Leave the channel
-//             if (clientRef.current) {
-//                 clientRef.current.leave();
-                
-//                 // Remove event listeners
-//                 clientRef.current.off('user-published', handleUserPublished);
-//                 clientRef.current.off('user-unpublished', handleUserUnpublished);
-//                 clientRef.current.off('user-left', handleUserLeft);
-//             }
-            
-//             // Clear timer
-//             if (timerRef.current) {
-//                 clearInterval(timerRef.current);
-//             }
-//         };
-//     }, [appId, channelName, token, uid]);
-    
-//     // Start call timer
-//     const startCallTimer = () => {
-//         timerRef.current = setInterval(() => {
-//             setCallDuration(prev => prev + 1);
-//         }, 1000);
-//     };
-    
-//     // Format call duration
-//     const formatCallDuration = (seconds) => {
-//         const minutes = Math.floor(seconds / 60);
-//         const remainingSeconds = seconds % 60;
-//         return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-//     };
-    
-//     // Toggle mute function
-//     const toggleMute = async () => {
-//         if (localTracks.audioTrack) {
-//             await localTracks.audioTrack.setMuted(!muted);
-//             setMuted(!muted);
-//         }
-//     };
-    
-//     // Toggle video function
-//     const toggleVideo = async () => {
-//         if (localTracks.videoTrack) {
-//             await localTracks.videoTrack.setMuted(!videoDisabled);
-//             setVideoDisabled(!videoDisabled);
-//         }
-//     };
-    
-//     // Leave call function
-//     const leaveCall = async () => {
-//         // Close local tracks
-//         if (localTracks.audioTrack) {
-//             localTracks.audioTrack.close();
-//         }
-//         if (localTracks.videoTrack) {
-//             localTracks.videoTrack.close();
-//         }
-        
-//         // Leave the channel
-//         if (clientRef.current) {
-//             await clientRef.current.leave();
-//         }
-        
-//         // Clear timer
-//         if (timerRef.current) {
-//             clearInterval(timerRef.current);
-//         }
-        
-//         // Reset state
-//         setIsJoined(false);
-//         setRemoteUsers([]);
-//         setLocalTracks({
-//             audioTrack: null,
-//             videoTrack: null
-//         });
-//         setCallDuration(0);
-//     };
-    
-//     return (
-//         <div className="signal-video-call-container position-relative" style={{ height: '100vh', width: '100%', overflow: 'hidden' }}>
-//             {/* Main remote video view */}
-//             <div className="remote-video-view position-relative h-100 w-100 bg-light">
-//                 {remoteUsers.length > 0 && remoteUsers[0].videoTrack ? (
-//                     <div className="h-100 w-100" ref={(ref) => {
-//                         if (ref) {
-//                             remoteUsers[0].videoTrack.play(ref);
-//                         }
-//                     }}></div>
-//                 ) : (
-//                     <div className="h-100 w-100 d-flex justify-content-center align-items-center">
-//                         <div className="text-center">
-//                             <div className="bg-secondary rounded-circle mx-auto mb-3" style={{ width: '100px', height: '100px' }}>
-//                                 <span className="text-white fs-1 d-flex justify-content-center align-items-center h-100">
-//                                     {remoteUserName.charAt(0)}
-//                                 </span>
-//                             </div>
-//                             <p className="text-dark fs-4">Waiting for {remoteUserName} to join...</p>
-//                         </div>
-//                     </div>
-//                 )}
-                
-//                 {/* Header info */}
-//                 <div className="call-header position-absolute top-0 start-0 w-100 p-3 text-center" 
-//                     style={{ 
-//                         background: 'rgba(0,0,0,0.3)',
-//                         color: 'white'
-//                     }}>
-//                     <h5 className="mb-0">{remoteUserName}</h5>
-//                     <p className="mb-0">Signal {formatCallDuration(callDuration)}</p>
-//                 </div>
-                
-//                 {/* Local video PiP */}
-//                 <div className="local-video-pip position-absolute" 
-//                     style={{ 
-//                         bottom: '100px', 
-//                         right: '20px', 
-//                         width: '120px', 
-//                         height: '160px',
-//                         borderRadius: '8px',
-//                         overflow: 'hidden',
-//                         backgroundColor: '#000',
-//                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
-//                     }}>
-//                     {isJoined && localTracks.videoTrack && !videoDisabled ? (
-//                         <div className="h-100 w-100" ref={(ref) => {
-//                             if (ref) {
-//                                 localTracks.videoTrack.play(ref);
-//                             }
-//                         }}></div>
-//                     ) : (
-//                         <div className="h-100 w-100 d-flex justify-content-center align-items-center bg-secondary">
-//                             <span className="text-white fs-4">You</span>
-//                         </div>
-//                     )}
-//                 </div>
-                
-//                 {/* Call controls */}
-//                 <div className="call-controls position-absolute bottom-0 start-0 w-100 d-flex justify-content-center pb-4">
-//                     <div className="d-flex gap-4">
-//                         <button 
-//                             onClick={toggleVideo} 
-//                             className={`btn btn-lg rounded-circle ${videoDisabled ? 'btn-light' : 'btn-light'}`}
-//                             style={{ 
-//                                 width: '60px', 
-//                                 height: '60px', 
-//                                 display: 'flex', 
-//                                 justifyContent: 'center', 
-//                                 alignItems: 'center',
-//                                 backgroundColor: videoDisabled ? '#e0e0e0' : '#ffffff'
-//                             }}
-//                         >
-//                             <i className={`bi ${videoDisabled ? 'bi-camera-video-off' : 'bi-camera-video'}`} style={{ fontSize: '24px' }}></i>
-//                         </button>
-                        
-//                         <button 
-//                             onClick={toggleMute} 
-//                             className={`btn btn-lg rounded-circle ${muted ? 'btn-light' : 'btn-light'}`}
-//                             style={{ 
-//                                 width: '60px', 
-//                                 height: '60px', 
-//                                 display: 'flex', 
-//                                 justifyContent: 'center', 
-//                                 alignItems: 'center',
-//                                 backgroundColor: muted ? '#e0e0e0' : '#ffffff'
-//                             }}
-//                         >
-//                             <i className={`bi ${muted ? 'bi-mic-mute' : 'bi-mic'}`} style={{ fontSize: '24px' }}></i>
-//                         </button>
-                        
-//                         <button 
-//                             onClick={leaveCall}
-//                             className="btn btn-lg btn-danger rounded-circle"
-//                             style={{ 
-//                                 width: '60px', 
-//                                 height: '60px', 
-//                                 display: 'flex', 
-//                                 justifyContent: 'center', 
-//                                 alignItems: 'center',
-//                                 backgroundColor: '#E53935'
-//                             }}
-//                         >
-//                             <i className="bi bi-telephone-x" style={{ fontSize: '24px' }}></i>
-//                         </button>
-//                     </div>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default AgoraVideoCall;
-
 import React, { useState, useEffect, useRef } from 'react';
 import AgoraRTC from 'agora-rtc-sdk-ng';
+
+import { FaceDetection } from '@mediapipe/face_detection';
+import { Camera } from '@mediapipe/camera_utils';
 
 const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User" }) => {
     // State variables
@@ -303,6 +12,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
         audioTrack: null,
         videoTrack: null
     });
+
     const [muted, setMuted] = useState(false);
     const [videoDisabled, setVideoDisabled] = useState(false);
     const [callDuration, setCallDuration] = useState(0);
@@ -369,7 +79,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                     audioTrack,
                     videoTrack
                 });
-                
+
                 // Publish local tracks
                 await clientRef.current.publish([audioTrack, videoTrack]);
                 
@@ -563,7 +273,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                 </div>
                 
                 {/* Local video PiP */}
-                <div className="local-video-pip position-absolute" 
+                <div className="local-video-pip position-absolute"
                     style={{ 
                         bottom: '100px', 
                         right: '20px', 
