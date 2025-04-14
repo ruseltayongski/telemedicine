@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
 use App\Services\AgoraService;
+use App\Models\BookedAppointment;
 
 class VideoCallController extends Controller
 {
@@ -20,6 +21,11 @@ class VideoCallController extends Controller
     {
         $channelName = 'channelName'.$request->query('booking_id').$request->query('patient_id');
         $uid = $request->query('uid', rand(1000, 9999));
+        $patient_id = $request->query('patient_id');
+        $booking_id = $request->query('booking_id');
+        $appointment = BookedAppointment::find($booking_id)->with('appointment')->first();
+        $doctor_id = $appointment->appointment->doctor_id;
+        $recipient = $request->query('recipient');
         
         $token = $this->agoraService->generateToken($channelName, $uid);
         
@@ -27,7 +33,11 @@ class VideoCallController extends Controller
             'appId' => config('services.agora.app_id'),
             'channelName' => $channelName,
             'token' => null,
-            'uid' => $uid
+            'uid' => $uid,
+            'patient_id' => $patient_id,
+            'doctor_id' => $doctor_id,
+            'recipient' => $recipient,
+            'booking_id' => $booking_id,
         ]);
     }
 }

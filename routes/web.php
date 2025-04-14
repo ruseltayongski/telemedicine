@@ -9,6 +9,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\BookedAppointmentController;
 use App\Http\Controllers\VideoCallController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Models\User;
 
@@ -54,7 +55,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/doctor-bookings', [BookedAppointmentController::class, 'manageBooking'])->name('doctor.manage.booking');
     Route::put('/doctor-bookings/{id}/status', [BookedAppointmentController::class, 'updateStatus'])->name('doctor.bookings.update-status');
+
+    Route::resource('prescriptions', PrescriptionController::class)->only(['store', 'show']);
 });
+Route::get('prescriptions/{patient_id}/{doctor_id}/{booking_id}/pdf', [PrescriptionController::class, 'downloadPrescriptionPdf'])->name('prescriptions.pdf');
 
 Route::match(['POST','GET'],'/video-call', [VideoCallController::class, 'index'])->name('video-call');
 

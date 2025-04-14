@@ -128,7 +128,7 @@ export default function ManageBookings() {
                             {booking.status === 'confirmed' && (
                                 <p style={{ marginBottom: '-15px' }}>
                                     <a 
-                                        href={`/video-call?booking_id=${booking.id}&patient_id=${booking.patient.id}`} 
+                                        href={`/video-call?booking_id=${booking.id}&patient_id=${booking.patient.id}&recipient=doctor`} 
                                         target="_blank" 
                                         rel="noopener noreferrer"
                                         className="btn btn-sm btn-primary"

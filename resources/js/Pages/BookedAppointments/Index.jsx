@@ -90,6 +90,7 @@ export default function BookedAppointments({bookedAppointments}) {
                                                                 >
                                                                     <input type="hidden" name="booking_id" value={booking.id} />
                                                                     <input type="hidden" name="patient_id" value={booking.patient_id} />
+                                                                    <input type="hidden" name="recipient" value="patient" />
                                                                     <a 
                                                                         href="#" 
                                                                         className="text-primary text-decoration-none"

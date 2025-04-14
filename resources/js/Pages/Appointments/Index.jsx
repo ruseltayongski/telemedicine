@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
 
 export default function Index({ appointments, search }) {
     const user = usePage().props.auth.user;
