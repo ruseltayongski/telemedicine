@@ -84,9 +84,8 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                 await clientRef.current.publish([audioTrack, videoTrack]);
                 
                 setIsJoined(true);
-                
                 // Start call duration timer
-                startCallTimer();
+                startCallTimer();                             
             } catch (error) {
                 console.error('Error joining channel:', error);
             }
@@ -98,7 +97,6 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
         document.body.style.overflow = 'hidden';
         document.body.style.margin = '0';
         document.body.style.padding = '0';
-        
         if (containerRef.current) {
             requestFullScreen(containerRef.current);
         }
@@ -362,3 +360,109 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
 };
 
 export default AgoraVideoCall;
+
+// import React, { useRef, useEffect, useState } from 'react';
+// import { FaceDetection } from '@mediapipe/face_detection';
+// import { Camera } from '@mediapipe/camera_utils';
+
+// const PersonCounter = () => {
+//   const videoRef = useRef(null);
+//   const canvasRef = useRef(null);
+//   const [personCount, setPersonCount] = useState(0);
+//   const faceDetectionRef = useRef(null);
+
+//   useEffect(() => {
+//     const onResults = (results) => {
+//       // Update the person count based on detected faces
+//       setPersonCount(results.detections.length);
+
+//       // Draw detections to canvas (optional)
+//       const canvasElement = canvasRef.current;
+//       const canvasCtx = canvasElement.getContext('2d');
+//       canvasCtx.save();
+//       canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+//       canvasCtx.drawImage(
+//         results.image, 0, 0, canvasElement.width, canvasElement.height
+//       );
+
+//       if (results.detections.length > 0) {
+//         results.detections.forEach(detection => {
+//           const box = detection.boundingBox;
+//           canvasCtx.strokeStyle = '#00FF00';
+//           canvasCtx.lineWidth = 2;
+//           canvasCtx.strokeRect(
+//             box.xMin * canvasElement.width,
+//             box.yMin * canvasElement.height,
+//             (box.xMax - box.xMin) * canvasElement.width,
+//             (box.yMax - box.yMin) * canvasElement.height
+//           );
+//         });
+//       }
+//       canvasCtx.restore();
+//     };
+
+//     // Initialize face detection
+//     faceDetectionRef.current = new FaceDetection({
+//       locateFile: (file) => {
+//         return `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`;
+//       }
+//     });
+
+//     faceDetectionRef.current.setOptions({
+//       model: 'short', // or 'full' for more accurate but slower detection
+//       minDetectionConfidence: 0.5
+//     });
+
+//     faceDetectionRef.current.onResults(onResults);
+
+//     // Initialize camera
+//     if (videoRef.current) {
+//       const camera = new Camera(videoRef.current, {
+//         onFrame: async () => {
+//           if (videoRef.current) {
+//             await faceDetectionRef.current.send({ image: videoRef.current });
+//           }
+//         },
+//         width: 640,
+//         height: 480
+//       });
+//       camera.start();
+//     }
+
+//     return () => {
+//       if (faceDetectionRef.current) {
+//         faceDetectionRef.current.close();
+//       }
+//     };
+//   }, []);
+
+//   return (
+//     <div style={{ position: 'relative', width: '640px', height: '480px' }}>
+//       <video 
+//         ref={videoRef} 
+//         style={{ position: 'absolute', width: '100%', height: '100%' }}
+//         playsInline
+//       />
+//       <canvas 
+//         ref={canvasRef} 
+//         style={{ position: 'absolute', width: '100%', height: '100%' }}
+//         width={640}
+//         height={480}
+//       />
+//       <div style={{
+//         position: 'absolute',
+//         top: '10px',
+//         left: '10px',
+//         backgroundColor: 'rgba(0,0,0,0.5)',
+//         color: 'white',
+//         padding: '10px',
+//         borderRadius: '5px',
+//         fontSize: '24px'
+//       }}>
+//         People: {personCount}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default PersonCounter;

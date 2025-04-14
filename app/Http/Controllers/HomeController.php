@@ -47,7 +47,7 @@ class HomeController extends Controller
                 ->where('status', 'confirmed')
                 //->whereRaw("TIMESTAMPDIFF(MINUTE, STR_TO_DATE('$nowTime', '%H:%i:%s'), selected_time) = 2")
                 ->whereHas('appointment', function ($query) use ($now) {
-                    $query->whereDate('start_time', $now->toDateString());
+                    $query->whereDate('date_start', $now->toDateString());
                 })
                 ->get();
         

@@ -36,7 +36,21 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
+            ]
+        ]);
+
+        User::insert([
+            [
+                'name' => 'Jane Merks',
+                'email' => 'rusel.ideahub@gmail.com',
+                'password' => Hash::make('password'),
+                'role_id' => 2,
+                'specialization_id' => 1,
+                'facility_id' => 1,
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
 
         $facilityIds = DB::table('facility')->pluck('id')->toArray();

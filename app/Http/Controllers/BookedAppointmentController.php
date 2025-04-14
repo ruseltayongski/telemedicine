@@ -151,7 +151,7 @@ class BookedAppointmentController extends Controller
 
         // Update the status
         $booking->status = $request->status;
-        //$booking->save();
+        $booking->save();
 
         session()->flash('success', 'Booking status updated successfully!');
     

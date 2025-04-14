@@ -38,8 +38,8 @@ class AppointmentController extends Controller
     {
         $request->validate([
             'title' => 'required',
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after:start_time',
+            'date_start' => 'required|date',
+            // 'date_end' => 'required|date|after:date_end',
         ]);
 
         Appointment::create($request->all());
@@ -57,8 +57,8 @@ class AppointmentController extends Controller
     {
         $request->validate([
             'title' => 'required',
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after:start_time',
+            'date_start' => 'required|date',
+            // 'date_end' => 'required|date|after:date_start',
         ]);
 
         $appointment->update($request->all());

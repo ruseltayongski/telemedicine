@@ -51,8 +51,8 @@ class AppointmentSeeder extends Seeder
                 $appointments[] = [
                     'title' => $title.' '.($i + 1),
                     'description' => $title . ' session.',
-                    'start_time' => Carbon::now()->addDays($dayOffset)->format('Y-m-d H:i:s'),
-                    'end_time' => Carbon::now()->addDays($dayOffset)->format('Y-m-d H:i:s'),
+                    'date_start' => Carbon::now()->addDays($dayOffset)->format('Y-m-d'),
+                    'date_end' => Carbon::now()->addDays($dayOffset)->format('Y-m-d'),
                     'slot' => rand(10, 30),
                     'doctor_id' => $doctor->id,
                     'created_at' => now(),

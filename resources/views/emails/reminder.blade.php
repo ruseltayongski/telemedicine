@@ -6,8 +6,8 @@ Hello {{ ucfirst($recipient) }},
 This is a reminder that you have an upcoming appointment:
 
 - **Title:** {{ $booking->appointment->title }}
-- **Date:** {{ \Carbon\Carbon::parse($booking->appointment->start_time)->format('F j, Y') }}
-- **Time:** {{ \Carbon\Carbon::parse($booking->appointment->start_time)->format('h:i A') }}
+- **Date:** {{ \Carbon\Carbon::parse($booking->appointment->date_start)->format('F j, Y') }}
+- **Time:** {{ \Carbon\Carbon::parse($booking->appointment->date_start)->format('h:i A') }}
 
 Please be ready 15 minutes before the scheduled time.
 

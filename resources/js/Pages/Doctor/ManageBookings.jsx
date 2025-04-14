@@ -114,7 +114,7 @@ export default function ManageBookings() {
                         <div className="col-md-8">
                             <h5 className="card-title mb-3">Patient: {booking.patient.name}</h5>
                             <p className="card-text mb-2">
-                                <i className="bi bi-calendar me-2"></i>Date: {formatDate(booking.appointment.start_time)}
+                                <i className="bi bi-calendar me-2"></i>Date: {formatDate(booking.appointment.date_start)}
                             </p>
                             <p className="card-text mb-2">
                                 <i className="bi bi-clock me-2"></i>Time: {formatTime(booking.selected_time)}

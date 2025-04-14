@@ -26,12 +26,12 @@ class SendAppointmentReminder extends Command
                 ->where('status', 'confirmed')
                 //->whereRaw("TIMESTAMPDIFF(MINUTE, STR_TO_DATE('$nowTime', '%H:%i:%s'), selected_time) = 2")
                 ->whereHas('appointment', function ($query) use ($now) {
-                    $query->whereDate('start_time', $now->toDateString());
+                    $query->whereDate('date_start', $now->toDateString());
                 })
                 ->get();
 
         foreach ($appointments as $booking) {
-            $startTime = Carbon::parse($booking->appointment->start_time);
+            $startTime = Carbon::parse($booking->appointment->date_start);
 
             Mail::to($booking->patient->email)->send(new AppointmentReminder($booking, 'patient'));
             Log::debug("Reminder sent to patient: {$booking->patient->email}");

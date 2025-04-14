@@ -64,7 +64,7 @@ export default function BookedAppointments({bookedAppointments}) {
                                                         <td className="border px-4 py-2">{booking.status}</td>
                                                         <td className="border px-4 py-2">
                                                             <span style={{ fontSize: '12px' }}>
-                                                                {new Date(booking.appointment.start_time).toLocaleDateString('en-US', {
+                                                                {new Date(booking.appointment.date_start).toLocaleDateString('en-US', {
                                                                     year: 'numeric',
                                                                     month: 'long',
                                                                     day: 'numeric',

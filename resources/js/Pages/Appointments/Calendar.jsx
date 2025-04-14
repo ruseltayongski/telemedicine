@@ -60,7 +60,7 @@ export default function Calendar({ appointments }) {
         return {
             id: appointment.id,
             title: appointment.title || "Untitled Event",
-            start: appointment.start_time,
+            start: appointment.date_start,
             allDay: true,
             className: "info",
         };

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Swal from 'sweetalert2'
 
 export default function Index({ appointments, search }) {
     const user = usePage().props.auth.user;
@@ -12,8 +13,8 @@ export default function Index({ appointments, search }) {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        start_time: '',
-        end_time: '',
+        date_start: '',
+        date_end: '',
         slot: 1,
         doctor_id: user.id
     });
@@ -27,14 +28,20 @@ export default function Index({ appointments, search }) {
     // Handle create appointment
     const handleCreate = () => {
         router.post(route('appointments.store'), formData, {
+            preserveScroll: true,
             onSuccess: () => {
                 setIsCreateModalOpen(false);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Created!',
+                    text: 'Appointment has been created successfully.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
                 setFormData({
                     ...formData,
                     title: '',
-                    // description: '',
-                    start_time: '',
-                    end_time: '',
+                    date_start: '',
                     slot: 1
                 });
             },
@@ -48,8 +55,8 @@ export default function Index({ appointments, search }) {
             ...formData,
             title: appointment.title,
             // description: appointment.description,
-            start_time: appointment.start_time,
-            end_time: appointment.end_time,
+            date_start: appointment.date_start,
+            date_end: appointment.date_end,
             slot: appointment.slot
         });
         setIsEditModalOpen(true);
@@ -57,7 +64,23 @@ export default function Index({ appointments, search }) {
 
     const handleUpdate = () => {
         router.put(route('appointments.update', selectedAppointment.id), formData, {
-            onSuccess: () => setIsEditModalOpen(false),
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsEditModalOpen(false);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Updated!',
+                    text: 'Appointment has been updated successfully.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+                setFormData({
+                    ...formData,
+                    title: '',
+                    date_start: '',
+                    slot: 1
+                });
+            },
         });
     };
 
@@ -69,7 +92,17 @@ export default function Index({ appointments, search }) {
 
     const confirmDelete = () => {
         router.delete(route('appointments.destroy', selectedAppointment.id), {
-            onSuccess: () => setIsDeleteModalOpen(false),
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsDeleteModalOpen(false);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted!',
+                    text: 'Appointment has been deleted successfully.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            },
         });
     };
 
@@ -110,8 +143,8 @@ export default function Index({ appointments, search }) {
                 <thead>
                     <tr>
                         <th>Title</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
+                        <th>Date</th>
+                        {/* <th>Date End</th> */}
                         <th>Slot</th>
                         <th>Actions</th>
                     </tr>
@@ -120,8 +153,14 @@ export default function Index({ appointments, search }) {
                     {appointments.data.map(appointment => (
                         <tr key={appointment.id}>
                             <td>{appointment.title}</td>
-                            <td>{appointment.start_time}</td>
-                            <td>{appointment.end_time}</td>
+                            <td>
+                                {new Date(appointment.date_start).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                })} 
+                            </td>
+                            {/* <td>{appointment.date_end}</td> */}
                             <td>{appointment.slot}</td>
                             <td>
                                 <button
@@ -185,23 +224,24 @@ export default function Index({ appointments, search }) {
                                     />
                                 </div> */}
                                 <div className="mb-3">
-                                    <label className="form-label">Start Time</label>
+                                    <label className="form-label">DATE</label>
                                     <input
-                                        type="datetime-local"
+                                        type="date"
                                         className="form-control"
-                                        value={formData.start_time}
-                                        onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                                        value={formData.date_start}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        onChange={(e) => setFormData({ ...formData, date_start: e.target.value })}
                                     />
                                 </div>
-                                <div className="mb-3">
+                                {/* <div className="mb-3">
                                     <label className="form-label">End Time</label>
                                     <input
                                         type="datetime-local"
                                         className="form-control"
-                                        value={formData.end_time}
-                                        onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                                        value={formData.date_end}
+                                        onChange={(e) => setFormData({ ...formData, date_end: e.target.value })}
                                     />
-                                </div>
+                                </div> */}
                                 <div className="mb-3">
                                     <label className="form-label">Slot</label>
                                     <input
@@ -237,7 +277,7 @@ export default function Index({ appointments, search }) {
                                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                     />
                                 </div>
-                                <div className="mb-3">
+                                {/* <div className="mb-3">
                                     <label className="form-label">Description</label>
                                     <input
                                         type="text"
@@ -245,31 +285,32 @@ export default function Index({ appointments, search }) {
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     />
-                                </div>
+                                </div> */}
                                 <div className="mb-3">
-                                    <label className="form-label">Start Time</label>
+                                    <label className="form-label">Date</label>
                                     <input
-                                        type="datetime-local"
+                                        type="date"
                                         className="form-control"
-                                        value={formData.start_time}
-                                        onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                                        value={formData.date_start}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        onChange={(e) => setFormData({ ...formData, date_start: e.target.value })}
                                     />
                                 </div>
-                                <div className="mb-3">
+                                {/* <div className="mb-3">
                                     <label className="form-label">End Time</label>
                                     <input
                                         type="datetime-local"
                                         className="form-control"
-                                        value={formData.end_time}
-                                        onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                                        value={formData.date_end}
+                                        onChange={(e) => setFormData({ ...formData, date_end: e.target.value })}
                                     />
-                                </div>
+                                </div> */}
                                 <div className="mb-3">
                                     <label className="form-label">Slot</label>
                                     <input
-                                        type="datetime-local"
+                                        type="number"
                                         className="form-control"
-                                        value={formData.end_tslotime}
+                                        value={formData.slot}
                                         onChange={(e) => setFormData({ ...formData, slot: e.target.value })}
                                     />
                                 </div>

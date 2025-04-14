@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->dateTime('start_time');
-            $table->dateTime('end_time');
+            $table->date('date_start');
+            $table->date('date_end')->nullable();
             $table->integer('slot'); 
             $table->unsignedBigInteger('doctor_id'); 
             $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade');
