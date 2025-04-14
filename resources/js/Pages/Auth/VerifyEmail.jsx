@@ -25,7 +25,7 @@ export default function VerifyEmail({ status }) {
                     </a>
                 </div>
 
-                <div className="alert alert-secondary">
+                <div className="alert alert-secondary col-md-4 text-center">
                     Thanks for signing up! Before getting started, could you verify
                     your email address by clicking on the link we just emailed to
                     you? If you didn't receive the email, we will gladly send you
