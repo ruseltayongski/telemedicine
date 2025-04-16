@@ -36,32 +36,26 @@ export default function BookedAppointments({bookedAppointments}) {
                             </div>
                         </div>
                         <div className="row">
-                            <div className="col-lg-8 col-12">
+                            <div className="col-lg-12 col-12">
                                 <div className="form-main">
                                     <div className="form-title">
                                         <h2>Activity List</h2>
                                     </div>
                                     <div className="overflow-x-auto">
-                                        <table className="min-w-full border border-gray-300">
+                                        <table className="border w-100 border-gray-300">
                                             <thead>
                                                 <tr className="bg-gray-200">
-                                                    <th className="border px-4 py-2">ID</th>
-                                                    <th className="border px-4 py-2">Patient Name</th>
+                                                    <th className="border px-4 py-2">Appointment Date</th>
                                                     <th className="border px-4 py-2">Appointment Title</th>
+                                                    <th className="border px-4 py-2">Appointment Time</th>
                                                     <th className="border px-4 py-2">Remarks</th>
                                                     <th className="border px-4 py-2">Status</th>
-                                                    <th className="border px-4 py-2">Booked Date</th>
-                                                    <th className="border px-4 py-2">Link</th>
+                                                    <th className="border px-4 py-2">Meeting Link</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {bookedAppointments.data.map((booking) => (
                                                     <tr key={booking.id} className="border">
-                                                        <td className="border px-4 py-2">{booking.id}</td>
-                                                        <td className="border px-4 py-2">{booking.patient.name}</td>
-                                                        <td className="border px-4 py-2">{booking.appointment.title}</td>
-                                                        <td className="border px-4 py-2">{booking.remarks}</td>
-                                                        <td className="border px-4 py-2">{booking.status}</td>
                                                         <td className="border px-4 py-2">
                                                             <span style={{ fontSize: '12px' }}>
                                                                 {new Date(booking.appointment.date_start).toLocaleDateString('en-US', {
@@ -78,6 +72,9 @@ export default function BookedAppointments({bookedAppointments}) {
                                                                 })}
                                                             </small>
                                                         </td>
+                                                        <td className="border px-4 py-2">{booking.appointment.title}</td>
+                                                        <td className="border px-4 py-2">{booking.remarks}</td>
+                                                        <td className="border px-4 py-2">{booking.status}</td>
                                                         <td className="border px-4 py-2">
                                                             {booking.status === "confirmed" ? (
                                                                 <form 
@@ -99,7 +96,7 @@ export default function BookedAppointments({bookedAppointments}) {
                                                                             e.target.closest('form').submit();
                                                                         }}
                                                                     >
-                                                                        Click here to join call
+                                                                        Join call
                                                                     </a>
                                                                 </form>
                                                             ) : (
@@ -130,7 +127,7 @@ export default function BookedAppointments({bookedAppointments}) {
 
                                 </div>
                             </div>
-                            <div className="col-lg-4 col-12">
+                            {/* <div className="col-lg-4 col-12">
                                 <div className="single-head">
                                     <h2 className="main-title">Contact Information</h2>
                                     <div className="single-info">
@@ -176,7 +173,7 @@ export default function BookedAppointments({bookedAppointments}) {
                                     </ul>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

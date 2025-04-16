@@ -37,6 +37,7 @@
 
 {{-- Salutation --}}
 @if (! empty($salutation))
+Regards, <br>
 {{ $salutation }}
 @else
 @lang('Regards,')<br>

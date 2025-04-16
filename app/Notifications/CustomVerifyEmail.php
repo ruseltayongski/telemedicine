@@ -42,7 +42,7 @@ class CustomVerifyEmail extends Notification
             ->line('Please click the button below to verify your email address.')
             ->action('Verify Email Address', $this->verificationUrl($notifiable))
             ->line('If you did not create an account, no further action is required.')
-            ->salutation("Regards, \n" . config('app.name'));
+            ->salutation(config('app.name'));
     }
 
     protected function verificationUrl($notifiable)

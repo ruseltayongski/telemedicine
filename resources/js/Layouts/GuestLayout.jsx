@@ -162,9 +162,9 @@ export default function GuestLayout({ children }) {
         router.post(route('logout'));
     };
 
-    const bookAppointment = () => {
-        router.get(route('calendar'));
-    };
+    // const bookAppointment = () => {
+    //     router.get(route('calendar'));
+    // };
     
     return <>{
         scriptsLoaded 
@@ -210,64 +210,173 @@ export default function GuestLayout({ children }) {
                                         <span className="toggler-icon"></span>
                                         </button>
                                         <div className="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent">
-                                        <ul id="nav" className="navbar-nav ms-auto">
-                                            <li className="nav-item">
-                                                <Link href={route('home')} className={`sidebar-item ${isActive('home') ? 'active' : ''}`} aria-label="Toggle navigation">Home</Link>
-                                            </li>
-                                            {user && (
+                                            <ul id="nav" className="navbar-nav ms-auto">
                                                 <li className="nav-item">
-                                                    <Link href={route('booked.appointments.index')} className={`sidebar-item ${isActive('booked.appointments.index') ? 'active' : ''}`} aria-label="Toggle navigation">Activity</Link>
+                                                    <Link href={route('home')} className={`sidebar-item ${isActive('home') ? 'active' : ''}`} aria-label="Toggle navigation">Home</Link>
                                                 </li>
-                                            )}
-                                            {/* <li className="nav-item">
-                                                <Link 
-                                                    href={route('home')} 
-                                                    className={`sidebar-item ${isActive('home') ? 'active' : ''}`} 
-                                                    aria-label="Toggle navigation"
-                                                    preserveScroll 
-                                                    preserveState
-                                                >
-                                                    Home
-                                                </Link>
-                                            </li>
-                                            {user && (
-                                                <li className="nav-item">
+                                                {user && (
+                                                    <li className="nav-item">
+                                                        <Link href={route('booked.appointments.index')} className={`sidebar-item ${isActive('booked.appointments.index') ? 'active' : ''}`} aria-label="Toggle navigation">Activity</Link>
+                                                    </li>
+                                                )}
+                                                {/* <li className="nav-item">
                                                     <Link 
-                                                        href={route('booked.appointments.index')} 
-                                                        className={`sidebar-item ${isActive('booked.appointments.index') ? 'active' : ''}`} 
+                                                        href={route('home')} 
+                                                        className={`sidebar-item ${isActive('home') ? 'active' : ''}`} 
                                                         aria-label="Toggle navigation"
                                                         preserveScroll 
                                                         preserveState
                                                     >
-                                                        Booked Appointments
+                                                        Home
                                                     </Link>
                                                 </li>
-                                            )} */}
-                                            {user ? (
-                                                <li className="nav-item">
-                                                    <a href="#" aria-label="Toggle navigation" onClick={(e) => {
-                                                            e.preventDefault();
-                                                            handleLogout();
-                                                        }}>
-                                                        Logout
-                                                    </a>
-                                                </li>
-                                            ) : (
-                                                <li className="nav-item">
+                                                {user && (
+                                                    <li className="nav-item">
+                                                        <Link 
+                                                            href={route('booked.appointments.index')} 
+                                                            className={`sidebar-item ${isActive('booked.appointments.index') ? 'active' : ''}`} 
+                                                            aria-label="Toggle navigation"
+                                                            preserveScroll 
+                                                            preserveState
+                                                        >
+                                                            Booked Appointments
+                                                        </Link>
+                                                    </li>
+                                                )} */}
+                                                {user ? (
+                                                    <li className="nav-item d-block d-md-none">
+                                                        <a href="#" aria-label="Toggle navigation" onClick={(e) => {
+                                                                e.preventDefault();
+                                                                handleLogout();
+                                                            }}>
+                                                            Logout
+                                                        </a>
+                                                    </li>
+                                                ) : (
+                                                    <li className="nav-item">
+                                                        <Link href={route('login')} aria-label="Toggle navigation">Login</Link>
+                                                    </li>
+                                                )}
+                                                {/* <li className="nav-item">
                                                     <Link href={route('login')} aria-label="Toggle navigation">Login</Link>
-                                                </li>
-                                            )}
-                                            {/* <li className="nav-item">
-                                                <Link href={route('login')} aria-label="Toggle navigation">Login</Link>
-                                            </li> */}
-                                            {/* <li className="nav-item">
-                                                <Link href={route('register')} aria-label="Toggle navigation">Register</Link>
-                                            </li> */}
-                                        </ul>
+                                                </li> */}
+                                                {/* <li className="nav-item">
+                                                    <Link href={route('register')} aria-label="Toggle navigation">Register</Link>
+                                                </li> */}
+                                            </ul>
                                         </div>
                                         {/* <div className="button add-list-button">
                                             <a href="#" className="btn cursor-pointer" onClick={bookAppointment}>Book Appointment</a>
                                         </div> */}
+                                        {user && (
+                                            <>
+                                                <a 
+                                                    className="nav-link dropdown-toggle d-flex align-items-center gap-2 d-none d-sm-flex" 
+                                                    href="#" 
+                                                    id="userDropdown" 
+                                                    role="button" 
+                                                    data-bs-toggle="dropdown" 
+                                                    aria-expanded="false"
+                                                    style={{ 
+                                                        background: "#f0f7ff", 
+                                                        borderRadius: "30px", 
+                                                        padding: "6px 15px", 
+                                                        transition: "all 0.3s ease",
+                                                        border: "1px solid #e0e7ff"
+                                                    }}
+                                                >
+                                                    <div 
+                                                        className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
+                                                        style={{ 
+                                                            width: "32px", 
+                                                            height: "32px", 
+                                                            backgroundColor: "#006838", 
+                                                            color: "white",
+                                                            fontWeight: "600",
+                                                            fontSize: "14px"
+                                                        }}
+                                                    >
+                                                        {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                                                    </div>
+                                                    <span style={{ 
+                                                            fontWeight: "500", 
+                                                            color: "#333", 
+                                                            fontSize: "14px"
+                                                        }}
+                                                    >
+                                                        {user.name || "User"}
+                                                    </span>
+                                                    <i className="fas fa-chevron-down ms-1" style={{ fontSize: "12px", color: "#666" }}></i>
+                                                </a>
+                                                <ul 
+                                                    className="dropdown-menu" 
+                                                    aria-labelledby="userDropdown"
+                                                    style={{
+                                                        borderRadius: "12px",
+                                                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                                                        border: "1px solid #eaeaea",
+                                                        padding: "8px 0",
+                                                        minWidth: "200px",
+                                                        marginTop: "10px",
+                                                        right: 0,
+                                                        left: "auto"
+                                                    }}
+                                                >
+                                                    {/* <li>
+                                                        <a 
+                                                            className="dropdown-item d-flex align-items-center gap-2" 
+                                                            href={route('profile.edit')}
+                                                            style={{
+                                                                padding: "10px 16px",
+                                                                fontSize: "14px",
+                                                                color: "#333",
+                                                                transition: "background-color 0.2s"
+                                                            }}
+                                                        >
+                                                            <i className="fas fa-user" style={{ color: "#666", width: "16px" }}></i>
+                                                            Profile
+                                                        </a>
+                                                    </li> */}
+                                                    <li>
+                                                        <Link 
+                                                            className="dropdown-item d-flex align-items-center gap-2" 
+                                                            href={route('booked.appointments.index')}
+                                                            style={{
+                                                                padding: "10px 16px",
+                                                                fontSize: "14px",
+                                                                color: "#333",
+                                                                transition: "background-color 0.2s"
+                                                            }}
+                                                        >
+                                                            <i className="fas fa-calendar-check" style={{ color: "#666", width: "16px" }}></i>
+                                                            Activity
+                                                        </Link>
+                                                    </li>
+                                                    <li>
+                                                        <hr className="dropdown-divider" style={{ margin: "8px 0", opacity: "0.1" }} />
+                                                    </li>
+                                                    <li>
+                                                        <a 
+                                                            className="dropdown-item d-flex align-items-center gap-2" 
+                                                            href="#" 
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                handleLogout();
+                                                            }}
+                                                            style={{
+                                                                padding: "10px 16px",
+                                                                fontSize: "14px",
+                                                                color: "#dc3545",
+                                                                transition: "background-color 0.2s"
+                                                            }}
+                                                        >
+                                                            <i className="fas fa-sign-out-alt" style={{ color: "#dc3545", width: "16px" }}></i>
+                                                            Logout
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </>
+                                        )}
                                     </nav>
                                 </div>
                             </div>

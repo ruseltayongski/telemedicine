@@ -14,6 +14,10 @@ export default function Calendar({ appointments }) {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    const [selectedTime, setSelectedTime] = useState('');
+    const [remarks, setRemarks] = useState("");
+    const [selectedDate, setSelectedDate] = useState('');
     
     // Get current date info for default events
     const date = new Date();
@@ -68,7 +72,6 @@ export default function Calendar({ appointments }) {
 
     const handleDateSelect = (selectInfo) => {
         setRemarks("");
-        setSelectedDate(selectInfo.event.start);
         setSelectedEvent({id: selectInfo.event.id});
         setIsModalOpen(true);
     };
@@ -76,15 +79,22 @@ export default function Calendar({ appointments }) {
     // Handle appointment booking confirmation
     const handleBookAppointment = () => {
         if (!selectedEvent) return;
+
+        if(!selectedTime) {
+            Swal.fire({
+                title: "Required Fields",
+                text: "Please select a time for your appointment.",
+                icon: "error"
+            });
+            return;
+        }
         
         selectedEvent.selected_time = selectedTime;
         selectedEvent.remarks = remarks;
         setLoading(true);
-    
         router.post(route("appointments.book"), selectedEvent, {
             preserveScroll: true,
             onSuccess: (response) => {
-                console.log(response);
                 setLoading(false);
                 setIsModalOpen(false);
                 Swal.fire({
@@ -104,36 +114,6 @@ export default function Calendar({ appointments }) {
             },
         });
     };
-
-    // const renderEventContent = (eventInfo) => {
-    //     const timeMatch = eventInfo.event.title.match(/^(\d+p)\s+(.+)$/);
-    //     let title = eventInfo.event.title;
-        
-    //     if (timeMatch) {
-    //         const [, timePrefix, actualTitle] = timeMatch;
-    //         title = actualTitle;
-            
-    //         return (
-    //             <>
-    //                 <div className="fc-daygrid-event-dot"></div>
-    //                 <div className="fc-event-time">{timePrefix}</div>
-    //                 <div className="fc-event-title" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-    //                     {title}
-    //                 </div>
-    //             </>
-    //         );
-    //     }
-        
-    //     // If no time prefix is found, just return the title
-    //     return (
-    //         <>
-    //             <div className="fc-daygrid-event-dot"></div>
-    //             <div className="fc-event-title" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-    //                 {title}
-    //             </div>
-    //         </>
-    //     );
-    // };
 
     const renderEventContent = (eventInfo) => {
         const timeMatch = eventInfo.event.title.match(/^(\d+p)\s+(.+)$/);
@@ -171,51 +151,9 @@ export default function Calendar({ appointments }) {
         );
     };
 
-    const [selectedTime, setSelectedTime] = useState('');
-    const [remarks, setRemarks] = useState("");
-    const [timeOptions, setTimeOptions] = useState([]);
-    // const [selectedDate, setSelectedDate] = useState(() => {
-    //     const tomorrow = new Date();
-    //     tomorrow.setDate(tomorrow.getDate() + 1);
-    //     return tomorrow.toISOString().split('T')[0];
-    // });
-    const [selectedDate, setSelectedDate] = useState('');
-    const generateTimeSlots = () => {
-        const slots = [];
-        const now = new Date();
-        const today = new Date();
-        const selected = new Date(selectedDate);
-        selected.setHours(0, 0, 0, 0);
-        today.setHours(0, 0, 0, 0);
-      
-        let start = new Date(selectedDate);
-        if (selected.getTime() === today.getTime()) {
-          start = new Date(now.getTime() + 40 * 60000);
-        } else {
-          start.setHours(0, 0, 0, 0);
-        }
-      
-        const end = new Date(selectedDate);
-        end.setHours(23, 59, 59);
-      
-        while (start <= end) {
-          const formattedTime = start.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-          });
-      
-          slots.push(formattedTime);
-          start = new Date(start.getTime() + 30 * 60000);
-        }
-      
-        setTimeOptions(slots);
-        setSelectedTime(slots[0] || '');
+    const handleTimeChange = (event) => {
+        setSelectedTime(event.target.value);
     };
-
-    useEffect(() => {
-        generateTimeSlots();
-    }, [selectedDate]);
 
     return (
         <GuestLayout>
@@ -299,18 +237,7 @@ export default function Calendar({ appointments }) {
                             </div>
                             <div className="modal-body">
                                 <p>Please select time for your appointment.</p>
-                                <select
-                                    className="form-select mt-2"
-                                    value={selectedTime}
-                                    onChange={(e) => setSelectedTime(e.target.value)}
-                                >
-                                    {timeOptions.map((time, index) => (
-                                        <option key={index} value={time}>
-                                            {time}
-                                        </option>
-                                    ))}
-                                </select>
-                                {/* Remarks Field */}
+                                <input type="time" className="form-control" onChange={handleTimeChange} value={selectedTime}/>
                                 <label className="mt-3">Remarks (optional)</label>
                                 <textarea
                                     className="form-control"

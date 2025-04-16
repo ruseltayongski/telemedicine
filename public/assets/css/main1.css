@@ -6837,3 +6837,7 @@ blockquote .shape {
 .ck-editor__editable {
   min-height: 300px;
 }
+
+.dropdown-toggle::after {
+  color: #006838 !important;
+}

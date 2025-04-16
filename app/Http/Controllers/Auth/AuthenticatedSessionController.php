@@ -82,7 +82,7 @@ class AuthenticatedSessionController extends Controller
 
         // Send OTP via email
         // $user->notify(new LoginOtpNotification($otp));
-        Mail::to($user->email)->send(new \App\Mail\OtpCodeMail($otp));
+        Mail::to($user->email)->send(new \App\Mail\OtpCodeMail($otp, $user->name));
 
         return back()->with([
             'status' => 'We have sent a verification code to your email.',

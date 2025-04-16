@@ -14,7 +14,7 @@
         <tr>
             <td style="padding: 30px 40px;">
                 <p style="font-size: 16px; color: #333;">
-                    Hello,
+                    Hello, {{ $name }}!
                 </p>
                 <p style="font-size: 16px; color: #333;">
                     Your One-Time Password (OTP) is:

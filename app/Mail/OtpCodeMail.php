@@ -17,9 +17,11 @@ class OtpCodeMail extends Mailable
      * Create a new message instance.
      */
     public $otp;
-    public function __construct($otp)
+    public $name;
+    public function __construct($otp, $name)
     {
         $this->otp = $otp;
+        $this->name = $name;
     }
 
     public function build()
@@ -29,6 +31,7 @@ class OtpCodeMail extends Mailable
             ->view('emails.otp')
             ->with([
                 'otp' => $this->otp,
+                'name' => $this->name
             ]);
     }
 
