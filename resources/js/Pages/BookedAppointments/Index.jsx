@@ -113,6 +113,7 @@ export default function BookedAppointments({bookedAppointments}) {
                                                 <tr className="bg-gray-200">
                                                     <th className="border px-4 py-2">Appointment Date</th>
                                                     <th className="border px-4 py-2">Appointment Title</th>
+                                                    <th className="border px-4 py-2">Doctor Name</th>
                                                     <th className="border px-4 py-2">Remarks</th>
                                                     <th className="border px-4 py-2">Status</th>
                                                     <th className="border px-4 py-2">Meeting Link</th>
@@ -139,6 +140,7 @@ export default function BookedAppointments({bookedAppointments}) {
                                                             </small>
                                                         </td>
                                                         <td className="border px-4 py-2">{booking.appointment.title}</td>
+                                                        <td className="border px-4 py-2">{booking.appointment.doctor.name}</td>
                                                         <td className="border px-4 py-2">{booking.remarks}</td>
                                                         <td className="border px-4 py-2">
                                                             <span className={`badge text-uppercase ms-2 ${
@@ -216,111 +218,6 @@ export default function BookedAppointments({bookedAppointments}) {
                                 </div>
                             </div>
                         </div>
-
-                        {/* <div className="row">
-                            <div className="col-lg-12 col-12">
-                                <div className="form-main">
-                                    <div className="form-title">
-                                        <h2>Activity List</h2>
-                                    </div>
-                                
-                                    <div className="overflow-x-auto">
-                                        <table className="border w-100 border-gray-300">
-                                            <thead>
-                                                <tr className="bg-gray-200">
-                                                    <th className="border px-4 py-2">Appointment Date</th>
-                                                    <th className="border px-4 py-2">Appointment Title</th>
-                                                    <th className="border px-4 py-2">Remarks</th>
-                                                    <th className="border px-4 py-2">Status</th>
-                                                    <th className="border px-4 py-2">Meeting Link</th>
-                                                    <th className="border px-4 py-2">Prescription</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {bookedAppointments.data.map((booking) => (
-                                                    <tr key={booking.id} className="border">
-                                                        <td className="border px-4 py-2">
-                                                            <span style={{ fontSize: '12px' }}>
-                                                                {new Date(booking.appointment.date_start).toLocaleDateString('en-US', {
-                                                                    year: 'numeric',
-                                                                    month: 'long',
-                                                                    day: 'numeric',
-                                                                })} 
-                                                            </span>
-                                                            <small className="text-gray-500 d-block" style={{ fontSize: '9px' }}>
-                                                                {new Date(`1970-01-01T${booking.selected_time}`).toLocaleTimeString([], {
-                                                                    hour: 'numeric',
-                                                                    minute: '2-digit',
-                                                                    hour12: true
-                                                                })}
-                                                            </small>
-                                                        </td>
-                                                        <td className="border px-4 py-2">{booking.appointment.title}</td>
-                                                        <td className="border px-4 py-2">{booking.remarks}</td>
-                                                        <td className="border px-4 py-2">
-                                                            <span className={`badge text-uppercase ms-2 ${
-                                                                booking.status === 'confirmed' ? 'bg-success text-white' :
-                                                                booking.status === 'pending' ? 'bg-warning text-dark' :
-                                                                booking.status === 'cancelled' ? 'bg-danger text-white' :
-                                                                'bg-secondary text-white'
-                                                            }`}>
-                                                                {booking.status}
-                                                            </span>
-                                                        </td>
-                                                        <td className="border px-4 py-2">
-                                                            {booking.status === "confirmed" ? (
-                                                                <form 
-                                                                    action={route('video-call')} 
-                                                                    method="GET" 
-                                                                    target="_blank" 
-                                                                    className="d-inline"
-                                                                    onSubmit={(e) => {
-                                                                    }}
-                                                                >
-                                                                    <input type="hidden" name="booking_id" value={booking.id} />
-                                                                    <input type="hidden" name="patient_id" value={booking.patient_id} />
-                                                                    <input type="hidden" name="recipient" value="patient" />
-                                                                    <a 
-                                                                        href="#" 
-                                                                        className="text-primary text-decoration-none"
-                                                                        onClick={(e) => {
-                                                                            e.preventDefault();
-                                                                            e.target.closest('form').submit();
-                                                                        }}
-                                                                    >
-                                                                        Join call
-                                                                    </a>
-                                                                </form>
-                                                            ) : (
-                                                                <span className="text-gray-500">Not available</span>
-                                                            )}
-                                                        </td>
-                                                        <td className="border px-4 py-2"><a href="#">Download</a></td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                        
-                                    <div className="d-flex flex-column align-items-end mt-4 mb-4" style={{ minHeight: "40vh" }}>
-                                        <div className="mt-auto">
-                                            {bookedAppointments.links.map((link, index) => (
-                                                <button
-                                                    key={index}
-                                                    onClick={() => link.url && router.visit(link.url, { preserveScroll: true, preserveState: true })}
-                                                    className={`px-3 py-2 mx-1 border rounded ${
-                                                        link.active ? 'bg-primary text-white' : 'bg-white'
-                                                    }`}
-                                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                                    disabled={!link.url}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div> */}
 
                     </div>
                 </div>

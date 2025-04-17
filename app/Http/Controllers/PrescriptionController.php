@@ -26,11 +26,37 @@ class PrescriptionController extends Controller
 
     public function downloadPrescriptionPdf($patient_id, $doctor_id, $booking_id)
     {
-        $prescription = Prescription::where('patient_id', $patient_id)
+        $prescription = Prescription::with(['doctor.specialization','doctor.facility','patient'])->where('patient_id', $patient_id)
             ->where('doctor_id', $doctor_id)
             ->where('booking_id', $booking_id)
             ->first();
-        $pdf = Pdf::loadView('pdf.prescription', ['prescription' => $prescription]);
+
+        $prescriptionData = [
+            'content' => $prescription->content,
+            'doctorName' => $prescription->doctor->name,
+            'specialty' => $prescription->doctor->specialization->name,
+            'clinicName' => $prescription->doctor->facility->name,
+            'location' => $prescription->doctor->address,
+            'phone' => $prescription->doctor->contact,
+            'patientName' => $prescription->patient->name,
+            'age' => 30,
+            'address' => $prescription->patient->address,
+            'date' => now()->format('m/d/Y'),
+            'gender' => ucfirst($prescription->patient->sex),
+            'prescriptionNumber' => $prescription->prescription_no,
+            'licenseNumber' => $prescription->doctor->license_no,
+            'ptrNumber' => $prescription->doctor->ptr_number,
+        ];
+        
+        $pdf = Pdf::loadView('pdf.prescription', $prescriptionData);
+        $pdf->setPaper('a4', 'portrait');
+        
+        // Adjust margins if needed
+        // $pdf->setOption('margin-top', '10mm');
+        // $pdf->setOption('margin-bottom', '10mm');
+        // $pdf->setOption('margin-left', '10mm');
+        // $pdf->setOption('margin-right', '10mm');
+        
         return $pdf->stream('prescription.pdf');
     }
 }

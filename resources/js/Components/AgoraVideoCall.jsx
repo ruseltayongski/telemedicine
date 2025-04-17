@@ -221,12 +221,14 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
     };
 
     const [prescription, setPrescription] = useState("<p><strong>Rx:</strong></p><ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>");
+    const [prescriptionNo, setPrescriptionNo] = useState('');
     const [isOpenPrescription, setIsOpenPrescription] = useState(false);
     const openModalPrescription = () => setIsOpenPrescription(true);
     const closeModalPrescription = () => setIsOpenPrescription(false);
     const savePrescription = () => {
         router.post(route('prescriptions.store'), {
             content: prescription,
+            prescription_no: prescriptionNo,
             doctor_id: doctor_id,
             patient_id: patient_id,
             booking_id: booking_id,
@@ -247,18 +249,6 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
     };
     
     const generatePrescription = () => {
-        // router.get(
-        //     route('prescriptions.pdf', {
-        //         patient_id: patient_id,
-        //         doctor_id: doctor_id,
-        //         booking_id: booking_id,
-        //     }),
-        //     {},
-        //     {
-        //         preserveScroll: true,
-        //         preserveState: true,
-        //     }
-        // );
         const url = route('prescriptions.pdf', {
             patient_id: patient_id,
             doctor_id: doctor_id,
@@ -267,6 +257,15 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
     
         window.open(url, '_blank');
     };
+
+    useEffect(() => {
+        if (isOpenPrescription) {
+            const year = new Date().getFullYear();
+            const random = Math.floor(1000 + Math.random() * 9000); // 4-digit random
+            const generatedNo = `RX-${year}-${random}`;
+            setPrescriptionNo(generatedNo);
+        }
+    }, [isOpenPrescription]);
 
     return (
         <>
@@ -444,9 +443,19 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                                 <button type="button" className="btn-close" onClick={() => setIsModalOpen(false)}></button>
                             </div>
                             <div className="modal-body">
+                                <div className="mb-3">
+                                    <label htmlFor="prescriptionNo" className="form-label">Prescription #</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="prescriptionNo"
+                                        value={prescriptionNo}
+                                        readOnly
+                                    />
+                                </div>
                                 <CKEditor
                                     editor={ClassicEditor}
-                                    data="<p><strong>Rx:</strong></p><ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>"
+                                    data="<ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>"
                                     config={{
                                         toolbar: ['bold', 'italic', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
                                     }}

@@ -16,10 +16,10 @@ class BookedAppointmentController extends Controller
     public function bookedAppointments(Request $request): Response
     {
         $user = auth()->user();
-        $bookedAppointments = BookedAppointment::with(['appointment', 'patient', 'prescription'])
+        $bookedAppointments = BookedAppointment::with(['appointment.doctor', 'patient', 'prescription'])
             ->where('patient_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(15);
         
         return Inertia::render('BookedAppointments/Index', [
             'bookedAppointments' => $bookedAppointments

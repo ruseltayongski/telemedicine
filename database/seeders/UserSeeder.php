@@ -17,26 +17,34 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        
+
         User::insert([
             [
                 'name' => 'Admin User',
                 'email' => 'admin@gmail.com',
                 'password' => Hash::make('password'),
-                'role_id' => 1, // Example role for admin/doctor
+                'role_id' => 1,
                 'email_verified_at' => now(),
+                'address' => 'Admin Office',
+                'contact' => '09123456789',
+                'sex' => 'male',
+                'license_no' => 'ADM123456',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
-                'name' => 'Jane Smith',
-                'email' => 'ruseltayong@gmail.com',
-                'password' => Hash::make('password'),
-                'role_id' => 3, // Example role for patient
-                'email_verified_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
+            // [
+            //     'name' => 'Jane Smith',
+            //     'email' => 'ruseltayong@gmail.com',
+            //     'password' => Hash::make('password'),
+            //     'role_id' => 3, // for patient
+            //     'email_verified_at' => now(),
+            //     'address' => 'Patient Street, City',
+            //     'contact' => '09234567890',
+            //     'sex' => 'female',
+            //     'license_no' => null,
+            //     'created_at' => now(),
+            //     'updated_at' => now(),
+            // ]
         ]);
 
         User::insert([
@@ -48,6 +56,11 @@ class UserSeeder extends Seeder
                 'specialization_id' => 1,
                 'facility_id' => 1,
                 'email_verified_at' => now(),
+                'address' => $faker->address,
+                'contact' => $faker->phoneNumber,
+                'sex' => 'female',
+                'license_no' => strtoupper($faker->bothify('DOC-#####')),
+                'ptr_number' => strtoupper($faker->bothify('PTR-#####')),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
@@ -56,46 +69,52 @@ class UserSeeder extends Seeder
         $facilityIds = DB::table('facility')->pluck('id')->toArray();
         $specializationIds = DB::table('specializations')->pluck('id')->toArray();
 
-        // Get facility ids for private and government
         $privateFacilities = array_filter($facilityIds, function($id) {
-            return DB::table('facility')->where('id', $id)->value('type') == 'private'; // Adjust as per your table structure
+            return DB::table('facility')->where('id', $id)->value('type') == 'private';
         });
 
         $governmentFacilities = array_filter($facilityIds, function($id) {
-            return DB::table('facility')->where('id', $id)->value('type') == 'government'; // Adjust as per your table structure
+            return DB::table('facility')->where('id', $id)->value('type') == 'government';
         });
 
         foreach ($specializationIds as $specializationId) {
-            // Add 5 doctors for private facilities
             for ($i = 1; $i <= 5; $i++) {
                 DB::table('users')->insert([
-                    'name' => 'Dr. ' . $faker->firstName . ' ' . $faker->lastName,
+                    'name' => $faker->firstName . ' ' . $faker->lastName,
                     'email' => 'doctor' . $specializationId . '_private_' . $i . '@gmail.com',
                     'password' => Hash::make('password'),
                     'role_id' => 2,
                     'specialization_id' => $specializationId,
                     'facility_id' => $privateFacilities[array_rand($privateFacilities)],
                     'email_verified_at' => now(),
+                    'address' => $faker->address,
+                    'contact' => $faker->phoneNumber,
+                    'sex' => $faker->randomElement(['male', 'female']),
+                    'license_no' => strtoupper($faker->bothify('DOC-#####')),
+                    'ptr_number' => strtoupper($faker->bothify('PTR-#####')),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             }
 
-            // Add 5 doctors for government facilities
             for ($i = 1; $i <= 5; $i++) {
                 DB::table('users')->insert([
-                    'name' => 'Dr. ' . $faker->firstName . ' ' . $faker->lastName,
+                    'name' => $faker->firstName . ' ' . $faker->lastName,
                     'email' => 'doctor' . $specializationId . '_government_' . $i . '@gmail.com',
                     'password' => Hash::make('password'),
                     'role_id' => 2,
                     'specialization_id' => $specializationId,
                     'facility_id' => $governmentFacilities[array_rand($governmentFacilities)],
                     'email_verified_at' => now(),
+                    'address' => $faker->address,
+                    'contact' => $faker->phoneNumber,
+                    'sex' => $faker->randomElement(['male', 'female']),
+                    'license_no' => strtoupper($faker->bothify('DOC-#####')),
+                    'ptr_number' => strtoupper($faker->bothify('PTR-#####')),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             }
         }
-
     }
 }
