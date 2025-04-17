@@ -278,7 +278,7 @@ export default function GuestLayout({ children }) {
                                                     data-bs-toggle="dropdown" 
                                                     aria-expanded="false"
                                                     style={{ 
-                                                        background: "#f0f7ff", 
+                                                        background: "#F1F8E8", 
                                                         borderRadius: "30px", 
                                                         padding: "6px 15px", 
                                                         transition: "all 0.3s ease",

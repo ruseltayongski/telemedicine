@@ -16,11 +16,13 @@ class AppointmentReminder extends Mailable
 
     public $booking;
     public $recipient;
+    public $name;
 
-    public function __construct(BookedAppointment $booking, $recipient)
+    public function __construct(BookedAppointment $booking, $recipient, $name)
     {
         $this->booking = $booking;
         $this->recipient = $recipient;
+        $this->name = $name;
     }
 
     public function build()

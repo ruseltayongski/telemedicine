@@ -1,7 +1,7 @@
 @component('mail::message')
 # Appointment Reminder
 
-Hello {{ ucfirst($recipient) }},
+Hello, {{ $name }}!
 
 This is a reminder that you have an upcoming appointment:
 

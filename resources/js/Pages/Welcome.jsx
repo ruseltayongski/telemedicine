@@ -89,17 +89,6 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
     //     return () => clearInterval(interval);
     // }, []);
 
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        department: ""
-    });
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-
     const bookAppointment = () => {
         router.get(route('calendar'));
     };
@@ -229,18 +218,6 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                         </div>
                         <form onSubmit={handleSubmit}>
                             <div className="row">
-                                {/* <div className="col-lg-3 col-md-6 col-12 p-0">
-                                    <div className="appointment-input">
-                                    <label htmlFor="name"><i className="lni lni-user"></i></label>
-                                    <input type="text" name="name" id="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
-                                    </div>
-                                </div> */}
-                                {/* <div className="col-lg-3 col-md-6 col-12 p-0">
-                                    <div className="appointment-input">
-                                    <label htmlFor="email"><i className="lni lni-envelope"></i></label>
-                                    <input type="email" name="email" id="email" placeholder="Your Email" value={formData.email} onChange={handleChange} required />
-                                    </div>
-                                </div> */}
                                 <div className="col-lg col-md-6 col-12 p-0">
                                     <div className="appointment-input">
                                         <label htmlFor="specialization"><i className="lni lni-notepad"></i></label>

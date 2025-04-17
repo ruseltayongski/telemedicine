@@ -111,64 +111,77 @@ export default function ManageBookings() {
             <div className="card mb-3 shadow-sm" key={booking.id}>
                 <div className="card-body">
                     <div className="row">
-                        <div className="col-md-8">
-                            <h5 className="card-title mb-3">Patient: {booking.patient.name}</h5>
-                            <p className="card-text mb-2">
-                                <i className="bi bi-calendar me-2"></i>Date: {formatDate(booking.appointment.date_start)}
-                            </p>
-                            <p className="card-text mb-2">
-                                <i className="bi bi-clock me-2"></i>Time: {formatTime(booking.selected_time)}
-                            </p>
-                            <p className="card-text mb-2">
-                                <i className="bi bi-journal me-2"></i>Remarks: {booking.remarks}
-                            </p>
-                            <p className="card-text mb-3">
-                                Status: <span className={`badge ${getBadgeClass(booking.status)} text-uppercase ms-2`}>{booking.status}</span>
-                            </p>
-                            {booking.status === 'confirmed' && (
-                                <p style={{ marginBottom: '-15px' }}>
-                                    <a 
-                                        href={`/video-call?booking_id=${booking.id}&patient_id=${booking.patient.id}&recipient=doctor`} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="btn btn-sm btn-primary"
-                                    >
-                                        Join Video Call
-                                    </a>
-                                </p>
-                            )}
-                        </div>
-                        
-                        {booking.status === 'pending' && (
-                            <div className="col-md-4 d-flex align-items-center justify-content-end">
-                                <div className="btn-group">
-                                    <button
-                                        onClick={() => confirmStatusUpdate(booking, 'confirmed')}
-                                        disabled={isLoading}
-                                        className="btn btn-success me-2 d-flex align-items-center"
-                                    >
-                                        {isLoading ? (
-                                            <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                                        ) : (
-                                            <i className="bi bi-check-circle me-1"></i>
+
+                        <div className="col-md-12">
+                            <div className="card-body p-3">
+                                {/* Header row - All in one line */}
+                                <div className="d-flex align-items-center justify-content-between mb-3">
+                                    <h5 className="card-title mb-0 text-truncate">{booking.patient.name}</h5>
+                                    <div className="d-flex align-items-center ms-2">
+                                        <span className={`badge ${getBadgeClass(booking.status)} text-uppercase me-2`}>{booking.status}</span>
+                                        {booking.status === 'confirmed' && (
+                                            <a 
+                                                href={`/video-call?booking_id=${booking.id}&patient_id=${booking.patient.id}&recipient=doctor`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="btn btn-sm btn-primary d-flex align-items-center"
+                                                style={{height: '24px'}}
+                                            >
+                                                <i className="bi bi-camera-video me-1"></i>
+                                                Join Call
+                                            </a>
                                         )}
-                                        Confirm
-                                    </button>
-                                    <button
-                                        onClick={() => confirmStatusUpdate(booking, 'cancelled')}
-                                        disabled={isLoading}
-                                        className="btn btn-danger d-flex align-items-center"
-                                    >
-                                        {isLoading ? (
-                                            <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                                        ) : (
-                                            <i className="bi bi-x-circle me-1"></i>
-                                        )}
-                                        Cancel
-                                    </button>
+                                    </div>
+                                </div>
+                                
+                                {/* Booking details */}
+                                <div className="row">
+                                    <div className="col-md-8">
+                                        <p className="card-text mb-2">
+                                            <i className="bi bi-calendar-event me-2"></i>
+                                            {formatDate(booking.appointment.date_start)} <span className="mx-2">|</span> 
+                                            <i className="bi bi-clock me-1" style={{paddingTop:'10px'}}></i>{formatTime(booking.selected_time)}
+                                        </p>
+                                        <p className="card-text mb-2">
+                                            <i className="bi bi-journal me-2"></i>Remarks: {booking.remarks}
+                                        </p>
+                                    </div>
+                                    
+                                    {/* Action buttons for pending status */}
+                                    {booking.status === 'pending' && (
+                                        <div className="col-md-4 d-flex align-items-center justify-content-end">
+                                            <div className="btn-group">
+                                                <button
+                                                    onClick={() => confirmStatusUpdate(booking, 'confirmed')}
+                                                    disabled={isLoading}
+                                                    className="btn btn-success me-2 d-flex align-items-center"
+                                                >
+                                                    {isLoading ? (
+                                                        <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                                    ) : (
+                                                        <i className="bi bi-check-circle me-1"></i>
+                                                    )}
+                                                    Confirm
+                                                </button>
+                                                <button
+                                                    onClick={() => confirmStatusUpdate(booking, 'cancelled')}
+                                                    disabled={isLoading}
+                                                    className="btn btn-danger d-flex align-items-center"
+                                                >
+                                                    {isLoading ? (
+                                                        <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                                    ) : (
+                                                        <i className="bi bi-x-circle me-1"></i>
+                                                    )}
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                        )}
+                        </div>
+
                     </div>
                 </div>
             </div>

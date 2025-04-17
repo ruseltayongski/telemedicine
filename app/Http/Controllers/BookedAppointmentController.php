@@ -16,7 +16,7 @@ class BookedAppointmentController extends Controller
     public function bookedAppointments(Request $request): Response
     {
         $user = auth()->user();
-        $bookedAppointments = BookedAppointment::with(['appointment', 'patient'])
+        $bookedAppointments = BookedAppointment::with(['appointment', 'patient', 'prescription'])
             ->where('patient_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -74,7 +74,7 @@ class BookedAppointmentController extends Controller
             'appointment_id' => $appointment->id,
             'patient_id' => Auth::id(),
             'status' => 'pending',
-            'selected_time' => date('H:i:s', strtotime($request->selected_time)),
+            'selected_time' => $request->selected_time,
             'remarks' => $request->remarks,
         ]);
 

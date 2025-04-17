@@ -33,9 +33,9 @@ class SendAppointmentReminder extends Command
         foreach ($appointments as $booking) {
             $startTime = Carbon::parse($booking->appointment->date_start);
 
-            Mail::to($booking->patient->email)->send(new AppointmentReminder($booking, 'patient'));
+            Mail::to($booking->patient->email)->send(new AppointmentReminder($booking, 'patient', $booking->patient->name));
             Log::debug("Reminder sent to patient: {$booking->patient->email}");
-            Mail::to($booking->appointment->doctor->email)->send(new AppointmentReminder($booking, 'doctor'));
+            Mail::to($booking->appointment->doctor->email)->send(new AppointmentReminder($booking, 'doctor', $booking->appointment->doctor->name));
         }
 
         $this->info('Appointment reminders sent.');
