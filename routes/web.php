@@ -10,6 +10,7 @@ use App\Http\Controllers\BookedAppointmentController;
 use App\Http\Controllers\VideoCallController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Models\User;
 
@@ -57,6 +58,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/doctor-bookings/{id}/status', [BookedAppointmentController::class, 'updateStatus'])->name('doctor.bookings.update-status');
 
     Route::resource('prescriptions', PrescriptionController::class)->only(['store', 'show']);
+
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat');
+    Route::post('/update-status', [ChatController::class, 'updateOnlineStatus'])->name('update.status');
 });
 Route::get('prescriptions/{patient_id}/{doctor_id}/{booking_id}/pdf', [PrescriptionController::class, 'downloadPrescriptionPdf'])->name('prescriptions.pdf');
 

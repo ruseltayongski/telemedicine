@@ -20,6 +20,10 @@ return new class extends Migration
             $table->integer('specialization_id')->nullable();
             $table->integer('facility_id')->nullable();
             $table->integer('role_id')->default(3);
+            $table->string('firebase_uid')->nullable();
+            $table->string('avatar')->nullable();
+            $table->boolean('online_status')->default(false);
+            $table->timestamp('last_active')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

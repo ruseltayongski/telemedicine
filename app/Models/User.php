@@ -23,7 +23,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'role_id'
+        'role_id',
+        'firebase_uid',
+        'avatar',
+        'online_status',
+        'last_active'
     ];
 
     /**
@@ -46,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_active' => 'datetime',
         ];
     }
 

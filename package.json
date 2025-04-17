@@ -41,6 +41,7 @@
         "@mediapipe/face_detection": "^0.4.1646425229",
         "agora-rtc-react": "^2.3.0",
         "agora-rtc-sdk-ng": "^4.23.2",
+        "firebase": "^11.6.0",
         "sweetalert2": "^11.17.2"
     }
 }
