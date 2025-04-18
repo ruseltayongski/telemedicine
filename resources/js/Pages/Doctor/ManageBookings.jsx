@@ -19,7 +19,6 @@ export default function ManageBookings() {
 
     const { flash } = usePage().props;
     useEffect(() => {
-        console.log(flash);
         if (flash && flash.success) {
             if(selectedStatus === 'confirmed') {
                 Swal.fire({
@@ -191,9 +190,9 @@ export default function ManageBookings() {
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="fw-bold fs-4 text-dark m-0">
-                    Manage Appointment Bookings
-                </h2>
+                <div className="page-heading">
+                    <h3>Manage Appointment Bookings</h3>
+                </div>
             }
         >
             <Head title="Manage Bookings" />

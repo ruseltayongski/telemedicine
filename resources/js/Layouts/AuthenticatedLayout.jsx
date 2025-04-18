@@ -351,8 +351,8 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                             <div className="float-end">
                                 <p>
-                                Crafted with <span className="text-danger"><i className="bi bi-heart"></i></span> by
-                                <a href="http://ahmadsaugi.com"> R. Tayong</a>
+                                Crafted by
+                                <a href="#"> Rusel Tayong</a>
                                 </p>
                             </div>
                             </div>

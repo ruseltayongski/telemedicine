@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Log;
+use App\Mail\AppointmentConfirmed;
+use Illuminate\Support\Facades\Mail;
 
 class BookedAppointmentController extends Controller
 {
@@ -151,10 +153,21 @@ class BookedAppointmentController extends Controller
 
         // Update the status
         $booking->status = $request->status;
-        $booking->save();
+        //$booking->save();
 
-        session()->flash('success', 'Booking status updated successfully!');
-    
+        // Send confirmation email to patient if status is set to confirmed
+        if ($request->status === 'confirmed') {
+            $patient = $booking->patient;
+            
+            // Send email to patient
+            Mail::to($patient->email)->send(new AppointmentConfirmed($booking));
+        }
+
+        if ($request->status === 'confirmed') {
+            session()->flash('success', 'Booking status updated successfully! A confirmation email has been sent to the patient.');
+        } else {
+            session()->flash('success', 'Booking status updated to ' . ucfirst($request->status) . ' successfully!');
+        }
         return redirect()->back();
     }
 
