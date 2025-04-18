@@ -1,16 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useForm, router } from '@inertiajs/react';
 import AgoraRTC from 'agora-rtc-sdk-ng';
-
-import { FaceDetection } from '@mediapipe/face_detection';
-import { Camera } from '@mediapipe/camera_utils';
-
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
-const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User", patient_id, doctor_id, recipient, booking_id }) => {
+const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id, recipient, booking_id, caller_name, exist_prescription }) => {
     // State variables
     const [isJoined, setIsJoined] = useState(false);
     const [remoteUsers, setRemoteUsers] = useState([]);
@@ -99,14 +94,6 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
         
         joinChannel();
         
-        // Apply full screen styles
-        document.body.style.overflow = 'hidden';
-        document.body.style.margin = '0';
-        document.body.style.padding = '0';
-        if (containerRef.current) {
-            //requestFullScreen(containerRef.current);
-        }
-        
         // Cleanup function
         return () => {
             // Close local tracks
@@ -131,30 +118,10 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
             if (timerRef.current) {
                 clearInterval(timerRef.current);
             }
-            
-            // Restore body styles
-            document.body.style.overflow = '';
-            document.body.style.margin = '';
-            document.body.style.padding = '';
-            
-            // Exit fullscreen if active
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            }
+        
         };
     }, [appId, channelName, token, uid]);
-    
-    // Request full screen mode
-    const requestFullScreen = (element) => {
-        if (element.requestFullscreen) {
-            element.requestFullscreen();
-        } else if (element.webkitRequestFullscreen) { /* Safari */
-            element.webkitRequestFullscreen();
-        } else if (element.msRequestFullscreen) { /* IE11 */
-            element.msRequestFullscreen();
-        }
-    };
-    
+      
     // Start call timer
     const startCallTimer = () => {
         timerRef.current = setInterval(() => {
@@ -226,38 +193,6 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
     const [isOpenPrescription, setIsOpenPrescription] = useState(false);
     const openModalPrescription = () => setIsOpenPrescription(true);
     const closeModalPrescription = () => setIsOpenPrescription(false);
-    // const savePrescription = () => {
-    //     // setPrescription('<p><strong>Rx:</strong></p><ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>');
-    //     // Swal.fire({
-    //     //     icon: 'success',
-    //     //     title: 'Created!',
-    //     //     text: 'Prescription saved successfully!',
-    //     //     timer: 2000,
-    //     //     showConfirmButton: false,
-    //     // });
-    //     // closeModalPrescription(); 
-    //     setIsOpenPrescription(false);
-    //     router.post(route('prescriptions.store'), {
-    //         content: prescription,
-    //         prescription_no: prescriptionNo,
-    //         doctor_id: doctor_id,
-    //         patient_id: patient_id,
-    //         booking_id: booking_id,
-    //     }, {
-    //         preserveScroll: true,
-    //         onSuccess: () => {
-    //             setPrescription('<p><strong>Rx:</strong></p><ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>');
-    //             Swal.fire({
-    //                 icon: 'success',
-    //                 title: 'Created!',
-    //                 text: 'Prescription saved successfully!',
-    //                 timer: 2000,
-    //                 showConfirmButton: false,
-    //             });
-    //         },
-    //     });
-    // };
-
     const savePrescription = async () => {
         try {
             await axios.post(route('prescriptions.store'), {
@@ -278,10 +213,10 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                 showConfirmButton: false,
             });
     
-            setIsOpenPrescription(false); // Close modal after success
+            closeModalPrescription(); // Close modal after success
         } catch (error) {
             Swal.fire('Error!', 'Failed to save prescription.', 'error');
-            setIsOpenPrescription(false); // Close modal even on error (optional)
+            closeModalPrescription(); // Close modal even on error (optional)
         }
     };
     
@@ -342,10 +277,10 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                             <div className="text-center">
                                 <div className="bg-secondary rounded-circle mx-auto mb-3" style={{ width: '100px', height: '100px' }}>
                                     <span className="text-white fs-1 d-flex justify-content-center align-items-center h-100">
-                                        {remoteUserName.charAt(0)}
+                                        {caller_name.charAt(0)}
                                     </span>
                                 </div>
-                                <p className="text-dark fs-4">Waiting for {remoteUserName} to join...</p>
+                                <p className="text-dark fs-4">Waiting for {caller_name} to join...</p>
                             </div>
                         </div>
                     )}
@@ -356,7 +291,14 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                             background: 'rgba(0,0,0,0.3)',
                             color: 'white'
                         }}>
-                        <h5 className="mb-1">{remoteUserName}</h5>
+                        <h5
+                            className="mb-1"
+                            style={{
+                                color: remoteUsers.length > 0 && remoteUsers[0].videoTrack ? '#1DB954' : '#006838',
+                            }}
+                        >
+                            {caller_name}
+                        </h5>
                         <p className="mb-0">Signal {formatCallDuration(callDuration)}</p>
                     </div>
                     
@@ -462,9 +404,14 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                                     color: 'white'
                                 }}
                             >
-                                <svg width="32px" height="32px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                {/* <svg width="32px" height="32px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 5v14M5 12h14" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
+                                </svg> */}
+                                {recipient === 'doctor' ? (
+                                    <svg fill="#ffffff" width="64px" height="64px" viewBox="0 0 256 256" id="Flat" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M183.31348,188l22.34326-22.34326a7.99984,7.99984,0,0,0-11.31348-11.31348L172,176.68652l-41.71289-41.71277A52.0008,52.0008,0,0,0,120,32H72a8.00008,8.00008,0,0,0-8,8V192a8,8,0,0,0,16,0V136h28.68652l52,52-22.34326,22.34326a7.99984,7.99984,0,1,0,11.31348,11.31348L172,199.31348l22.34326,22.34326a7.99984,7.99984,0,0,0,11.31348-11.31348ZM80,120V48h40a36,36,0,0,1,0,72Z"></path> </g></svg>
+                                ) : (
+                                    <svg fill="#ffffff" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" xmlSpace="preserve" width="64px" height="64px" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path id="prescription_1_" d="M28,31.36H4c-0.199,0-0.36-0.161-0.36-0.36V1c0-0.199,0.161-0.36,0.36-0.36h18 c0.096,0,0.188,0.038,0.255,0.105l6,6C28.322,6.813,28.36,6.904,28.36,7v24C28.36,31.199,28.199,31.36,28,31.36z M4.36,30.64h23.28 V7.36H22c-0.199,0-0.36-0.161-0.36-0.36V1.36H4.36V30.64z M22.36,6.64h4.771L22.36,1.869V6.64z M20,27.36H8v-0.72h12V27.36z M24,23.36H8v-0.72h16V23.36z M24,19.36H8v-0.72h16V19.36z M16.254,9.254l-0.509-0.509L13,11.491l-2.252-2.252 C11.684,8.925,12.36,8.04,12.36,7c0-1.301-1.059-2.36-2.36-2.36H7.64V13h0.72V9.36h1.491l2.64,2.64l-2.746,2.746l0.509,0.509 L13,12.509l2.746,2.746l0.509-0.509L13.509,12L16.254,9.254z M8.36,8.64V5.36H10c0.904,0,1.64,0.736,1.64,1.64S10.904,8.64,10,8.64 H8.36z"></path> </g></svg>
+                                )}
                             </button>
                         </div>
                     </div>
@@ -492,15 +439,10 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                                 </div>
                                 <CKEditor
                                     editor={ClassicEditor}
-                                    data="<ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>"
+                                    data={(exist_prescription && exist_prescription.content) || "<ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>"}
                                     config={{
                                         toolbar: ['bold', 'italic', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
                                     }}
-                                    onReady={(editor) => {
-                                        // You can store the editor instance for later use if needed
-                                        // Editor is ready to use now
-                                        console.log('Editor is ready to use!', editor);
-                                      }}
                                     onChange={(event, editor) => {
                                         const data = editor.getData();
                                         setPrescription(data);

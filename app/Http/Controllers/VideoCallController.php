@@ -7,6 +7,7 @@ use Inertia\Response;
 use Illuminate\Http\Request;
 use App\Services\AgoraService;
 use App\Models\BookedAppointment;
+use App\Models\Prescription;
 
 class VideoCallController extends Controller
 {
@@ -21,13 +22,21 @@ class VideoCallController extends Controller
     {
         $channelName = 'channelName'.$request->query('booking_id').$request->query('patient_id');
         $uid = $request->query('uid', rand(1000, 9999));
+        $token = $this->agoraService->generateToken($channelName, $uid);
         $patient_id = $request->query('patient_id');
         $booking_id = $request->query('booking_id');
-        $appointment = BookedAppointment::find($booking_id)->with('appointment')->first();
+        $appointment = BookedAppointment::find($booking_id)->with('appointment.doctor','patient')->first();
         $doctor_id = $appointment->appointment->doctor_id;
         $recipient = $request->query('recipient');
-        
-        $token = $this->agoraService->generateToken($channelName, $uid);
+        if($recipient === 'patient') {
+            $caller_name = 'Dr. '.$appointment->appointment->doctor->name;
+        } else {
+            $caller_name = $appointment->patient->name;
+        }
+        $exist_prescription = Prescription::where('patient_id', $patient_id)
+            ->where('doctor_id', $doctor_id)
+            ->where('booking_id', $booking_id)
+            ->first();
         
         return Inertia::render('VideoCall', [
             'appId' => config('services.agora.app_id'),
@@ -38,6 +47,8 @@ class VideoCallController extends Controller
             'doctor_id' => $doctor_id,
             'recipient' => $recipient,
             'booking_id' => $booking_id,
+            'caller_name' => $caller_name,
+            'exist_prescription' => $exist_prescription,
         ]);
     }
 }

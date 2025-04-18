@@ -153,7 +153,7 @@ class BookedAppointmentController extends Controller
 
         // Update the status
         $booking->status = $request->status;
-        //$booking->save();
+        $booking->save();
 
         // Send confirmation email to patient if status is set to confirmed
         if ($request->status === 'confirmed') {
