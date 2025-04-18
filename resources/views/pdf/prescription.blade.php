@@ -113,7 +113,7 @@
         <div class="header">
             {{-- <div class="logo">❤</div> --}}
             <img src="assets/images/doh_logo.png" alt="Logo" style="width: 60px;" />
-            <h2 class="fw-bold" style="color:#006838;">{{ $doctorName }}</h2>
+            <h2 class="fw-bold" style="color:#006838;">Dr. {{ $doctorName }}</h2>
             <p class="text-muted">{{ $specialty }}</p>
             <p class="fw-bold mb-1">{{ $clinicName }}</p>
             <p class="mb-1">{{ $location }}</p>
@@ -128,7 +128,7 @@
                 <p class="mb-0"><span class="fw-bold">ADDRESS:</span> {{ $address }}</p>
             </div>
             <div class="patient-info-right">
-                <p class="mb-2"><span class="fw-bold">DATE:</span> <span style="color:#006838;">{{ $date }}</span></p>
+                <p class="mb-2"><span class="fw-bold">DATE OF BIRTH:</span> <span style="color:#006838;">{{ $dob }}</span></p>
                 <p class="mb-2"><span class="fw-bold">SEX:</span> {{ $gender }}</p>
                 <p class="mb-0"><span class="fw-bold">PRESCRIPTION #:</span> <span style="color: #006838;">{{ $prescriptionNumber }}</span></p>
             </div>

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('contact')->nullable();
             $table->enum('sex', ['male', 'female'])->nullable();
+            $table->date('dob')->nullable();
             $table->string('license_no')->nullable();
             $table->string('ptr_number')->nullable();
             $table->timestamp('email_verified_at')->nullable();

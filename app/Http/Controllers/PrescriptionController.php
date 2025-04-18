@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Prescription;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class PrescriptionController extends Controller
 {
@@ -21,7 +22,7 @@ class PrescriptionController extends Controller
             $data // Fields to update if the record exists
         );
 
-        return redirect()->back()->with('success', 'Prescription saved successfully!');
+        //return redirect()->back()->with('success', 'Prescription saved successfully!');
     }
 
     public function downloadPrescriptionPdf($patient_id, $doctor_id, $booking_id)
@@ -39,9 +40,10 @@ class PrescriptionController extends Controller
             'location' => $prescription->doctor->address,
             'phone' => $prescription->doctor->contact,
             'patientName' => $prescription->patient->name,
-            'age' => 30,
+            'age' => Carbon::parse($prescription->patient->dob)->age,
             'address' => $prescription->patient->address,
             'date' => now()->format('m/d/Y'),
+            'dob' => Carbon::parse($prescription->patient->dob)->format('m/d/Y'),
             'gender' => ucfirst($prescription->patient->sex),
             'prescriptionNumber' => $prescription->prescription_no,
             'licenseNumber' => $prescription->doctor->license_no,

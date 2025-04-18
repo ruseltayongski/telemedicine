@@ -8,6 +8,7 @@ import { Camera } from '@mediapipe/camera_utils';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import Swal from 'sweetalert2';
+import axios from 'axios';
 
 const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User", patient_id, doctor_id, recipient, booking_id }) => {
     // State variables
@@ -225,27 +226,63 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
     const [isOpenPrescription, setIsOpenPrescription] = useState(false);
     const openModalPrescription = () => setIsOpenPrescription(true);
     const closeModalPrescription = () => setIsOpenPrescription(false);
-    const savePrescription = () => {
-        router.post(route('prescriptions.store'), {
-            content: prescription,
-            prescription_no: prescriptionNo,
-            doctor_id: doctor_id,
-            patient_id: patient_id,
-            booking_id: booking_id,
-        }, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setPrescription('<p><strong>Rx:</strong></p><ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>');
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Created!',
-                    text: 'Prescription saved successfully!',
-                    timer: 2000,
-                    showConfirmButton: false,
-                });
-                closeModalPrescription(); 
-            },
-        });
+    // const savePrescription = () => {
+    //     // setPrescription('<p><strong>Rx:</strong></p><ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>');
+    //     // Swal.fire({
+    //     //     icon: 'success',
+    //     //     title: 'Created!',
+    //     //     text: 'Prescription saved successfully!',
+    //     //     timer: 2000,
+    //     //     showConfirmButton: false,
+    //     // });
+    //     // closeModalPrescription(); 
+    //     setIsOpenPrescription(false);
+    //     router.post(route('prescriptions.store'), {
+    //         content: prescription,
+    //         prescription_no: prescriptionNo,
+    //         doctor_id: doctor_id,
+    //         patient_id: patient_id,
+    //         booking_id: booking_id,
+    //     }, {
+    //         preserveScroll: true,
+    //         onSuccess: () => {
+    //             setPrescription('<p><strong>Rx:</strong></p><ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>');
+    //             Swal.fire({
+    //                 icon: 'success',
+    //                 title: 'Created!',
+    //                 text: 'Prescription saved successfully!',
+    //                 timer: 2000,
+    //                 showConfirmButton: false,
+    //             });
+    //         },
+    //     });
+    // };
+
+    const savePrescription = async () => {
+        try {
+            await axios.post(route('prescriptions.store'), {
+                content: prescription,
+                prescription_no: prescriptionNo,
+                doctor_id: doctor_id,
+                patient_id: patient_id,
+                booking_id: booking_id,
+            });
+    
+            setPrescription('<p><strong>Rx:</strong></p><ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Created!',
+                text: 'Prescription saved successfully!',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+    
+            setIsOpenPrescription(false); // Close modal after success
+        } catch (error) {
+            Swal.fire('Error!', 'Failed to save prescription.', 'error');
+            setIsOpenPrescription(false); // Close modal even on error (optional)
+        }
     };
     
     const generatePrescription = () => {
@@ -440,7 +477,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Create Prescription</h5>
-                                <button type="button" className="btn-close" onClick={() => setIsModalOpen(false)}></button>
+                                <button type="button" className="btn-close" onClick={closeModalPrescription}></button>
                             </div>
                             <div className="modal-body">
                                 <div className="mb-3">
@@ -459,6 +496,11 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, remoteUserName = "User
                                     config={{
                                         toolbar: ['bold', 'italic', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
                                     }}
+                                    onReady={(editor) => {
+                                        // You can store the editor instance for later use if needed
+                                        // Editor is ready to use now
+                                        console.log('Editor is ready to use!', editor);
+                                      }}
                                     onChange={(event, editor) => {
                                         const data = editor.getData();
                                         setPrescription(data);
