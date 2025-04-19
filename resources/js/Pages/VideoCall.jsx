@@ -22,6 +22,7 @@ export default function VideoCall({ appId, channelName, token, uid, patient_id, 
             { type: "css", href: "assets/css/tiny-slider.css" },
             { type: "css", href: "assets/css/glightbox.min.css" },
             { type: "css", href: "assets/css/main1.css" },
+            { type: "css", href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" },
         ]
 
         const jsToLoad = [
@@ -70,7 +71,7 @@ export default function VideoCall({ appId, channelName, token, uid, patient_id, 
                 <div className="container">
                     <div className="card">
                         <div className="card-body">
-                            <h1 className="fs-2 fw-bold mb-4">Video Call</h1>
+                            {/* <h1 className="fs-2 fw-bold mb-4">Video Call</h1> */}
                             <AgoraVideoCall 
                                 appId={appId}
                                 channelName={channelName}

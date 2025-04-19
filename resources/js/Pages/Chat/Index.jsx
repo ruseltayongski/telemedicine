@@ -118,22 +118,6 @@ export default function Chat({ auth, users, currentUser }) {
       // }
     };
 
-    // Add this useEffect for document visibility
-    useEffect(() => {
-      const handleVisibilityChange = () => {
-        if (document.visibilityState === 'visible' && selectedUser) {
-          // Update currentChatRef when document becomes visible
-          currentChatRef.current = selectedUser.id;
-        }
-      };
-      
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      
-      return () => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-      };
-    }, [selectedUser]);
-
     // Generate a unique chat room ID between two users
     const getChatRoomId = (user1Id, user2Id) => {
         return [user1Id, user2Id].sort().join('_');

@@ -63,6 +63,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/update-status', [ChatController::class, 'updateOnlineStatus'])->name('update.status');
 });
 Route::get('prescriptions/{patient_id}/{doctor_id}/{booking_id}/pdf', [PrescriptionController::class, 'downloadPrescriptionPdf'])->name('prescriptions.pdf');
+Route::post('/chats', [ChatController::class, 'store'])->name('chats.store');
+Route::get('/chats', [ChatController::class, 'chats'])->name('chats');
+Route::get('/chats/{id}/download', [ChatController::class, 'downloadFile'])->name('chats.download');
 
 Route::match(['POST','GET'],'/video-call', [VideoCallController::class, 'index'])->name('video-call');
 

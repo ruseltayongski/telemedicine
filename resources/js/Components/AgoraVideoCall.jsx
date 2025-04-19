@@ -4,6 +4,24 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, push, onChildAdded, off } from 'firebase/database';
+
+// Firebase configuration (replace with your actual config)
+const firebaseConfig = {
+    apiKey: "AIzaSyB7Epl_VSU8H1sN8rH9J-kENGtdOIDfsYM",
+    authDomain: "telemedicinethesis-27316.firebaseapp.com",
+    databaseURL: "https://telemedicinethesis-27316-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    projectId: "telemedicinethesis-27316",
+    storageBucket: "telemedicinethesis-27316.firebasestorage.app",
+    messagingSenderId: "554743062964",
+    appId: "1:554743062964:web:244a2183f8a4c3af2b12e1",
+    measurementId: "G-H24X2N4E9E"
+};
+  
+  // Initialize Firebase
+const firebaseApp = initializeApp(firebaseConfig);
+const database = getDatabase(firebaseApp);
 
 const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id, recipient, booking_id, caller_name, exist_prescription }) => {
     // State variables
@@ -17,11 +35,324 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
     const [muted, setMuted] = useState(false);
     const [videoDisabled, setVideoDisabled] = useState(false);
     const [callDuration, setCallDuration] = useState(0);
+
+    // Chat related state
+    const [message, setMessage] = useState('');
+    const [messages, setMessages] = useState([]);
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const chatContainerRef = useRef(null);
+
+    const [file, setFile] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState(null);
+
+    const messageInputRef = useRef(null);
+    const typingTimeoutRef = useRef(null);
+
+    // Draggable position state
+    // const [position, setPosition] = useState({ x: 20, y: 100 });
+    const [position, setPosition] = useState({
+        x: window.innerWidth - 370,
+        bottom: 100 
+    });
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     
     // Refs
     const clientRef = useRef(null);
     const timerRef = useRef(null);
     const containerRef = useRef(null);
+    const [isTyping, setIsTyping] = useState(false);
+    const chatPanelRef = useRef(null);
+
+    // Initialize on component mount
+    let currentUserId = null;
+    if(recipient === 'doctor') {
+        currentUserId = doctor_id;
+    } else if(recipient === 'patient') {
+        currentUserId = patient_id;
+    }
+
+    useEffect(() => {
+        const chatRef = ref(database, `chats/${channelName}`);
+        
+        const handleNewMessage = (snapshot) => {
+          const newMessage = snapshot.val();
+          setMessages(prev => [...prev, {
+            id: snapshot.key,
+            senderId: newMessage.senderId,
+            text: newMessage.text,
+            timestamp: newMessage.timestamp,
+            isMe: newMessage.senderId === currentUserId,
+            file: newMessage.file
+          }]);
+          
+          // Scroll to bottom when new message arrives
+          setTimeout(() => {
+            scrollToLatestMessage();
+          }, 100);
+        };
+        
+        onChildAdded(chatRef, handleNewMessage);
+        
+        // Cleanup Firebase listener
+        return () => {
+          off(chatRef, 'child_added', handleNewMessage);
+        };
+    }, [channelName, currentUserId, database]);
+
+    useEffect(() => {
+        if (isChatOpen) {
+          scrollToLatestMessage();
+          if (messageInputRef.current) {
+            messageInputRef.current.focus();
+          }
+        }
+    }, [isChatOpen]);
+
+    const scrollToLatestMessage = () => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    };
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            //console.log(chatPanelRef.current.offsetHeight);
+            if (isDragging && chatPanelRef.current) {
+                // Calculate new left position
+                const newX = e.clientX - dragOffset.x;
+                const viewportWidth = window.innerWidth;
+                const panelWidth = chatPanelRef.current.offsetWidth;
+    
+                const boundedX = Math.max(10, Math.min(newX, viewportWidth - panelWidth - 10));
+    
+                // Calculate bottom instead of top
+                const viewportHeight = window.innerHeight;
+                const panelHeight = chatPanelRef.current.offsetHeight;
+                const panelBottom = viewportHeight - (e.clientY + (panelHeight - dragOffset.y));
+                // const boundedBottom = Math.max(10, Math.min(panelBottom, viewportHeight - 10));
+                const boundedBottom = Math.max(10, Math.min(panelBottom, 250));
+                setPosition({ x: boundedX, bottom: boundedBottom });
+            }
+        };
+    
+        const handleMouseUp = () => {
+            if (isDragging) {
+                setIsDragging(false);
+                document.body.style.userSelect = 'auto';
+            }
+        };
+    
+        if (isDragging) {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            document.body.style.userSelect = 'none';
+        }
+    
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging, dragOffset]);
+
+    // Start dragging
+    const handleMouseDown = (e) => {
+        // Only start drag on the header element
+        if (e.target.closest('.chat-header')) {
+            const rect = chatPanelRef.current.getBoundingClientRect();
+            setDragOffset({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            });
+            setIsDragging(true);
+            e.preventDefault();
+        }
+    };
+
+    const sendMessage = async () => {
+        if(!message.trim()) {
+            showToast('Please write a message');
+            return;
+        }
+        if (!message.trim() && !file) return;
+        
+        try {
+          setIsUploading(true);
+          
+          const formData = new FormData();
+          formData.append('booking_id', booking_id);
+          formData.append('sender_id', currentUserId);
+          formData.append('receiver_id', currentUserId === doctor_id ? patient_id : doctor_id);
+          formData.append('message', message);
+          
+          if (file) {
+            formData.append('file', file);
+          }
+          
+          // First upload to Laravel
+          const response = await axios.post('/chats', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+          
+          // Then push to Firebase
+          const messagesRef = ref(database, `chats/${channelName}`);
+          await push(messagesRef, {
+            senderId: currentUserId,
+            text: message,
+            timestamp: Date.now(),
+            channelName: channelName,
+            file: file ? {
+              name: response.data.file_name,
+              type: response.data.file_type,
+              path: response.data.file_path,
+              size: response.data.file_size,
+              id: response.data.id
+            } : null
+          });
+          
+          setMessage('');
+          setFile(null);
+          setPreviewUrl(null);
+        } catch (error) {
+          console.error('Error sending message:', error);
+          // Use more subtle notification instead of full screen alert
+          showToast('Failed to send message');
+        } finally {
+          setIsUploading(false);
+        }
+    };
+
+    const showToast = (message) => {
+        // Simple toast notification implementation
+        const toast = document.createElement('div');
+        toast.className = 'chat-toast';
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.classList.add('show');
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => document.body.removeChild(toast), 300);
+          }, 3000);
+        }, 100);
+    };
+      
+    
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    };
+
+    const handleTextChange = (e) => {
+        setMessage(e.target.value);
+        
+        // Simulate typing indicator
+        if (e.target.value.length > 0) {
+          setIsTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 3000);
+        } else {
+          setIsTyping(false);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        }
+    };
+    
+    const toggleChat = () => {
+        setIsChatOpen(!isChatOpen);
+    };
+
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        if (!selectedFile) return;
+        
+        // File size validation - 10MB max
+        if (selectedFile.size > 10 * 1024 * 1024) {
+          showToast('File size exceeds 10MB limit');
+          return;
+        }
+        
+        setFile(selectedFile);
+        
+        // Create preview for images
+        if (selectedFile.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = () => setPreviewUrl(reader.result);
+          reader.readAsDataURL(selectedFile);
+        }
+        messageInputRef.current.focus();
+    };
+
+    const removeFile = () => {
+        setFile(null);
+        setPreviewUrl(null);
+    };
+    
+    // Render message content with improved styling
+    const renderMessageContent = (msg) => {
+        if (msg.file) {
+        return (
+            <div className="file-message">
+            {msg.file.type.startsWith('image/') ? (
+                <div className="image-preview mb-2">
+                <img 
+                    src={`/storage/${msg.file.path}`} 
+                    alt={msg.file.name} 
+                    className="rounded img-fluid"
+                    style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'cover' }}
+                    onClick={() => window.open(`/storage/${msg.file.path}`, '_blank')}
+                />
+                </div>
+            ) : (
+                <div className="file-info d-flex align-items-center p-2 bg-light rounded">
+                    <div className="file-icon me-2">
+                        {getFileIcon(msg.file.type)}
+                    </div>
+                    <div className="file-details flex-grow-1">
+                        <div className="file-name text-truncate text-muted" style={{ maxWidth: '150px' }}>
+                            {msg.file.name}
+                        </div>
+                        <div className="file-size small text-muted">
+                            {formatFileSize(msg.file.size)}
+                        </div>
+                    </div>
+                    <a
+                        href={route('chats.download', { id: msg.file.id })}
+                        className="btn btn-sm btn-primary ms-2 download-btn"
+                        download
+                    >
+                        ↓
+                    </a>
+                </div>
+            )}
+            {msg.text && <div className="text-message mt-2">{msg.text}</div>}
+            </div>
+        );
+        }
+        return <div className="msg-text">{msg.text}</div>;
+    };
+
+    // Helper functions
+    const getFileIcon = (fileType) => {
+        if (fileType.includes('pdf')) return '📄';
+        if (fileType.includes('word')) return '📝';
+        if (fileType.includes('excel') || fileType.includes('sheet')) return '📊';
+        if (fileType.includes('image')) return '🖼️';
+        return '📁';
+    };
+
+    const formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    };    
     
     // Initialize on component mount
     useEffect(() => {
@@ -123,9 +454,22 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
     }, [appId, channelName, token, uid]);
       
     // Start call timer
+    const alertShownRef = useRef(false);
     const startCallTimer = () => {
         timerRef.current = setInterval(() => {
-            setCallDuration(prev => prev + 1);
+            setCallDuration(prev => {
+                const updatedDuration = prev + 1;
+                if (updatedDuration === 60 && !alertShownRef.current) {
+                    alertShownRef.current = true;
+                    Swal.fire({
+                        title: '1 Hour Mark Approaching!',
+                        text: '15 minutes remaining until you reach 1 hour in your video call.',
+                        icon: 'info',
+                        confirmButtonText: 'OK'
+                    });                    
+                }
+                return updatedDuration;
+            });
         }, 1000);
     };
     
@@ -181,10 +525,6 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
         });
         setCallDuration(0);
         
-        // Exit fullscreen
-        if (document.fullscreenElement) {
-            document.exitFullscreen();
-        }
         window.close();
     };
 
@@ -213,10 +553,10 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                 showConfirmButton: false,
             });
     
-            closeModalPrescription(); // Close modal after success
+            closeModalPrescription();
         } catch (error) {
             Swal.fire('Error!', 'Failed to save prescription.', 'error');
-            closeModalPrescription(); // Close modal even on error (optional)
+            closeModalPrescription();
         }
     };
     
@@ -299,7 +639,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                         >
                             {caller_name}
                         </h5>
-                        <p className="mb-0">Signal {formatCallDuration(callDuration)}</p>
+                        <p className="mb-0">Duration: {formatCallDuration(callDuration)}</p>
                     </div>
                     
                     {/* Local video PiP */}
@@ -331,6 +671,242 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                     {/* Call controls */}
                     <div className="call-controls position-absolute bottom-0 start-0 w-100 d-flex justify-content-center pb-5" style={{ zIndex: 20 }}>
                         <div className="d-flex gap-4">
+
+                            <button 
+                                onClick={toggleChat}
+                                className="btn btn-lg rounded-circle shadow"
+                                style={{ 
+                                    width: '60px', 
+                                    height: '60px', 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center',
+                                    backgroundColor: '#2196F3',
+                                    color: 'white'
+                                }}
+                            >
+                                {/* 💬 */}
+                                <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 16V8" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M8 14V10" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M16 14V10" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M17 3.33782C15.5291 2.48697 13.8214 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22C17.5228 22 22 17.5228 22 12C22 10.1786 21.513 8.47087 20.6622 7" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> </g></svg>
+                            </button>
+
+                            {/* Chat panel */}
+                            <div 
+                                ref={chatPanelRef}
+                                className={`chat-panel position-absolute ${isChatOpen ? 'chat-open' : 'chat-closed'}`}
+                                style={{
+                                    bottom: isChatOpen ? `${position.bottom}px` : '-400px',
+                                    // right: '20px',
+                                    left: position.x,
+                                    width: '350px',
+                                    height: '600px',
+                                    backgroundColor: 'white',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    zIndex: 1000,
+                                    opacity: isChatOpen ? 1 : 0,
+                                    pointerEvents: isChatOpen ? 'all' : 'none'
+                                }}
+                                onMouseDown={handleMouseDown}
+                            >
+                                {/* Chat header - handle for dragging */}
+                                <div 
+                                    className="chat-header p-3 d-flex justify-content-between align-items-center border-bottom"
+                                    style={{ 
+                                        cursor: isDragging ? 'grabbing' : 'grab',
+                                        borderTopLeftRadius: '12px',
+                                        borderTopRightRadius: '12px',
+                                        backgroundColor: '#f0f4f8',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    <div className="d-flex align-items-center">
+                                        <div className="drag-handle-icon me-2">
+                                        <div className="drag-dots">
+                                            <span></span><span></span>
+                                            <span></span><span></span>
+                                            <span></span><span></span>
+                                        </div>
+                                        </div>
+                                        <h6 className="mb-0 fw-bold">Chat</h6>
+                                    </div>
+                                    <button 
+                                        onClick={toggleChat} 
+                                        className="btn btn-sm btn-light rounded-circle"
+                                        style={{ width: '30px', height: '30px', lineHeight: '10px' }}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                
+                                {/* Messages container */}
+                                <div 
+                                ref={chatContainerRef}
+                                className="chat-messages flex-grow-1 p-3 overflow-auto"
+                                style={{ 
+                                    scrollBehavior: 'smooth',
+                                    backgroundColor: '#f8f9fa'
+                                }}
+                                >
+                                {messages.length === 0 && (
+                                    <div className="text-center text-muted my-5">
+                                    <div style={{ fontSize: '24px', marginBottom: '10px' }}>👋</div>
+                                    <p>No messages yet</p>
+                                    <p className="small">Start the conversation!</p>
+                                    </div>
+                                )}
+                                
+                                {messages.map((msg, index) => (
+                                    <div 
+                                    key={msg.id} 
+                                    className={`mb-3 ${msg.isMe ? 'text-end' : 'text-start'}`}
+                                    >
+                                    <div 
+                                        className={`d-inline-block p-3 rounded-3 message-bubble ${
+                                        msg.isMe ? 'bg-primary text-white' : 'bg-white border'
+                                        }`}
+                                        style={{ 
+                                        maxWidth: '85%',
+                                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                                        position: 'relative',
+                                        marginTop: 
+                                            index > 0 && messages[index-1].senderId === msg.senderId ? '5px' : '15px'
+                                        }}
+                                    >
+                                        {renderMessageContent(msg)}
+                                        <div 
+                                            className={`small ${msg.isMe ? 'text-light' : 'text-muted'} mt-2`}
+                                            style={{ opacity: 0.8 }}
+                                        >
+                                            {new Date(msg.timestamp).toLocaleTimeString([], {
+                                                hour: '2-digit', 
+                                                minute: '2-digit'
+                                            })}
+                                        </div>
+                                    </div>
+                                    </div>
+                                ))}
+                                
+                                {/* Typing indicator */}
+                                {isTyping && (
+                                    <div className="typing-indicator d-flex align-items-center mb-3">
+                                    <div className="typing-dots">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                    <span className="small text-muted ms-2">Typing...</span>
+                                    </div>
+                                )}
+                                </div>
+                                
+                                {/* Input area */}
+                                <div className="chat-input p-3 border-top bg-white">
+                                {/* Image preview */}
+                                {previewUrl && (
+                                    <div className="image-preview-container mb-2 position-relative">
+                                    <img 
+                                        src={previewUrl} 
+                                        alt="Preview" 
+                                        style={{ 
+                                        maxWidth: '100%', 
+                                        maxHeight: '150px', 
+                                        borderRadius: '8px',
+                                        objectFit: 'cover' 
+                                        }}
+                                    />
+                                    <button 
+                                        onClick={removeFile}
+                                        className="btn btn-sm btn-danger position-absolute top-0 end-0 m-1"
+                                        style={{ 
+                                        borderRadius: '50%', 
+                                        width: '28px', 
+                                        height: '28px', 
+                                        padding: '0',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                        }}
+                                    >
+                                        ×
+                                    </button>
+                                    </div>
+                                )}
+                                
+                                {/* File preview */}
+                                {file && !previewUrl && (
+                                    <div className="file-preview mb-2 p-2 bg-light rounded d-flex justify-content-between align-items-center">
+                                    <div className="d-flex align-items-center">
+                                        <span className="me-2 file-icon-lg">{getFileIcon(file.type)}</span>
+                                        <div>
+                                        <div className="text-truncate" style={{ maxWidth: '200px' }}>{file.name}</div>
+                                        <small className="text-muted">{formatFileSize(file.size)}</small>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={removeFile}
+                                        className="btn btn-sm btn-danger rounded-circle"
+                                        style={{ width: '28px', height: '28px', padding: '0px' }}
+                                    >
+                                        ×
+                                    </button>
+                                    </div>
+                                )}
+                                
+                                {/* Message input and buttons */}
+                                <div className="d-flex gap-2">
+                                    <div className="input-group flex-nowrap">
+                                    <textarea
+                                        ref={messageInputRef}
+                                        className="form-control rounded-pill-start"
+                                        rows="1"
+                                        value={message}
+                                        onChange={handleTextChange}
+                                        onKeyPress={handleKeyPress}
+                                        placeholder="Type a message..."
+                                        style={{ 
+                                        resize: 'none',
+                                        borderRadius: '20px 0 0 20px',
+                                        paddingRight: '40px'
+                                        }}
+                                    />
+                                    
+                                    <label 
+                                        className="input-group-text bg-white border-start-0" 
+                                        htmlFor="file-upload"
+                                        style={{ 
+                                        cursor: 'pointer',
+                                        borderRadius: '0',
+                                        padding: '0 15px'
+                                        }}
+                                    >
+                                        📎
+                                        <input
+                                        id="file-upload"
+                                        type="file"
+                                        onChange={handleFileChange}
+                                        style={{ display: 'none' }}
+                                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                                        />
+                                    </label>
+                                    
+                                    <button 
+                                        className="btn btn-primary send-btn"
+                                        onClick={sendMessage}
+                                        disabled={isUploading || (!message.trim() && !file)}
+                                        style={{ 
+                                        borderRadius: '0 20px 20px 0',
+                                        transition: 'all 0.2s ease'
+                                        }}
+                                    >
+                                        {isUploading ? '...' : '➤'}
+                                    </button>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+
                             <button 
                                 onClick={toggleVideo} 
                                 className={`btn btn-lg rounded-circle shadow`}
@@ -404,11 +980,8 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                                     color: 'white'
                                 }}
                             >
-                                {/* <svg width="32px" height="32px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 5v14M5 12h14" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg> */}
                                 {recipient === 'doctor' ? (
-                                    <svg fill="#ffffff" width="64px" height="64px" viewBox="0 0 256 256" id="Flat" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M183.31348,188l22.34326-22.34326a7.99984,7.99984,0,0,0-11.31348-11.31348L172,176.68652l-41.71289-41.71277A52.0008,52.0008,0,0,0,120,32H72a8.00008,8.00008,0,0,0-8,8V192a8,8,0,0,0,16,0V136h28.68652l52,52-22.34326,22.34326a7.99984,7.99984,0,1,0,11.31348,11.31348L172,199.31348l22.34326,22.34326a7.99984,7.99984,0,0,0,11.31348-11.31348ZM80,120V48h40a36,36,0,0,1,0,72Z"></path> </g></svg>
+                                    <svg fill="#ffffff" width="64px" height="64px" viewBox="0 0 256 256" id="Flat" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M183.31348,188l22.34326-22.34326a7.99984,7.99984,0,0,0-11.31348-11.31348L172,176.68652l-41.71289-41.71277A52.0008,52.0008,0,0,0,120,32H72a8.00008,8.00008,0,0,0-8,8V192a8,8,0,0,0,16,0V136h28.68652l52,52-22.34326,22.34326a7.99984,7.99984,0,1,0,11.31348,11.31348L172,199.31348l22.34326,22.34326a7.99984,7.99984,0,0,0,11.31348-11.31348ZM80,120V48h40a36,36,0,0,1,0,72Z"></path> </g></svg>
                                 ) : (
                                     <svg fill="#ffffff" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" xmlSpace="preserve" width="64px" height="64px" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path id="prescription_1_" d="M28,31.36H4c-0.199,0-0.36-0.161-0.36-0.36V1c0-0.199,0.161-0.36,0.36-0.36h18 c0.096,0,0.188,0.038,0.255,0.105l6,6C28.322,6.813,28.36,6.904,28.36,7v24C28.36,31.199,28.199,31.36,28,31.36z M4.36,30.64h23.28 V7.36H22c-0.199,0-0.36-0.161-0.36-0.36V1.36H4.36V30.64z M22.36,6.64h4.771L22.36,1.869V6.64z M20,27.36H8v-0.72h12V27.36z M24,23.36H8v-0.72h16V23.36z M24,19.36H8v-0.72h16V19.36z M16.254,9.254l-0.509-0.509L13,11.491l-2.252-2.252 C11.684,8.925,12.36,8.04,12.36,7c0-1.301-1.059-2.36-2.36-2.36H7.64V13h0.72V9.36h1.491l2.64,2.64l-2.746,2.746l0.509,0.509 L13,12.509l2.746,2.746l0.509-0.509L13.509,12L16.254,9.254z M8.36,8.64V5.36H10c0.904,0,1.64,0.736,1.64,1.64S10.904,8.64,10,8.64 H8.36z"></path> </g></svg>
                                 )}
@@ -468,6 +1041,8 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
 };
 
 export default AgoraVideoCall;
+
+// export default AgoraVideoCall;
 
 // import React, { useRef, useEffect, useState } from 'react';
 // import { FaceDetection } from '@mediapipe/face_detection';
