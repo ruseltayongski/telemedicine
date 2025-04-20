@@ -330,14 +330,20 @@ export default function ManageBookings() {
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title">Confirm Action</h5>
+                                <h5 className="modal-title">Confirm Booking Status</h5>
                                 <button type="button" className="btn-close" onClick={() => setShowConfirmDialog(false)} disabled={isLoading}></button>
                             </div>
                             <div className="modal-body">
-                                Are you sure you want to {pendingStatus === 'confirmed' ? 'confirm' : 'cancelled'} this booking?
+                                {pendingStatus === 'confirmed' ? (
+                                    <>Are you sure you want to <strong>confirm</strong> this appointment?</>
+                                ) : (
+                                    <>Are you sure you want to <strong>cancel</strong> this appointment?</>
+                                )}
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmDialog(false)} disabled={isLoading}>Cancel</button>
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmDialog(false)} disabled={isLoading}>
+                                    Close
+                                </button>
                                 <button 
                                     type="button" 
                                     className={`btn ${pendingStatus === 'confirmed' ? 'btn-success' : 'btn-danger'}`}
@@ -347,7 +353,7 @@ export default function ManageBookings() {
                                     {isLoading ? (
                                         <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                                     ) : null}
-                                    {pendingStatus === 'confirmed' ? 'Confirm' : 'Submit'}
+                                    {pendingStatus === 'confirmed' ? 'Confirm Appointment' : 'Cancel Appointment'}
                                 </button>
                             </div>
                         </div>

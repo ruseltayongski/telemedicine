@@ -3,7 +3,7 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import AgoraVideoCall from '@/Components/AgoraVideoCall';
 import React, { useEffect, useRef, useState } from "react";
 
-export default function VideoCall({ appId, channelName, token, uid, patient_id, doctor_id, recipient, booking_id, caller_name, exist_prescription }) {
+export default function VideoCall({ appId, channelName, token, uid, patient_id, doctor_id, recipient, booking_id, caller_name, exist_prescription, booking_code }) {
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
     useEffect(() => {
         document.querySelectorAll("[data-dynamic='true']").forEach((el) => el.remove());
@@ -83,6 +83,7 @@ export default function VideoCall({ appId, channelName, token, uid, patient_id, 
                                 booking_id={booking_id}
                                 caller_name={caller_name}
                                 exist_prescription={exist_prescription}
+                                booking_code={booking_code}
                             />
                         </div>
                     </div>

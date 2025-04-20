@@ -43,7 +43,7 @@ class PrescriptionController extends Controller
             'age' => Carbon::parse($prescription->patient->dob)->age,
             'address' => $prescription->patient->address,
             'date' => now()->format('m/d/Y'),
-            'dob' => Carbon::parse($prescription->patient->dob)->format('m/d/Y'),
+            'dob' => Carbon::parse($prescription->patient->dob)->format('F d, Y'),
             'gender' => ucfirst($prescription->patient->sex),
             'prescriptionNumber' => $prescription->prescription_no,
             'licenseNumber' => $prescription->doctor->license_no,

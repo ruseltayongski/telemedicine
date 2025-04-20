@@ -20,7 +20,7 @@ class VideoCallController extends Controller
     
     public function index(Request $request): Response
     {
-        $channelName = 'channelName'.$request->query('booking_id').$request->query('patient_id');
+        $channelName = 'channelName'.$request->query('booking_code').$request->query('patient_id').$request->query('doctor_id');
         $uid = $request->query('uid', rand(1000, 9999));
         $token = $this->agoraService->generateToken($channelName, $uid);
         $patient_id = $request->query('patient_id');
@@ -49,6 +49,7 @@ class VideoCallController extends Controller
             'booking_id' => $booking_id,
             'caller_name' => $caller_name,
             'exist_prescription' => $exist_prescription,
+            'booking_code' => $appointment->booking_code,
         ]);
     }
 }

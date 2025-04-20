@@ -23,7 +23,7 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const database = getDatabase(firebaseApp);
 
-const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id, recipient, booking_id, caller_name, exist_prescription }) => {
+const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id, recipient, booking_id, caller_name, exist_prescription, booking_code }) => {
     // State variables
     const [isJoined, setIsJoined] = useState(false);
     const [remoteUsers, setRemoteUsers] = useState([]);
@@ -181,7 +181,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
           setIsUploading(true);
           
           const formData = new FormData();
-          formData.append('booking_id', booking_id);
+          formData.append('booking_code', booking_code);
           formData.append('sender_id', currentUserId);
           formData.append('receiver_id', currentUserId === doctor_id ? patient_id : doctor_id);
           formData.append('message', message);
@@ -528,7 +528,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
         window.close();
     };
 
-    const [prescription, setPrescription] = useState("<p><strong>Rx:</strong></p><ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>");
+    const [prescription, setPrescription] = useState("<ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>");
     const [prescriptionNo, setPrescriptionNo] = useState('');
     const [isOpenPrescription, setIsOpenPrescription] = useState(false);
     const openModalPrescription = () => setIsOpenPrescription(true);
@@ -543,7 +543,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                 booking_id: booking_id,
             });
     
-            setPrescription('<p><strong>Rx:</strong></p><ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>');
+            setPrescription('<ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>');
             
             Swal.fire({
                 icon: 'success',

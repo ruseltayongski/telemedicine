@@ -33,19 +33,20 @@ class UserSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // [
-            //     'name' => 'Jane Smith',
-            //     'email' => 'ruseltayong@gmail.com',
-            //     'password' => Hash::make('password'),
-            //     'role_id' => 3, // for patient
-            //     'email_verified_at' => now(),
-            //     'address' => 'Patient Street, City',
-            //     'contact' => '09234567890',
-            //     'sex' => 'female',
-            //     'license_no' => null,
-            //     'created_at' => now(),
-            //     'updated_at' => now(),
-            // ]
+            [
+                'name' => 'Rusel Tayong',
+                'email' => 'ruseltayong@gmail.com',
+                'password' => Hash::make('password'),
+                'role_id' => 3, // for patient
+                'email_verified_at' => now(),
+                'address' => 'Patient Street, City',
+                'contact' => '09234567890',
+                'sex' => 'male',
+                'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
+                'license_no' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
 
         User::insert([
@@ -100,25 +101,25 @@ class UserSeeder extends Seeder
                 ]);
             }
 
-            for ($i = 1; $i <= 5; $i++) {
-                DB::table('users')->insert([
-                    'name' => $faker->firstName . ' ' . $faker->lastName,
-                    'email' => 'doctor' . $specializationId . '_government_' . $i . '@gmail.com',
-                    'password' => Hash::make('password'),
-                    'role_id' => 2,
-                    'specialization_id' => $specializationId,
-                    'facility_id' => $governmentFacilities[array_rand($governmentFacilities)],
-                    'email_verified_at' => now(),
-                    'address' => $faker->address,
-                    'contact' => $faker->phoneNumber,
-                    'sex' => $faker->randomElement(['male', 'female']),
-                    'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
-                    'license_no' => strtoupper($faker->bothify('DOC-#####')),
-                    'ptr_number' => strtoupper($faker->bothify('PTR-#####')),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+            // for ($i = 1; $i <= 5; $i++) {
+            //     DB::table('users')->insert([
+            //         'name' => $faker->firstName . ' ' . $faker->lastName,
+            //         'email' => 'doctor' . $specializationId . '_government_' . $i . '@gmail.com',
+            //         'password' => Hash::make('password'),
+            //         'role_id' => 2,
+            //         'specialization_id' => $specializationId,
+            //         'facility_id' => $governmentFacilities[array_rand($governmentFacilities)],
+            //         'email_verified_at' => now(),
+            //         'address' => $faker->address,
+            //         'contact' => $faker->phoneNumber,
+            //         'sex' => $faker->randomElement(['male', 'female']),
+            //         'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
+            //         'license_no' => strtoupper($faker->bothify('DOC-#####')),
+            //         'ptr_number' => strtoupper($faker->bothify('PTR-#####')),
+            //         'created_at' => now(),
+            //         'updated_at' => now(),
+            //     ]);
+            // }
         }
     }
 }

@@ -46,7 +46,7 @@ class ChatController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'booking_id' => 'required|exists:booked_appointments,id',
+            'booking_code' => 'required|exists:booked_appointments,booking_code',
             'sender_id' => 'required|exists:users,id',
             'receiver_id' => 'required|exists:users,id',
             'message' => 'nullable|string',

@@ -48,6 +48,16 @@ export default function BookedAppointments({bookedAppointments}) {
         window.open(url, '_blank');
     };    
 
+    const generateLaboratoryRequest = (patient_id, doctor_id, booking_id) => {
+        const url = route('laboratory-request', {
+            patient_id: patient_id,
+            doctor_id: doctor_id,
+            booking_id: booking_id,
+        });
+    
+        window.open(url, '_blank');
+    };   
+
     return (
         <GuestLayout>
             <Head title="Book Appointment" />
@@ -118,6 +128,7 @@ export default function BookedAppointments({bookedAppointments}) {
                                                     <th className="border px-4 py-2">Status</th>
                                                     <th className="border px-4 py-2">Meeting Link</th>
                                                     <th className="border px-4 py-2">Prescription</th>
+                                                    <th className="border px-4 py-2">Laboratory Request</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -193,6 +204,18 @@ export default function BookedAppointments({bookedAppointments}) {
                                                             ) : (
                                                                 <span className="text-muted">Not available</span>
                                                             )}
+                                                        </td>
+                                                        <td className="border px-4 py-2">
+                                                            <a 
+                                                                href="#" 
+                                                                className="text-primary text-decoration-none"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    generateLaboratoryRequest(booking.patient_id, booking.appointment.doctor_id, booking.id);
+                                                                }}
+                                                            >
+                                                                Download
+                                                            </a>
                                                         </td>
                                                     </tr>
                                                 ))}

@@ -11,17 +11,11 @@ use App\Http\Controllers\VideoCallController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\LabRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Models\User;
 
-// Route::get('/', function () {
-//     return Inertia::render('Welcome', [
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION
-//     ]);
-// })->name('home');
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/test-api', [HomeController::class, 'testApi'])->name('test-api');
 
@@ -66,8 +60,12 @@ Route::get('prescriptions/{patient_id}/{doctor_id}/{booking_id}/pdf', [Prescript
 Route::post('/chats', [ChatController::class, 'store'])->name('chats.store');
 Route::get('/chats', [ChatController::class, 'chats'])->name('chats');
 Route::get('/chats/{id}/download', [ChatController::class, 'downloadFile'])->name('chats.download');
-
 Route::match(['POST','GET'],'/video-call', [VideoCallController::class, 'index'])->name('video-call');
+Route::get('/lab-requests-create', [LabRequestController::class, 'create'])->name('lab-requests.create');
+Route::get('/test-lab-request', function () {
+    $pdf = PDF::loadView('pdf.lab_request');
+    return $pdf->stream('sample-lab-request.pdf');
+})->name('laboratory-request');
 
 Route::middleware('guest')->group(function () {
     Route::post('login/request-otp', [AuthenticatedSessionController::class, 'requestOtp'])

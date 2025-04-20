@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Log;
 use App\Mail\AppointmentConfirmed;
+use App\Mail\AppointmentCancelled;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class BookedAppointmentController extends Controller
 {
@@ -58,6 +60,7 @@ class BookedAppointmentController extends Controller
     public function book(Request $request)
     {
         $appointment = Appointment::find($request->id);
+        $type = $request->input('type', 'new'); // 'new' or 'follow_up'
 
         if (!$appointment) {
             return Redirect::back()->withErrors(['error' => 'Appointment slot not available']);
@@ -67,21 +70,37 @@ class BookedAppointmentController extends Controller
             ->where('patient_id', Auth::id())
             ->first();
 
-        if ($existingBooking) {
+        if ($existingBooking && $type !== 'follow_up') {
             return Redirect::back()->withErrors(['error' => 'You have already booked this appointment']);
         }
+        
+        $bookingCode = null;
+        if ($type === 'follow_up') {
+            if(!$existingBooking) {
+                return Redirect::back()->withErrors(['error' => 'Error booking follow-up appointment']);
+            }
+            $bookingCode = $existingBooking->booking_code;
+        } else {
+            // Generate a unique booking_code for 'new'
+            do {
+                $bookingCode = 'BOOK-' . strtoupper(Str::random(7));
+            } while (BookedAppointment::where('booking_code', $bookingCode)->exists());
+        }
 
-        // Create a new booked appointment
+        // Create the booked appointment
         BookedAppointment::create([
             'appointment_id' => $appointment->id,
             'patient_id' => Auth::id(),
             'status' => 'pending',
+            'type' => $type,
             'selected_time' => $request->selected_time,
             'remarks' => $request->remarks,
+            'booking_code' => $bookingCode,
         ]);
 
         return Redirect::back()->with('success', 'Appointment successfully booked!');
     }
+
 
     public function manageBooking()
     {
@@ -161,6 +180,12 @@ class BookedAppointmentController extends Controller
             
             // Send email to patient
             Mail::to($patient->email)->send(new AppointmentConfirmed($booking));
+        }
+        else if ($request->status === 'cancelled') {
+            $patient = $booking->patient;
+            
+            // Send email to patient
+            Mail::to($patient->email)->send(new AppointmentCancelled($booking));
         }
 
         if ($request->status === 'confirmed') {

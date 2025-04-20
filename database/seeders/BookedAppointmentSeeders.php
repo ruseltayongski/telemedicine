@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\BookedAppointment;
 use App\Models\Appointment;
 use App\Models\User;
+use Illuminate\Support\Str;
 
 class BookedAppointmentSeeders extends Seeder
 {
@@ -16,28 +17,37 @@ class BookedAppointmentSeeders extends Seeder
     public function run(): void
     {
         $patient = User::where('role_id', 3)->first();
-        $appointment = Appointment::first();
 
-        if ($patient && $appointment) {
+        if ($patient) {
+            do {
+                $bookingCode = 'BOOK-' . strtoupper(Str::random(7));
+            } while (BookedAppointment::where('booking_code', $bookingCode)->exists());
+
             BookedAppointment::insert([
                 [
-                    'appointment_id' => $appointment->id,
+                    'booking_code' => $bookingCode,
+                    'appointment_id' => 1,
                     'patient_id' => $patient->id,
-                    'status' => 'confirmed',
+                    'status' => 'pending',
                     'selected_time' => now()->addHours(4)->format('H:i:s'),
-                    'remarks' => 'Follow-up consultation for general check-up.',
+                    'remarks' => 'Consultation for general check-up.',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
             ]);
 
+            do {
+                $bookingCode = 'BOOK-' . strtoupper(Str::random(7));
+            } while (BookedAppointment::where('booking_code', $bookingCode)->exists());
+
             BookedAppointment::insert([
                 [
+                    'booking_code' => $bookingCode,
                     'appointment_id' => 2,
                     'patient_id' => $patient->id,
-                    'status' => 'confirmed',
+                    'status' => 'pending',
                     'selected_time' => now()->addHours(5)->format('H:i:s'),
-                    'remarks' => 'Follow-up consultation for general check-up.',
+                    'remarks' => 'Consultation for general check-up.',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
