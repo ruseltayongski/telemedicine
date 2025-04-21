@@ -51,12 +51,12 @@ class UserSeeder extends Seeder
 
         User::insert([
             [
-                'name' => 'Jane Merks',
+                'name' => 'Christian Martinez',
                 'email' => 'rusel.ideahub@gmail.com',
                 'password' => Hash::make('password'),
                 'role_id' => 2,
-                'specialization_id' => 1,
-                'facility_id' => 1,
+                'specialization_id' => 2, //Dermatology
+                'facility_id' => 3,
                 'email_verified_at' => now(),
                 'address' => $faker->address,
                 'contact' => $faker->phoneNumber,
@@ -81,34 +81,14 @@ class UserSeeder extends Seeder
         });
 
         foreach ($specializationIds as $specializationId) {
-            for ($i = 1; $i <= 5; $i++) {
-                DB::table('users')->insert([
-                    'name' => $faker->firstName . ' ' . $faker->lastName,
-                    'email' => 'doctor' . $specializationId . '_private_' . $i . '@gmail.com',
-                    'password' => Hash::make('password'),
-                    'role_id' => 2,
-                    'specialization_id' => $specializationId,
-                    'facility_id' => $privateFacilities[array_rand($privateFacilities)],
-                    'email_verified_at' => now(),
-                    'address' => $faker->address,
-                    'contact' => $faker->phoneNumber,
-                    'sex' => $faker->randomElement(['male', 'female']),
-                    'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
-                    'license_no' => strtoupper($faker->bothify('DOC-#####')),
-                    'ptr_number' => strtoupper($faker->bothify('PTR-#####')),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-
             // for ($i = 1; $i <= 5; $i++) {
             //     DB::table('users')->insert([
             //         'name' => $faker->firstName . ' ' . $faker->lastName,
-            //         'email' => 'doctor' . $specializationId . '_government_' . $i . '@gmail.com',
+            //         'email' => 'doctor' . $specializationId . '_private_' . $i . '@gmail.com',
             //         'password' => Hash::make('password'),
             //         'role_id' => 2,
             //         'specialization_id' => $specializationId,
-            //         'facility_id' => $governmentFacilities[array_rand($governmentFacilities)],
+            //         'facility_id' => $privateFacilities[array_rand($privateFacilities)],
             //         'email_verified_at' => now(),
             //         'address' => $faker->address,
             //         'contact' => $faker->phoneNumber,
@@ -120,6 +100,26 @@ class UserSeeder extends Seeder
             //         'updated_at' => now(),
             //     ]);
             // }
+
+            for ($i = 1; $i <= 5; $i++) {
+                DB::table('users')->insert([
+                    'name' => $faker->firstName . ' ' . $faker->lastName,
+                    'email' => 'doctor' . $specializationId . '_government_' . $i . '@gmail.com',
+                    'password' => Hash::make('password'),
+                    'role_id' => 2,
+                    'specialization_id' => $specializationId,
+                    'facility_id' => $governmentFacilities[array_rand($governmentFacilities)],
+                    'email_verified_at' => now(),
+                    'address' => $faker->address,
+                    'contact' => $faker->phoneNumber,
+                    'sex' => $faker->randomElement(['male', 'female']),
+                    'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
+                    'license_no' => strtoupper($faker->bothify('DOC-#####')),
+                    'ptr_number' => strtoupper($faker->bothify('PTR-#####')),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         }
     }
 }
