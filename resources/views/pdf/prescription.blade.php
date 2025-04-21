@@ -67,8 +67,9 @@
         }
         .medication {
             background-color: #f8f9fa;
-            padding-top: 12px;
-            padding-bottom: 12px;
+            /* padding-top: 12px;
+            padding-bottom: 12px; */
+            padding: 10px;
             border-radius: 6px;
             margin-bottom: 10px;
             border-left: 3px solid #006838;

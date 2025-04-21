@@ -97,16 +97,6 @@
             margin-top: 40px;
         }
 
-
-        .custom-section-title {
-            font-weight: bold;
-            background-color: #f1f1f1;
-            padding: 5px;
-            margin-bottom: 5px;
-            border-left: 4px solid #006838;
-            margin-top: 20px;
-        }
-
     </style>
 </head>
 <body>
