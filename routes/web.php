@@ -14,6 +14,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\LabRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -61,7 +62,8 @@ Route::post('/chats', [ChatController::class, 'store'])->name('chats.store');
 Route::get('/chats', [ChatController::class, 'chats'])->name('chats');
 Route::get('/chats/{id}/download', [ChatController::class, 'downloadFile'])->name('chats.download');
 Route::match(['POST','GET'],'/video-call', [VideoCallController::class, 'index'])->name('video-call');
-Route::get('/lab-requests-create', [LabRequestController::class, 'create'])->name('lab-requests.create');
+Route::post('/lab-requests-create', [LabRequestController::class, 'labRequestCreate'])->name('lab-requests.create');
+Route::get('/lab-tests', [LabRequestController::class, 'labTests'])->name('lab-tests');
 Route::get('/test-lab-request', function () {
     $pdf = PDF::loadView('pdf.lab_request');
     return $pdf->stream('sample-lab-request.pdf');
@@ -73,6 +75,34 @@ Route::middleware('guest')->group(function () {
     
     Route::post('login/verify-otp', [AuthenticatedSessionController::class, 'verifyOtp'])
         ->name('login.verify-otp');
+});
+
+Route::post('/ai/prescription', function (Request $request) {
+    try {
+        $client = OpenAI::client(config('services.openai.key'));
+        
+        $response = $client->chat()->create([
+            'model' => 'gpt-4.1',
+            'messages' => [
+                [
+                    'role' => 'system', 
+                    'content' => 'You are a helpful medical assistant that helps doctors create and refine prescriptions. 
+                    Always respond with properly formatted HTML lists of medications with dosages and instructions.
+                    Never suggest medications without proper dosage information.
+                    Include warnings about potential interactions when relevant.'
+                ],
+                ['role' => 'user', 'content' => $request->prompt]
+            ],
+            'temperature' => 0.3
+        ]);
+
+        return response()->json([
+            'content' => $response->choices[0]->message->content
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
 });
 
 require __DIR__.'/auth.php';

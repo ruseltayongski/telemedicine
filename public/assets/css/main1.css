@@ -6966,3 +6966,27 @@ blockquote .shape {
   0%, 60%, 100% { transform: translateY(0); }
   30% { transform: translateY(-5px); }
 }
+
+
+.ai-panel {
+  background-color: #f8f9fa;
+  border-left: 4px solid #0d6efd;
+}
+
+.chat-toast-ai {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.chat-toast-ai.show {
+  opacity: 1;
+}

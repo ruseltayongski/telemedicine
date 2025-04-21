@@ -228,7 +228,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
     const showToast = (message) => {
         // Simple toast notification implementation
         const toast = document.createElement('div');
-        toast.className = 'chat-toast';
+        toast.className = 'chat-toast-ai';
         toast.innerHTML = message;
         document.body.appendChild(toast);
         
@@ -423,7 +423,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
             }
         };
         
-        joinChannel();
+        //joinChannel();
         
         // Cleanup function
         return () => {
@@ -578,6 +578,145 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
             setPrescriptionNo(generatedNo);
         }
     }, [isOpenPrescription]);
+
+    // lab requesr variable
+    const [isOpenLabRequest, setIsOpenLabRequest] = useState(false);
+    const [selectedTests, setSelectedTests] = useState([]);
+    const [doctorNotes, setDoctorNotes] = useState('');
+    const [requestedDate, setRequestedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [scheduledDate, setScheduledDate] = useState(new Date().toISOString().split('T')[0]);
+    const [labTests, setLabTests] = useState([]);
+
+    // Add these functions near your other functions
+    const openModalLabRequest = () => setIsOpenLabRequest(true);
+    const closeModalLabRequest = () => {
+        setIsOpenLabRequest(false);
+        setSelectedTests([]);
+        setDoctorNotes('');
+    };
+
+    const fetchLabTests = async () => {
+        try {
+            const response = await axios.get('/lab-tests');
+            setLabTests(response.data);
+        } catch (error) {
+            console.error('Error fetching lab tests:', error);
+            showToast('Failed to load lab tests');
+        }
+    };
+
+    useEffect(() => {
+        if (isOpenLabRequest) {
+            fetchLabTests();
+        }
+    }, [isOpenLabRequest]);
+
+    const toggleTestSelection = (testId) => {
+        setSelectedTests(prev => 
+            prev.includes(testId) 
+            ? prev.filter(id => id !== testId) 
+            : [...prev, testId]
+        );
+    };
+
+    const submitLabRequest = async () => {
+        if (selectedTests.length === 0) {
+            showToast('Please select at least one lab test');
+            return;
+        }
+        if(!doctorNotes) {
+            showToast('Please provide doctor notes');
+            return;
+        }
+
+        try {
+            const lab_request_data = {
+                doctor_id: doctor_id,
+                patient_id: patient_id,
+                booking_id: booking_id,
+                requested_date: requestedDate,
+                scheduled_date: scheduledDate,
+                doctor_notes: doctorNotes,
+                lab_tests: selectedTests
+            };
+            console.log(lab_request_data);
+            const response = await axios.post('/lab-requests-create', lab_request_data);
+            console.log(response);
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Lab request submitted successfully',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+
+            closeModalLabRequest();
+        } catch (error) {
+            console.error('Error submitting lab request:', error);
+            Swal.fire('Error!', 'Failed to submit lab request', 'error');
+        }
+    };
+
+
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [aiPrompt, setAiPrompt] = useState('');
+    const [showAiPanel, setShowAiPanel] = useState(false);
+    const editorRef = useRef(null);
+
+    const generateWithAI = async () => {
+        if (!aiPrompt.trim()) {
+          showToast('Please enter some symptoms or conditions');
+          return;
+        }
+      
+        setIsGenerating(true);
+        
+        try {
+          const response = await axios.post('/ai/prescription', {
+            prompt: `As a medical professional, generate a prescription for a patient with these symptoms/conditions: ${aiPrompt}. 
+            Include appropriate medications, dosages, and instructions. Format as HTML with proper list structure.`
+          });
+      
+          if (response.data && response.data.content) {
+            setPrescription(response.data.content);
+            if (editorRef.current) {
+                editorRef.current.setData(response.data.content);
+            }
+            setShowAiPanel(false);
+          }
+        } catch (error) {
+          console.error('AI generation error:', error);
+          showToast('Failed to generate prescription');
+        } finally {
+          setIsGenerating(false);
+        }
+      };
+      
+      const refineWithAI = async () => {
+        if (!prescription.trim()) {
+          showToast('Please write a prescription first');
+          return;
+        }
+      
+        setIsGenerating(true);
+        
+        try {
+          const response = await axios.post('/api/ai/prescription', {
+            prompt: `Review and improve this medical prescription: ${prescription}. 
+            Ensure proper formatting, check for medication interactions, and suggest any improvements.
+            Return the enhanced prescription in HTML format.`
+          });
+      
+          if (response.data && response.data.content) {
+            setPrescription(response.data.content);
+          }
+        } catch (error) {
+          console.error('AI refinement error:', error);
+          showToast('Failed to refine prescription');
+        } finally {
+          setIsGenerating(false);
+        }
+    };
 
     return (
         <>
@@ -986,6 +1125,23 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                                     <svg fill="#ffffff" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" xmlSpace="preserve" width="64px" height="64px" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path id="prescription_1_" d="M28,31.36H4c-0.199,0-0.36-0.161-0.36-0.36V1c0-0.199,0.161-0.36,0.36-0.36h18 c0.096,0,0.188,0.038,0.255,0.105l6,6C28.322,6.813,28.36,6.904,28.36,7v24C28.36,31.199,28.199,31.36,28,31.36z M4.36,30.64h23.28 V7.36H22c-0.199,0-0.36-0.161-0.36-0.36V1.36H4.36V30.64z M22.36,6.64h4.771L22.36,1.869V6.64z M20,27.36H8v-0.72h12V27.36z M24,23.36H8v-0.72h16V23.36z M24,19.36H8v-0.72h16V19.36z M16.254,9.254l-0.509-0.509L13,11.491l-2.252-2.252 C11.684,8.925,12.36,8.04,12.36,7c0-1.301-1.059-2.36-2.36-2.36H7.64V13h0.72V9.36h1.491l2.64,2.64l-2.746,2.746l0.509,0.509 L13,12.509l2.746,2.746l0.509-0.509L13.509,12L16.254,9.254z M8.36,8.64V5.36H10c0.904,0,1.64,0.736,1.64,1.64S10.904,8.64,10,8.64 H8.36z"></path> </g></svg>
                                 )}
                             </button>
+
+                            <button 
+                                onClick={openModalLabRequest}
+                                className="btn btn-lg rounded-circle shadow"
+                                style={{ 
+                                    width: '60px', 
+                                    height: '60px', 
+                                    display: 'flex', 
+                                    justifyContent: 'center', 
+                                    alignItems: 'center',
+                                    backgroundColor: '#2196F3', // Blue color for lab action
+                                    color: 'white'
+                                }}
+                            >
+                                <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M9 10H15M12 7V13M9.8 21H14.2C15.8802 21 16.7202 21 17.362 20.673C17.9265 20.3854 18.3854 19.9265 18.673 19.362C19 18.7202 19 17.8802 19 16.2V7.8C19 6.11984 19 5.27976 18.673 4.63803C18.3854 4.07354 17.9265 3.6146 17.362 3.32698C16.7202 3 15.8802 3 14.2 3H9.8C8.11984 3 7.27976 3 6.63803 3.32698C6.07354 3.6146 5.6146 4.07354 5.32698 4.63803C5 5.27976 5 6.11984 5 7.8V16.2C5 17.8802 5 18.7202 5.32698 19.362C5.6146 19.9265 6.07354 20.3854 6.63803 20.673C7.27976 21 8.11984 21 9.8 21Z" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
+                            </button>
+
                         </div>
                     </div>
                 </div>
@@ -999,7 +1155,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                                 <h5 className="modal-title">Create Prescription</h5>
                                 <button type="button" className="btn-close" onClick={closeModalPrescription}></button>
                             </div>
-                            <div className="modal-body">
+                            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                                 <div className="mb-3">
                                     <label htmlFor="prescriptionNo" className="form-label">Prescription #</label>
                                     <input
@@ -1010,11 +1166,60 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                                         readOnly
                                     />
                                 </div>
+
+                                {/* AI Panel Toggle */}
+                                <div className="mb-3">
+                                    <button 
+                                        onClick={() => setShowAiPanel(!showAiPanel)}
+                                        className="btn btn-sm btn-outline-primary"
+                                        type="button"
+                                    >
+                                        {showAiPanel ? 'Hide AI Assistant' : 'Get AI Help'}
+                                    </button>
+                                </div>
+
+                                {/* AI Assistant Panel */}
+                                {showAiPanel && (
+                                    <div className="ai-panel mb-3 p-3 border rounded">
+                                        <h6>AI Prescription Assistant</h6>
+                                        <div className="mb-2">
+                                        <label className="form-label">Describe symptoms/conditions:</label>
+                                        <textarea
+                                            className="form-control mb-2"
+                                            rows="3"
+                                            value={aiPrompt}
+                                            onChange={(e) => setAiPrompt(e.target.value)}
+                                            placeholder="E.g., 'Patient has high fever, cough, and sore throat...'"
+                                        />
+                                        <button 
+                                            onClick={generateWithAI}
+                                            className="btn btn-primary me-2"
+                                            disabled={isGenerating}
+                                        >
+                                            {isGenerating ? 'Generating...' : 'Generate Prescription'}
+                                        </button>
+                                        <button 
+                                            onClick={refineWithAI}
+                                            className="btn btn-outline-primary"
+                                            disabled={isGenerating || !prescription.trim()}
+                                        >
+                                            {isGenerating ? 'Refining...' : 'Refine Current'}
+                                        </button>
+                                        </div>
+                                        <div className="small text-muted">
+                                        AI suggestions are for assistance only. Always review carefully.
+                                        </div>
+                                    </div>
+                                )}
+
                                 <CKEditor
                                     editor={ClassicEditor}
                                     data={(exist_prescription && exist_prescription.content) || "<ul><li>Paracetamol 500mg - Take 1 tablet every 6 hours as needed</li></ul>"}
                                     config={{
                                         toolbar: ['bold', 'italic', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
+                                    }}
+                                    onReady={(editor) => {
+                                        editorRef.current = editor;
                                     }}
                                     onChange={(event, editor) => {
                                         const data = editor.getData();
@@ -1035,8 +1240,110 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                 </div>
                 {isOpenPrescription && <div className="modal-backdrop fade show"></div>}
             </div>
+
+            <div className="container mt-5">
+                <div className={`modal fade ${isOpenLabRequest ? "show d-block" : ""}`} tabIndex="-1">
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                            <h5 className="modal-title">Create Laboratory Request</h5>
+                            <button type="button" className="btn-close" onClick={closeModalLabRequest}></button>
+                            </div>
+                            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                                <div className="mb-3">
+                                    <label htmlFor="requestedDate" className="form-label">Requested Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        id="requestedDate"
+                                        value={requestedDate}
+                                        onChange={(e) => setRequestedDate(e.target.value)}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="scheduledDate" className="form-label">Scheduled Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        id="scheduledDate"
+                                        value={scheduledDate}
+                                        onChange={(e) => setScheduledDate(e.target.value)}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        required
+                                    />
+                                </div>
+                                
+                                <div className="mb-3">
+                                    <label className="form-label">Select Lab Tests</label>
+                                    <div className="row">
+                                    {labTests.map(test => (
+                                        <div key={test.id} className="col-md-6 mb-2">
+                                            <div 
+                                                className={`card ${selectedTests.includes(test.id) ? 'border-primary' : ''}`}
+                                                onClick={() => toggleTestSelection(test.id)}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                <div className="card-body">
+                                                <div className="form-check">
+                                                    <input
+                                                    className="form-check-input"
+                                                    type="checkbox"
+                                                    checked={selectedTests.includes(test.id)}
+                                                    onChange={() => {}}
+                                                    />
+                                                    <label className="form-check-label">
+                                                    <strong>{test.name}</strong> ({test.code})
+                                                    </label>
+                                                </div>
+                                                <p className="small mb-1">{test.description}</p>
+                                                <div className="d-flex justify-content-between small text-muted">
+                                                    <span>Category: {test.category}</span>
+                                                    <span>Sample: {test.sample_type}</span>
+                                                </div>
+                                                {test.requires_fasting != 0 && (
+                                                    <div className="badge bg-warning text-dark mt-1">
+                                                    Requires Fasting
+                                                    </div>
+                                                )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="mb-3">
+                                    <label htmlFor="doctorNotes" className="form-label">Doctor's Notes</label>
+                                    <textarea
+                                        className="form-control"
+                                        id="doctorNotes"
+                                        rows="3"
+                                        value={doctorNotes}
+                                        onChange={(e) => setDoctorNotes(e.target.value)}
+                                        placeholder="Any special instructions for the lab..."
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={closeModalLabRequest}>
+                                Cancel
+                            </button>
+                            <button className="btn btn-primary" onClick={submitLabRequest}>
+                                Submit Request
+                            </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {isOpenLabRequest && <div className="modal-backdrop fade show"></div>}
+            </div>
+
         </>
-        
+    
     );
 };
 

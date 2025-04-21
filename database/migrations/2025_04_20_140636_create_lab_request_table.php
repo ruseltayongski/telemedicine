@@ -19,8 +19,8 @@ return new class extends Migration
             $table->date('requested_date');
             $table->date('scheduled_date')->nullable();
             $table->text('doctor_notes')->nullable();
-            $table->text('result')->nullable();
-            $table->text('result_comments')->nullable();
+            $table->text('result')->nullable(); //Review After Test Completion
+            $table->text('result_comments')->nullable(); //Review After Test Completion
             $table->boolean('is_abnormal')->nullable(); #true	The result is abnormal, false	The result is normal, null	The doctor has not reviewed or decided yet
             $table->timestamps();
         });

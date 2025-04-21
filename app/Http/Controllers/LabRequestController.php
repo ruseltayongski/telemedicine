@@ -161,4 +161,54 @@ class LabRequestController extends Controller
         
     //     return back()->with('success', 'Lab request status updated successfully.');
     // }
+
+    public function labTests()
+    {
+        $labTests = LabTest::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+        
+        return response()->json($labTests);
+    }
+
+    public function labRequestCreate(Request $request)
+    {
+        // Find existing lab request with the same doctor, patient, and booking
+            $labRequest = LabRequest::where('doctor_id', $request->doctor_id)
+            ->where('patient_id', $request->patient_id)
+            ->where('booking_id', $request->booking_id)
+            ->first();
+
+        if ($labRequest) {
+            // Update the existing lab request
+            $labRequest->update([
+                'scheduled_date' => $request->scheduled_date,
+                'requested_date' => $request->requested_date,
+                'doctor_notes' => $request->doctor_notes,
+            ]);
+
+            // Sync (update) the lab tests instead of attach (adds duplicates)
+            $labRequest->labTests()->sync($request->lab_tests);
+        } else {
+            // Create a new lab request
+            $labRequest = LabRequest::create([
+                'doctor_id' => $request->doctor_id,
+                'patient_id' => $request->patient_id,
+                'booking_id' => $request->booking_id,
+                'scheduled_date' => $request->scheduled_date,
+                'requested_date' => $request->requested_date,
+                'doctor_notes' => $request->doctor_notes,
+            ]);
+
+            // Attach the lab tests
+            $labRequest->labTests()->attach($request->lab_tests);
+        }
+
+        return response()->json([
+            'message' => $labRequest->wasRecentlyCreated
+                ? 'Lab request submitted successfully'
+                : 'Lab request updated successfully',
+            'lab_request' => $labRequest->load('labTests'),
+        ], 201);
+    }
 }
