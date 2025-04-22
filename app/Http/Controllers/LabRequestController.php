@@ -108,6 +108,8 @@ class LabRequestController extends Controller
 
     public function downloadLabRequestPdf(Request $request)
     {
+        $pdf = PDF::loadView('pdf.lab_request');
+        return $pdf->stream('sample-lab-request.pdf');
         return $lab_request = LabRequest::with(['labTests', 'patient', 'doctor'])->where('patient_id', $request->patient_id)
             ->where('doctor_id', $request->doctor_id)
             ->where('booking_id', $request->booking_id)
