@@ -20,7 +20,7 @@ class BookedAppointmentController extends Controller
     public function bookedAppointments(Request $request): Response
     {
         $user = auth()->user();
-        $bookedAppointments = BookedAppointment::with(['appointment.doctor', 'patient', 'prescription'])
+        $bookedAppointments = BookedAppointment::with(['appointment.doctor', 'patient', 'prescription', 'lab_request'])
             ->where('patient_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
@@ -194,6 +194,36 @@ class BookedAppointmentController extends Controller
             session()->flash('success', 'Booking status updated to ' . ucfirst($request->status) . ' successfully!');
         }
         return redirect()->back();
+    }
+
+    public function createFollowUpAppointment(Request $request)
+    {
+        $appointment = Appointment::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'date_start' => $request->date_start,
+            'date_end' => $request->date_start,
+            'slot' => $request->slot,
+            'doctor_id' => $request->doctor_id,
+        ]);
+
+        $booked = BookedAppointment::create([
+            'booking_code' =>  $request->booking_code,
+            'appointment_id' => $appointment->id,
+            'patient_id' => $request->patient_id,
+            'status' => 'confirmed',
+            'type' => 'follow_up',
+            'selected_time' => $request->selected_time,
+            'remarks' => $request->remarks,
+        ]);
+
+        Mail::to('ruseltayong@gmail.com')->send(new AppointmentConfirmed($booked));
+
+        return response()->json([
+            'message' => 'Follow-up appointment successfully saved.',
+            'appointment' => $appointment,
+            'booking' => $booked,
+        ], 201);
     }
 
 }

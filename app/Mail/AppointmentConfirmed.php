@@ -29,34 +29,24 @@ class AppointmentConfirmed extends Mailable
      */
     public function envelope(): Envelope
     {
+        $subject = $this->booking->type === 'follow_up'
+            ? 'Follow-Up Appointment Confirmed'
+            : 'Appointment Confirmed';
+
         return new Envelope(
-            subject: 'Appointment Confirmed',
+            subject: $subject,
         );
     }
 
     public function build()
     {
+        if ($this->booking->type === 'follow_up') {
+            return $this->subject('Follow-Up Appointment Confirmed')
+                        ->markdown('emails.followup_confirmed')
+                        ->with(['booking' => $this->booking]);
+        }
+
         return $this->subject('Your Appointment Has Been Confirmed')
                     ->markdown('emails.appointment_confirmed');
     }
-
-    /**
-     * Get the message content definition.
-     */
-    // public function content(): Content
-    // {
-    //     return new Content(
-    //         view: 'view.name',
-    //     );
-    // }
-
-    // /**
-    //  * Get the attachments for the message.
-    //  *
-    //  * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-    //  */
-    // public function attachments(): array
-    // {
-    //     return [];
-    // }
 }

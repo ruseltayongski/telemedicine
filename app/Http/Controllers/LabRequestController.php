@@ -10,15 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LabRequestController extends Controller
-{   
-    /**
-     * Display a listing of the lab requests.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Inertia\Response
-     */
+{  
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -45,11 +40,6 @@ class LabRequestController extends Controller
         ]);
     }
     
-    /**
-     * Show the form for creating a new lab request.
-     *
-     * @return \Inertia\Response
-     */
     public function create()
     {   
         $labTests = LabTest::where('is_active', true)
@@ -66,102 +56,6 @@ class LabRequestController extends Controller
         ]);
     }
     
-    /**
-     * Store a newly created lab request in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    // public function store(Request $request)
-    // {
-    //     // Only doctors can create lab requests
-    //     $this->authorize('create', LabRequest::class);
-        
-    //     $validated = $request->validate([
-    //         'lab_test_id' => 'required|exists:lab_tests,id',
-    //         'patient_id' => 'required|exists:users,id',
-    //         'booking_id' => 'nullable|exists:bookings,id',
-    //         'requested_date' => 'required|date|after_or_equal:today',
-    //         'doctor_notes' => 'nullable|string',
-    //         'priority' => 'required|in:normal,urgent',
-    //     ]);
-        
-    //     $validated['doctor_id'] = Auth::id();
-    //     $validated['status'] = 'pending';
-        
-    //     $labRequest = LabRequest::create($validated);
-        
-    //     // Generate PDF
-    //     $pdfPath = $this->pdfGenerator->generate($labRequest);
-        
-    //     return redirect()->route('lab-requests.show', $labRequest)
-    //         ->with('success', 'Lab request created successfully and PDF generated.');
-    // }
-    
-    /**
-     * Display the specified lab request.
-     *
-     * @param  \App\Models\LabRequest  $labRequest
-     * @return \Inertia\Response
-     */
-    public function show(LabRequest $labRequest)
-    {
-        $this->authorize('view', $labRequest);
-        
-        $labRequest->load(['labTest', 'doctor:id,name', 'patient:id,name', 'booking']);
-        
-        return Inertia::render('LabRequests/Show', [
-            'labRequest' => $labRequest
-        ]);
-    }
-    
-    /**
-     * Download the lab request PDF.
-     *
-     * @param  \App\Models\LabRequest  $labRequest
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse
-     */
-    // public function downloadPdf(LabRequest $labRequest)
-    // {
-    //     $this->authorize('view', $labRequest);
-        
-    //     // If PDF doesn't exist, generate it first
-    //     if (!$labRequest->pdf_path || !Storage::exists($labRequest->pdf_path)) {
-    //         $pdfPath = $this->pdfGenerator->generate($labRequest);
-    //     } else {
-    //         $pdfPath = $labRequest->pdf_path;
-    //     }
-        
-    //     return Storage::download($pdfPath, 'lab-request-' . $labRequest->id . '.pdf');
-    // }
-    
-    /**
-     * Update the specified lab request status.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\LabRequest  $labRequest
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    // public function updateStatus(Request $request, LabRequest $labRequest)
-    // {
-    //     $this->authorize('update', $labRequest);
-        
-    //     $validated = $request->validate([
-    //         'status' => 'required|in:pending,scheduled,completed,cancelled',
-    //         'completed_date' => $request->status === 'completed' ? 'required|date' : 'nullable|date',
-    //         'result' => $request->status === 'completed' ? 'required|string' : 'nullable|string',
-    //         'scheduled_date' => $request->status === 'scheduled' ? 'required|date' : 'nullable|date',
-    //         'scheduled_time' => $request->status === 'scheduled' ? 'required' : 'nullable',
-    //     ]);
-        
-    //     $labRequest->update($validated);
-        
-    //     // Re-generate PDF if status updated
-    //     $pdfPath = $this->pdfGenerator->generate($labRequest);
-        
-    //     return back()->with('success', 'Lab request status updated successfully.');
-    // }
-
     public function labTests()
     {
         $labTests = LabTest::where('is_active', true)
@@ -174,7 +68,7 @@ class LabRequestController extends Controller
     public function labRequestCreate(Request $request)
     {
         // Find existing lab request with the same doctor, patient, and booking
-            $labRequest = LabRequest::where('doctor_id', $request->doctor_id)
+        $labRequest = LabRequest::where('doctor_id', $request->doctor_id)
             ->where('patient_id', $request->patient_id)
             ->where('booking_id', $request->booking_id)
             ->first();
@@ -210,5 +104,35 @@ class LabRequestController extends Controller
                 : 'Lab request updated successfully',
             'lab_request' => $labRequest->load('labTests'),
         ], 201);
+    }
+
+    public function downloadLabRequestPdf(Request $request)
+    {
+        return $lab_request = LabRequest::with(['labTests', 'patient', 'doctor'])->where('patient_id', $request->patient_id)
+            ->where('doctor_id', $request->doctor_id)
+            ->where('booking_id', $request->booking_id)
+            ->first();
+
+        $lab_request_data = [
+            'content' => $lab_request->content,
+            'doctorName' => $lab_request->doctor->name,
+            'specialty' => $lab_request->doctor->specialization->name,
+            'clinicName' => $lab_request->doctor->facility->name,
+            'location' => $lab_request->doctor->address,
+            'phone' => $lab_request->doctor->contact,
+            'patientName' => $lab_request->patient->name,
+            'age' => Carbon::parse($lab_request->patient->dob)->age,
+            'address' => $lab_request->patient->address,
+            'date' => now()->format('m/d/Y'),
+            'dob' => Carbon::parse($lab_request->patient->dob)->format('F d, Y'),
+            'gender' => ucfirst($lab_request->patient->sex),
+            'labRequestNumber' => $lab_request->lab_request_no,
+            'licenseNumber' => $lab_request->doctor->license_no,
+            'ptrNumber' => $lab_request->doctor->ptr_number,
+        ];
+        
+        $pdf = Pdf::loadView('pdf.lab_request', $lab_request_data);
+        $pdf->setPaper('a4');
+        return $pdf->stream('Lab Request - ' . $labRequest->booking->booking_code . '.pdf');
     }
 }

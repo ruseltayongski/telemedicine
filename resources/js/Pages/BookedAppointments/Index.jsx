@@ -3,6 +3,7 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import React, { useEffect, useRef, useState } from "react";
 
 export default function BookedAppointments({bookedAppointments}) {
+    console.log(bookedAppointments);
     // State for filtered appointments
     const [filteredAppointments, setFilteredAppointments] = useState([]);
 
@@ -49,7 +50,8 @@ export default function BookedAppointments({bookedAppointments}) {
     };    
 
     const generateLaboratoryRequest = (patient_id, doctor_id, booking_id) => {
-        const url = route('laboratory-request', {
+        console.log(booking_id);
+        const url = route('laboratory.request.pdf', {
             patient_id: patient_id,
             doctor_id: doctor_id,
             booking_id: booking_id,
@@ -206,16 +208,20 @@ export default function BookedAppointments({bookedAppointments}) {
                                                             )}
                                                         </td>
                                                         <td className="border px-4 py-2">
-                                                            <a 
-                                                                href="#" 
-                                                                className="text-primary text-decoration-none"
-                                                                onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    generateLaboratoryRequest(booking.patient_id, booking.appointment.doctor_id, booking.id);
-                                                                }}
-                                                            >
-                                                                Download
-                                                            </a>
+                                                            {booking.type == 'follow_up' && booking.lab_request ? (
+                                                                <a 
+                                                                    href="#" 
+                                                                    className="text-primary text-decoration-none"
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        generateLaboratoryRequest(booking.patient_id, booking.appointment.doctor_id, booking.id);
+                                                                    }}
+                                                                >
+                                                                    Download
+                                                                </a>
+                                                            ) : (
+                                                                <span className="text-muted">Not available</span>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))}

@@ -24,6 +24,11 @@ class BookedAppointment extends Model
         return $this->belongsTo(User::class, 'doctor_id');
     }
 
+    public function lab_request()
+    {
+        return $this->hasOne(LabRequest::class, 'booking_id');
+    }
+
     public function prescription()
     {
         return $this->hasOne(Prescription::class, 'booking_id');

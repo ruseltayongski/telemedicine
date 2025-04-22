@@ -423,7 +423,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
             }
         };
         
-        //joinChannel();
+        joinChannel();
         
         // Cleanup function
         return () => {
@@ -633,7 +633,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
             const lab_request_data = {
                 doctor_id: doctor_id,
                 patient_id: patient_id,
-                booking_id: booking_id,
+                booking_id: followupBookingId,
                 requested_date: requestedDate,
                 scheduled_date: scheduledDate,
                 doctor_notes: doctorNotes,
@@ -662,6 +662,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
     const [aiPrompt, setAiPrompt] = useState('');
     const [showAiPanel, setShowAiPanel] = useState(false);
     const editorRef = useRef(null);
+    const [searchLabTest, setSearchLabTest] = useState('');
 
     const generateWithAI = async () => {
         if (!aiPrompt.trim()) {
@@ -715,6 +716,60 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
           showToast('Failed to refine prescription');
         } finally {
           setIsGenerating(false);
+        }
+    };
+
+    const [isOpenFollowUp, setIsOpenFollowUp] = useState(false);
+    const [scheduledDateFollowup, setScheduledDateFollowup] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedTimeFollowup, setSelectedTimeFollowup] = useState("");
+    const [isSavingFollowUp, setIsSavingFollowUp] = useState(false);
+    const [followupBookingId, setFollowupBookingId] = useState("");
+
+    const openModalFollowUp = () => setIsOpenFollowUp(true);
+    const closeModalFollowUp = () => setIsOpenFollowUp(false);
+    const saveFollowUp = async () => {
+        if(!selectedTimeFollowup.trim()) {  
+            showToast('Please select a time');
+            return;
+        }
+        setIsSavingFollowUp(true);
+        try {
+            // Prepare the payload to send to the backend
+            const payload = {
+                title: 'Follow-up Consultation',  // Example title
+                description: 'Follow-up for previous diagnosis', // Example description
+                date_start: scheduledDateFollowup, // From the date picker
+                slot: 1,  // You can adjust this based on your slot system
+                doctor_id: doctor_id,  // You'll need to track this in your state or context
+                patient_id: patient_id, // You can track the current patient ID as well
+                selected_time: selectedTimeFollowup,  // From the time picker
+                remarks: 'Follow-up Consultation',  // Optional remarks
+                booking_code: booking_code,
+            };
+            
+            // Send the request to the server
+            const response = await axios.post('/appointments/follow-up', payload);
+            console.log(response.data.booking.id);
+            setFollowupBookingId(response.data.booking.id);
+            // Check if the response was successful
+            if (response.status === 201) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Follow-up appointment successfully saved.',
+                    confirmButtonColor: '#4CAF50',
+                }).then(() => {
+                    setIsSavingFollowUp(false);
+                    closeModalFollowUp();
+                });
+            }
+        } catch (error) {
+            console.error('Error saving follow-up appointment:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong. Please try again.',
+            });
         }
     };
 
@@ -811,22 +866,24 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                     <div className="call-controls position-absolute bottom-0 start-0 w-100 d-flex justify-content-center pb-5" style={{ zIndex: 20 }}>
                         <div className="d-flex gap-4">
 
-                            <button 
-                                onClick={toggleChat}
-                                className="btn btn-lg rounded-circle shadow"
-                                style={{ 
-                                    width: '60px', 
-                                    height: '60px', 
-                                    display: 'flex', 
-                                    justifyContent: 'center', 
-                                    alignItems: 'center',
-                                    backgroundColor: '#2196F3',
-                                    color: 'white'
-                                }}
-                            >
-                                {/* 💬 */}
-                                <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 16V8" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M8 14V10" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M16 14V10" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M17 3.33782C15.5291 2.48697 13.8214 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22C17.5228 22 22 17.5228 22 12C22 10.1786 21.513 8.47087 20.6622 7" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> </g></svg>
-                            </button>
+                            <div className="tooltip-container">
+                                <button 
+                                    onClick={toggleChat}
+                                    className="btn btn-lg rounded-circle shadow"
+                                    style={{ 
+                                        width: '60px', 
+                                        height: '60px', 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        backgroundColor: '#4CAF50',
+                                        color: 'white'
+                                    }}
+                                >
+                                    <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 16V8" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M8 14V10" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M16 14V10" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> <path d="M17 3.33782C15.5291 2.48697 13.8214 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22C17.5228 22 22 17.5228 22 12C22 10.1786 21.513 8.47087 20.6622 7" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round"></path> </g></svg>
+                                    <span className="tooltip-text">Chat</span>
+                                </button>
+                            </div>
 
                             {/* Chat panel */}
                             <div 
@@ -993,158 +1050,254 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                                     </div>
                                 )}
                                 
-                                {/* Message input and buttons */}
-                                <div className="d-flex gap-2">
-                                    <div className="input-group flex-nowrap">
-                                    <textarea
-                                        ref={messageInputRef}
-                                        className="form-control rounded-pill-start"
-                                        rows="1"
-                                        value={message}
-                                        onChange={handleTextChange}
-                                        onKeyPress={handleKeyPress}
-                                        placeholder="Type a message..."
-                                        style={{ 
-                                        resize: 'none',
-                                        borderRadius: '20px 0 0 20px',
-                                        paddingRight: '40px'
-                                        }}
-                                    />
-                                    
-                                    <label 
-                                        className="input-group-text bg-white border-start-0" 
-                                        htmlFor="file-upload"
-                                        style={{ 
-                                        cursor: 'pointer',
-                                        borderRadius: '0',
-                                        padding: '0 15px'
-                                        }}
-                                    >
-                                        📎
-                                        <input
-                                        id="file-upload"
-                                        type="file"
-                                        onChange={handleFileChange}
-                                        style={{ display: 'none' }}
-                                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-                                        />
-                                    </label>
-                                    
-                                    <button 
-                                        className="btn btn-primary send-btn"
-                                        onClick={sendMessage}
-                                        disabled={isUploading || (!message.trim() && !file)}
-                                        style={{ 
-                                        borderRadius: '0 20px 20px 0',
-                                        transition: 'all 0.2s ease'
-                                        }}
-                                    >
-                                        {isUploading ? '...' : '➤'}
-                                    </button>
+                                    {/* Message input and buttons */}
+                                    <div className="d-flex gap-2">
+                                        <div className="input-group flex-nowrap">
+                                            <textarea
+                                                ref={messageInputRef}
+                                                className="form-control rounded-pill-start"
+                                                rows="1"
+                                                value={message}
+                                                onChange={handleTextChange}
+                                                onKeyPress={handleKeyPress}
+                                                placeholder="Type a message..."
+                                                style={{ 
+                                                resize: 'none',
+                                                borderRadius: '20px 0 0 20px',
+                                                paddingRight: '40px'
+                                                }}
+                                            />
+                                            
+                                            <label 
+                                                className="input-group-text bg-white border-start-0" 
+                                                htmlFor="file-upload"
+                                                style={{ 
+                                                cursor: 'pointer',
+                                                borderRadius: '0',
+                                                padding: '0 15px'
+                                                }}
+                                            >
+                                                📎
+                                                <input
+                                                id="file-upload"
+                                                type="file"
+                                                onChange={handleFileChange}
+                                                style={{ display: 'none' }}
+                                                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                                                />
+                                            </label>
+                                            
+                                            <button 
+                                                className="btn btn-primary send-btn"
+                                                onClick={sendMessage}
+                                                disabled={isUploading || (!message.trim() && !file)}
+                                                style={{ 
+                                                borderRadius: '0 20px 20px 0',
+                                                transition: 'all 0.2s ease'
+                                                }}
+                                            >
+                                                {isUploading ? '...' : '➤'}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
                                 </div>
                             </div>
 
-                            <button 
-                                onClick={toggleVideo} 
-                                className={`btn btn-lg rounded-circle shadow`}
-                                style={{ 
-                                    width: '60px', 
-                                    height: '60px', 
-                                    display: 'flex', 
-                                    justifyContent: 'center', 
-                                    alignItems: 'center',
-                                    backgroundColor: videoDisabled ? '#e0e0e0' : '#ffffff'
-                                }}
-                            >
-                                {videoDisabled ? (
-                                    <svg fill="#000000" width="64px" height="64px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" ></g><g id="SVGRepo_tracerCarrier"></g><g id="SVGRepo_iconCarrier"> <path d="m1421.141 2.417 91.775 64.262L215.481 1918.962l.595.416-.378.54-92.37-64.678L246.074 1680H0V240h1254.726L1421.141 2.416Zm79.395 278.487V678.89L1920 346.052v1228.01l-419.464-332.951V1680H520.538l76.895-109.78 793.325.001v-556.235l177.995 141.29 241.468 191.548V573.176l-241.468 191.662-177.995 141.29-.001-468.498 109.779-156.726Zm-322.705 68.874H109.779v1220.443h213.19l854.862-1220.443Z" ></path> </g></svg>
-                                ) : (
-                                    <svg fill="#000000" width="64px" height="64px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" ></g><g id="SVGRepo_tracerCarrier"></g><g id="SVGRepo_iconCarrier"> <path d="M0 240v1440h1500.536v-438.89L1920 1574.062V346.051L1500.536 678.89V240H0Zm109.779 109.779h1280.979v556.348l177.995-141.29 241.468-191.66v773.646l-241.468-191.549-177.995-141.29v556.236H109.778V349.78Z" ></path> </g></svg>
-                                )}
-                            </button>
+                            <div className="tooltip-container">
+                                <button 
+                                    onClick={toggleVideo} 
+                                    className={`btn btn-lg rounded-circle shadow`}
+                                    style={{ 
+                                        width: '60px', 
+                                        height: '60px', 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        backgroundColor: videoDisabled ? '#e0e0e0' : '#4CAF50'
+                                    }}
+                                >
+                                    {videoDisabled ? (
+                                        <svg fill="#000000" width="64px" height="64px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" ></g><g id="SVGRepo_tracerCarrier"></g><g id="SVGRepo_iconCarrier"> <path d="m1421.141 2.417 91.775 64.262L215.481 1918.962l.595.416-.378.54-92.37-64.678L246.074 1680H0V240h1254.726L1421.141 2.416Zm79.395 278.487V678.89L1920 346.052v1228.01l-419.464-332.951V1680H520.538l76.895-109.78 793.325.001v-556.235l177.995 141.29 241.468 191.548V573.176l-241.468 191.662-177.995 141.29-.001-468.498 109.779-156.726Zm-322.705 68.874H109.779v1220.443h213.19l854.862-1220.443Z" ></path> </g></svg>
+                                    ) : (
+                                        <svg fill="#ffffff" width="64px" height="64px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" ></g><g id="SVGRepo_tracerCarrier"></g><g id="SVGRepo_iconCarrier"> <path d="M0 240v1440h1500.536v-438.89L1920 1574.062V346.051L1500.536 678.89V240H0Zm109.779 109.779h1280.979v556.348l177.995-141.29 241.468-191.66v773.646l-241.468-191.549-177.995-141.29v556.236H109.778V349.78Z" ></path> </g></svg>
+                                    )}
+                                    <span className="tooltip-text">Video</span>
+                                </button>
+                            </div>
 
-                            <button 
-                                onClick={toggleMute} 
-                                className={`btn btn-lg rounded-circle shadow`}
-                                style={{ 
-                                    width: '60px', 
-                                    height: '60px', 
-                                    display: 'flex', 
-                                    justifyContent: 'center', 
-                                    alignItems: 'center',
-                                    backgroundColor: muted ? '#e0e0e0' : '#ffffff'
-                                }}
-                            >
-                                {muted ? (
-                                    <svg fill="#000000" width="64px" height="64px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" ></g><g id="SVGRepo_tracerCarrier"></g><g id="SVGRepo_iconCarrier"> <path d="M621.452 435.678c0-186.858 152.004-338.862 338.862-338.862 159.316 0 293.306 110.504 329.336 258.896L724.351 1162.76c-63.433-61.62-102.899-147.78-102.899-242.994V435.678Zm46.834 807.122c-88.168-79.79-143.65-195.06-143.65-323.033V435.679C524.636 195.475 720.111 0 960.315 0c176.955 0 329.645 106.09 397.775 257.997L1538.8 0l92.38 64.669L333.381 1917.48 241 1852.81l305.287-435.84C414.414 1301.53 331 1132.02 331 943.411V709.984h96.818v233.427c0 155.809 67.319 296.239 174.392 393.719l66.076-94.33Zm292.028 15.83c-9.387 0-18.687-.39-27.883-1.14l-62.071 88.62c29.036 6.12 59.127 9.34 89.955 9.34 240.205 0 435.675-195.48 435.675-435.683V595.685l-96.81 138.223v185.858c0 186.854-152.01 338.864-338.866 338.864Zm-162.996 191.75-57.715 82.4c54.294 20.4 112.13 33.5 172.305 38.1v252.3H669.861V1920h580.909v-96.82h-242.044v-252.3c324.464-24.8 580.904-296.76 580.904-627.469V709.984h-96.82v233.427c0 293.549-238.94 532.499-532.495 532.499-56.824 0-111.602-8.96-162.997-25.53Z" ></path> </g></svg>
-                                ) : (
-                                    <svg fill="#000000" width="64px" height="64px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier"></g><g id="SVGRepo_tracerCarrier"></g><g id="SVGRepo_iconCarrier"> <path d="M960.315 96.818c-186.858 0-338.862 152.003-338.862 338.861v484.088c0 186.858 152.004 338.862 338.862 338.862 186.858 0 338.861-152.004 338.861-338.862V435.68c0-186.858-152.003-338.861-338.861-338.861M427.818 709.983V943.41c0 293.551 238.946 532.497 532.497 532.497 293.55 0 532.496-238.946 532.496-532.497V709.983h96.818V943.41c0 330.707-256.438 602.668-580.9 627.471l-.006 252.301h242.044V1920H669.862v-96.818h242.043l-.004-252.3C587.438 1546.077 331 1274.116 331 943.41V709.983h96.818ZM960.315 0c240.204 0 435.679 195.475 435.679 435.68v484.087c0 240.205-195.475 435.68-435.68 435.68-240.204 0-435.679-195.475-435.679-435.68V435.68C524.635 195.475 720.11 0 960.315 0Z"></path> </g></svg>
-                                )}
-                            </button>
+                            <div className="tooltip-container">
+                                <button 
+                                    onClick={toggleMute} 
+                                    className={`btn btn-lg rounded-circle shadow`}
+                                    style={{ 
+                                        width: '60px', 
+                                        height: '60px', 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        backgroundColor: muted ? '#e0e0e0' : '#4CAF50'
+                                    }}
+                                >
+                                    {muted ? (
+                                        <svg fill="#000000" width="64px" height="64px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" ></g><g id="SVGRepo_tracerCarrier"></g><g id="SVGRepo_iconCarrier"> <path d="M621.452 435.678c0-186.858 152.004-338.862 338.862-338.862 159.316 0 293.306 110.504 329.336 258.896L724.351 1162.76c-63.433-61.62-102.899-147.78-102.899-242.994V435.678Zm46.834 807.122c-88.168-79.79-143.65-195.06-143.65-323.033V435.679C524.636 195.475 720.111 0 960.315 0c176.955 0 329.645 106.09 397.775 257.997L1538.8 0l92.38 64.669L333.381 1917.48 241 1852.81l305.287-435.84C414.414 1301.53 331 1132.02 331 943.411V709.984h96.818v233.427c0 155.809 67.319 296.239 174.392 393.719l66.076-94.33Zm292.028 15.83c-9.387 0-18.687-.39-27.883-1.14l-62.071 88.62c29.036 6.12 59.127 9.34 89.955 9.34 240.205 0 435.675-195.48 435.675-435.683V595.685l-96.81 138.223v185.858c0 186.854-152.01 338.864-338.866 338.864Zm-162.996 191.75-57.715 82.4c54.294 20.4 112.13 33.5 172.305 38.1v252.3H669.861V1920h580.909v-96.82h-242.044v-252.3c324.464-24.8 580.904-296.76 580.904-627.469V709.984h-96.82v233.427c0 293.549-238.94 532.499-532.495 532.499-56.824 0-111.602-8.96-162.997-25.53Z" ></path> </g></svg>
+                                    ) : (
+                                        <svg fill="#ffffff" width="64px" height="64px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier"></g><g id="SVGRepo_tracerCarrier"></g><g id="SVGRepo_iconCarrier"> <path d="M960.315 96.818c-186.858 0-338.862 152.003-338.862 338.861v484.088c0 186.858 152.004 338.862 338.862 338.862 186.858 0 338.861-152.004 338.861-338.862V435.68c0-186.858-152.003-338.861-338.861-338.861M427.818 709.983V943.41c0 293.551 238.946 532.497 532.497 532.497 293.55 0 532.496-238.946 532.496-532.497V709.983h96.818V943.41c0 330.707-256.438 602.668-580.9 627.471l-.006 252.301h242.044V1920H669.862v-96.818h242.043l-.004-252.3C587.438 1546.077 331 1274.116 331 943.41V709.983h96.818ZM960.315 0c240.204 0 435.679 195.475 435.679 435.68v484.087c0 240.205-195.475 435.68-435.68 435.68-240.204 0-435.679-195.475-435.679-435.68V435.68C524.635 195.475 720.11 0 960.315 0Z"></path> </g></svg>
+                                    )}
+                                    <span className="tooltip-text">Audio</span>
+                                </button>
+                            </div>
                             
-                            <button 
-                                onClick={leaveCall}
-                                className="btn btn-lg rounded-circle shadow"
-                                style={{ 
-                                    width: '60px', 
-                                    height: '60px', 
-                                    display: 'flex', 
-                                    justifyContent: 'center', 
-                                    alignItems: 'center',
-                                    backgroundColor: '#E53935',
-                                    color: 'white'
-                                }}
-                            >
-                                <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" ></g><g id="SVGRepo_tracerCarrier"></g><g id="SVGRepo_iconCarrier"> <path d="M14.3308 15.9402L15.6608 14.6101C15.8655 14.403 16.1092 14.2384 16.3778 14.1262C16.6465 14.014 16.9347 13.9563 17.2258 13.9563C17.517 13.9563 17.8052 14.014 18.0739 14.1262C18.3425 14.2384 18.5862 14.403 18.7908 14.6101L20.3508 16.1702C20.5579 16.3748 20.7224 16.6183 20.8346 16.887C20.9468 17.1556 21.0046 17.444 21.0046 17.7351C21.0046 18.0263 20.9468 18.3146 20.8346 18.5833C20.7224 18.8519 20.5579 19.0954 20.3508 19.3L19.6408 20.02C19.1516 20.514 18.5189 20.841 17.8329 20.9541C17.1469 21.0672 16.4427 20.9609 15.8208 20.6501C10.4691 17.8952 6.11008 13.5396 3.35083 8.19019C3.03976 7.56761 2.93414 6.86242 3.04914 6.17603C3.16414 5.48963 3.49384 4.85731 3.99085 4.37012L4.70081 3.65015C5.11674 3.23673 5.67937 3.00464 6.26581 3.00464C6.85225 3.00464 7.41488 3.23673 7.83081 3.65015L9.40082 5.22021C9.81424 5.63615 10.0463 6.19871 10.0463 6.78516C10.0463 7.3716 9.81424 7.93416 9.40082 8.3501L8.0708 9.68018C8.95021 10.8697 9.91617 11.9926 10.9608 13.04C11.9994 14.0804 13.116 15.04 14.3008 15.9102L14.3308 15.9402Z" stroke="#ffffff"></path> </g></svg>
-                            </button>
+                            <div className="tooltip-container">
+                                <button 
+                                    onClick={leaveCall}
+                                    className="btn btn-lg rounded-circle shadow"
+                                    style={{ 
+                                        width: '60px', 
+                                        height: '60px', 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        backgroundColor: '#E53935',
+                                        color: 'white'
+                                    }}
+                                >
+                                    <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" ></g><g id="SVGRepo_tracerCarrier"></g><g id="SVGRepo_iconCarrier"> <path d="M14.3308 15.9402L15.6608 14.6101C15.8655 14.403 16.1092 14.2384 16.3778 14.1262C16.6465 14.014 16.9347 13.9563 17.2258 13.9563C17.517 13.9563 17.8052 14.014 18.0739 14.1262C18.3425 14.2384 18.5862 14.403 18.7908 14.6101L20.3508 16.1702C20.5579 16.3748 20.7224 16.6183 20.8346 16.887C20.9468 17.1556 21.0046 17.444 21.0046 17.7351C21.0046 18.0263 20.9468 18.3146 20.8346 18.5833C20.7224 18.8519 20.5579 19.0954 20.3508 19.3L19.6408 20.02C19.1516 20.514 18.5189 20.841 17.8329 20.9541C17.1469 21.0672 16.4427 20.9609 15.8208 20.6501C10.4691 17.8952 6.11008 13.5396 3.35083 8.19019C3.03976 7.56761 2.93414 6.86242 3.04914 6.17603C3.16414 5.48963 3.49384 4.85731 3.99085 4.37012L4.70081 3.65015C5.11674 3.23673 5.67937 3.00464 6.26581 3.00464C6.85225 3.00464 7.41488 3.23673 7.83081 3.65015L9.40082 5.22021C9.81424 5.63615 10.0463 6.19871 10.0463 6.78516C10.0463 7.3716 9.81424 7.93416 9.40082 8.3501L8.0708 9.68018C8.95021 10.8697 9.91617 11.9926 10.9608 13.04C11.9994 14.0804 13.116 15.04 14.3008 15.9102L14.3308 15.9402Z" stroke="#ffffff"></path> </g></svg>
+                                    <span className="tooltip-text">End Call</span>
+                                </button>
+                            </div>
 
-                            <button 
-                                onClick={() => {
-                                    if (recipient === 'doctor') {
-                                        openModalPrescription();  // Doctor action
-                                    } else if (recipient === 'patient') {
-                                        generatePrescription();  // Patient action
-                                    }
-                                }}
-                                className="btn btn-lg rounded-circle shadow"
-                                style={{ 
-                                    width: '60px', 
-                                    height: '60px', 
-                                    display: 'flex', 
-                                    justifyContent: 'center', 
-                                    alignItems: 'center',
-                                    backgroundColor: '#4CAF50', // Green color for medical action
-                                    color: 'white'
-                                }}
-                            >
-                                {recipient === 'doctor' ? (
-                                    <svg fill="#ffffff" width="64px" height="64px" viewBox="0 0 256 256" id="Flat" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M183.31348,188l22.34326-22.34326a7.99984,7.99984,0,0,0-11.31348-11.31348L172,176.68652l-41.71289-41.71277A52.0008,52.0008,0,0,0,120,32H72a8.00008,8.00008,0,0,0-8,8V192a8,8,0,0,0,16,0V136h28.68652l52,52-22.34326,22.34326a7.99984,7.99984,0,1,0,11.31348,11.31348L172,199.31348l22.34326,22.34326a7.99984,7.99984,0,0,0,11.31348-11.31348ZM80,120V48h40a36,36,0,0,1,0,72Z"></path> </g></svg>
-                                ) : (
-                                    <svg fill="#ffffff" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" xmlSpace="preserve" width="64px" height="64px" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path id="prescription_1_" d="M28,31.36H4c-0.199,0-0.36-0.161-0.36-0.36V1c0-0.199,0.161-0.36,0.36-0.36h18 c0.096,0,0.188,0.038,0.255,0.105l6,6C28.322,6.813,28.36,6.904,28.36,7v24C28.36,31.199,28.199,31.36,28,31.36z M4.36,30.64h23.28 V7.36H22c-0.199,0-0.36-0.161-0.36-0.36V1.36H4.36V30.64z M22.36,6.64h4.771L22.36,1.869V6.64z M20,27.36H8v-0.72h12V27.36z M24,23.36H8v-0.72h16V23.36z M24,19.36H8v-0.72h16V19.36z M16.254,9.254l-0.509-0.509L13,11.491l-2.252-2.252 C11.684,8.925,12.36,8.04,12.36,7c0-1.301-1.059-2.36-2.36-2.36H7.64V13h0.72V9.36h1.491l2.64,2.64l-2.746,2.746l0.509,0.509 L13,12.509l2.746,2.746l0.509-0.509L13.509,12L16.254,9.254z M8.36,8.64V5.36H10c0.904,0,1.64,0.736,1.64,1.64S10.904,8.64,10,8.64 H8.36z"></path> </g></svg>
-                                )}
-                            </button>
+                            <div className="tooltip-container">
+                                <button 
+                                    onClick={() => {
+                                        if (recipient === 'doctor') {
+                                            openModalPrescription();  // Doctor action
+                                        } else if (recipient === 'patient') {
+                                            generatePrescription();  // Patient action
+                                        }
+                                    }}
+                                    className="btn btn-lg rounded-circle shadow"
+                                    style={{ 
+                                        width: '60px', 
+                                        height: '60px', 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        backgroundColor: '#4CAF50', // Green color for medical action
+                                        color: 'white'
+                                    }}
+                                >
+                                    {recipient === 'doctor' ? (
+                                        <svg fill="#ffffff" width="64px" height="64px" viewBox="0 0 256 256" id="Flat" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M183.31348,188l22.34326-22.34326a7.99984,7.99984,0,0,0-11.31348-11.31348L172,176.68652l-41.71289-41.71277A52.0008,52.0008,0,0,0,120,32H72a8.00008,8.00008,0,0,0-8,8V192a8,8,0,0,0,16,0V136h28.68652l52,52-22.34326,22.34326a7.99984,7.99984,0,1,0,11.31348,11.31348L172,199.31348l22.34326,22.34326a7.99984,7.99984,0,0,0,11.31348-11.31348ZM80,120V48h40a36,36,0,0,1,0,72Z"></path> </g></svg>
+                                    ) : (
+                                        <svg fill="#ffffff" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" xmlSpace="preserve" width="64px" height="64px" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path id="prescription_1_" d="M28,31.36H4c-0.199,0-0.36-0.161-0.36-0.36V1c0-0.199,0.161-0.36,0.36-0.36h18 c0.096,0,0.188,0.038,0.255,0.105l6,6C28.322,6.813,28.36,6.904,28.36,7v24C28.36,31.199,28.199,31.36,28,31.36z M4.36,30.64h23.28 V7.36H22c-0.199,0-0.36-0.161-0.36-0.36V1.36H4.36V30.64z M22.36,6.64h4.771L22.36,1.869V6.64z M20,27.36H8v-0.72h12V27.36z M24,23.36H8v-0.72h16V23.36z M24,19.36H8v-0.72h16V19.36z M16.254,9.254l-0.509-0.509L13,11.491l-2.252-2.252 C11.684,8.925,12.36,8.04,12.36,7c0-1.301-1.059-2.36-2.36-2.36H7.64V13h0.72V9.36h1.491l2.64,2.64l-2.746,2.746l0.509,0.509 L13,12.509l2.746,2.746l0.509-0.509L13.509,12L16.254,9.254z M8.36,8.64V5.36H10c0.904,0,1.64,0.736,1.64,1.64S10.904,8.64,10,8.64 H8.36z"></path> </g></svg>
+                                    )}
+                                    <span className="tooltip-text">Prescription</span>
+                                </button>
+                            </div>
 
-                            <button 
-                                onClick={openModalLabRequest}
-                                className="btn btn-lg rounded-circle shadow"
-                                style={{ 
-                                    width: '60px', 
-                                    height: '60px', 
-                                    display: 'flex', 
-                                    justifyContent: 'center', 
-                                    alignItems: 'center',
-                                    backgroundColor: '#2196F3', // Blue color for lab action
-                                    color: 'white'
-                                }}
-                            >
-                                <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M9 10H15M12 7V13M9.8 21H14.2C15.8802 21 16.7202 21 17.362 20.673C17.9265 20.3854 18.3854 19.9265 18.673 19.362C19 18.7202 19 17.8802 19 16.2V7.8C19 6.11984 19 5.27976 18.673 4.63803C18.3854 4.07354 17.9265 3.6146 17.362 3.32698C16.7202 3 15.8802 3 14.2 3H9.8C8.11984 3 7.27976 3 6.63803 3.32698C6.07354 3.6146 5.6146 4.07354 5.32698 4.63803C5 5.27976 5 6.11984 5 7.8V16.2C5 17.8802 5 18.7202 5.32698 19.362C5.6146 19.9265 6.07354 20.3854 6.63803 20.673C7.27976 21 8.11984 21 9.8 21Z" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
-                            </button>
+                            {followupBookingId && (
+                                <div className="tooltip-container">
+                                    <button 
+                                        onClick={openModalLabRequest}
+                                        className="btn btn-lg rounded-circle shadow"
+                                        style={{ 
+                                            width: '60px', 
+                                            height: '60px', 
+                                            display: 'flex', 
+                                            justifyContent: 'center', 
+                                            alignItems: 'center',
+                                            backgroundColor: '#4CAF50',
+                                            color: 'white'
+                                        }}
+                                    >
+                                        <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M9 10H15M12 7V13M9.8 21H14.2C15.8802 21 16.7202 21 17.362 20.673C17.9265 20.3854 18.3854 19.9265 18.673 19.362C19 18.7202 19 17.8802 19 16.2V7.8C19 6.11984 19 5.27976 18.673 4.63803C18.3854 4.07354 17.9265 3.6146 17.362 3.32698C16.7202 3 15.8802 3 14.2 3H9.8C8.11984 3 7.27976 3 6.63803 3.32698C6.07354 3.6146 5.6146 4.07354 5.32698 4.63803C5 5.27976 5 6.11984 5 7.8V16.2C5 17.8802 5 18.7202 5.32698 19.362C5.6146 19.9265 6.07354 20.3854 6.63803 20.673C7.27976 21 8.11984 21 9.8 21Z" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
+                                        <span className="tooltip-text">Laboratory Request</span>
+                                    </button>
+                                </div>
+                            )}
 
+                            <div className="tooltip-container">
+                                <button 
+                                    onClick={openModalFollowUp}
+                                    className="btn btn-lg rounded-circle shadow"
+                                    style={{ 
+                                        width: '60px', 
+                                        height: '60px', 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        alignItems: 'center',
+                                        backgroundColor: '#4CAF50',
+                                        color: 'white'
+                                    }}
+                                >
+                                    <svg width="64px" height="64px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="none" d="M0 0H24V24H0z"></path> <path d="M21 3c.552 0 1 .448 1 1v14c0 .552-.448 1-1 1H6.455L2 22.5V4c0-.552.448-1 1-1h18zm-1 2H4v13.385L5.763 17H20V5zm-3 2v8h-2V7h2zm-6 1v1.999L13 10v2l-2-.001V14H9v-2.001L7 12v-2l2-.001V8h2z"></path> </g> </g></svg>
+                                    <span className="tooltip-text">Follow-up Appointment</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div className="container mt-5">
+                <div className={`modal fade ${isOpenFollowUp ? "show d-block" : ""}`} tabIndex="-1">
+                    <div className="modal-dialog modal-md">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Follow-up Appointment</h5>
+                                <button type="button" className="btn-close" onClick={closeModalFollowUp}></button>
+                            </div>
+                            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                                <div className="mb-3">
+                                    <label htmlFor="scheduledDateFollowup" className="form-label">Scheduled Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        id="scheduledDateFollowup"
+                                        value={scheduledDateFollowup}
+                                        min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                                        onChange={(e) => setScheduledDateFollowup(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="selectedTimeFollowup" className="form-label">Selected Time</label>
+                                    <input
+                                        type="time"
+                                        className="form-control"
+                                        id="selectedTimeFollowup"
+                                        value={selectedTimeFollowup}
+                                        onChange={(e) => setSelectedTimeFollowup(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={closeModalFollowUp}>
+                                    Cancel
+                                </button>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={saveFollowUp}
+                                    disabled={isSavingFollowUp}
+                                >
+                                    {isSavingFollowUp ? (
+                                        <>
+                                            <span
+                                                className="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                                aria-hidden="true"
+                                            ></span>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        'Save'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {isOpenFollowUp && <div className="modal-backdrop fade show"></div>}
             </div>
 
             <div className="container mt-5">
@@ -1245,73 +1398,96 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                 <div className={`modal fade ${isOpenLabRequest ? "show d-block" : ""}`} tabIndex="-1">
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
-                            <div className="modal-header">
-                            <h5 className="modal-title">Create Laboratory Request</h5>
-                            <button type="button" className="btn-close" onClick={closeModalLabRequest}></button>
-                            </div>
-                            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-                                <div className="mb-3">
-                                    <label htmlFor="requestedDate" className="form-label">Requested Date</label>
+
+                            <div className="modal-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                                <h5 className="modal-title mb-2 mb-md-0">Create Laboratory Request</h5>
+                                <div className="w-50 w-md-50">
                                     <input
-                                        type="date"
+                                        type="text"
                                         className="form-control"
-                                        id="requestedDate"
-                                        value={requestedDate}
-                                        onChange={(e) => setRequestedDate(e.target.value)}
-                                        min={new Date().toISOString().split('T')[0]}
-                                        required
+                                        placeholder="Search lab tests..."
+                                        value={searchLabTest}
+                                        onChange={(e) => setSearchLabTest(e.target.value)}
                                     />
                                 </div>
+                            </div>
 
-                                <div className="mb-3">
-                                    <label htmlFor="scheduledDate" className="form-label">Scheduled Date</label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        id="scheduledDate"
-                                        value={scheduledDate}
-                                        onChange={(e) => setScheduledDate(e.target.value)}
-                                        min={new Date().toISOString().split('T')[0]}
-                                        required
-                                    />
+                            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                                <div className="row">
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="requestedDate" className="form-label">Requested Date</label>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            id="requestedDate"
+                                            value={requestedDate}
+                                            onChange={(e) => setRequestedDate(e.target.value)}
+                                            min={new Date().toISOString().split('T')[0]}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="scheduledDate" className="form-label">Scheduled Date</label>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            id="scheduledDate"
+                                            value={scheduledDate}
+                                            onChange={(e) => setScheduledDate(e.target.value)}
+                                            min={new Date().toISOString().split('T')[0]}
+                                            required
+                                        />
+                                    </div>
                                 </div>
                                 
                                 <div className="mb-3">
                                     <label className="form-label">Select Lab Tests</label>
                                     <div className="row">
-                                    {labTests.map(test => (
-                                        <div key={test.id} className="col-md-6 mb-2">
-                                            <div 
-                                                className={`card ${selectedTests.includes(test.id) ? 'border-primary' : ''}`}
-                                                onClick={() => toggleTestSelection(test.id)}
-                                                style={{ cursor: 'pointer' }}
-                                            >
-                                                <div className="card-body">
-                                                <div className="form-check">
-                                                    <input
-                                                    className="form-check-input"
-                                                    type="checkbox"
-                                                    checked={selectedTests.includes(test.id)}
-                                                    onChange={() => {}}
-                                                    />
-                                                    <label className="form-check-label">
-                                                    <strong>{test.name}</strong> ({test.code})
-                                                    </label>
-                                                </div>
-                                                <p className="small mb-1">{test.description}</p>
-                                                <div className="d-flex justify-content-between small text-muted">
-                                                    <span>Category: {test.category}</span>
-                                                    <span>Sample: {test.sample_type}</span>
-                                                </div>
-                                                {test.requires_fasting != 0 && (
-                                                    <div className="badge bg-warning text-dark mt-1">
-                                                    Requires Fasting
+                                        {labTests.filter(
+                                            test =>
+                                                test.name.toLowerCase().includes(searchLabTest.toLowerCase()) ||
+                                                test.code.toLowerCase().includes(searchLabTest.toLowerCase()) ||
+                                                test.category.toLowerCase().includes(searchLabTest.toLowerCase())
+                                        ).length === 0 && (
+                                            <p className="text-muted">No lab tests match your search.</p>
+                                        )}
+                                        {labTests.filter(test =>
+                                                test.name.toLowerCase().includes(searchLabTest.toLowerCase()) ||
+                                                test.code.toLowerCase().includes(searchLabTest.toLowerCase()) ||
+                                                test.category.toLowerCase().includes(searchLabTest.toLowerCase())
+                                            ).map(test => (
+                                            <div key={test.id} className="col-md-6 mb-2">
+                                                <div 
+                                                    className={`card ${selectedTests.includes(test.id) ? 'border-primary' : ''}`}
+                                                    onClick={() => toggleTestSelection(test.id)}
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    <div className="card-body">
+                                                    <div className="form-check">
+                                                        <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        checked={selectedTests.includes(test.id)}
+                                                        onChange={() => {}}
+                                                        />
+                                                        <label className="form-check-label">
+                                                        <strong>{test.name}</strong> ({test.code})
+                                                        </label>
                                                     </div>
-                                                )}
+                                                    <p className="small mb-1">{test.description}</p>
+                                                    <div className="d-flex justify-content-between small text-muted">
+                                                        <span>Category: {test.category}</span>
+                                                        <span>Sample: {test.sample_type}</span>
+                                                    </div>
+                                                    {test.requires_fasting != 0 && (
+                                                        <div className="badge bg-warning text-dark mt-1">
+                                                        Requires Fasting
+                                                        </div>
+                                                    )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
                                     </div>
                                 </div>
                                 

@@ -64,10 +64,7 @@ Route::get('/chats/{id}/download', [ChatController::class, 'downloadFile'])->nam
 Route::match(['POST','GET'],'/video-call', [VideoCallController::class, 'index'])->name('video-call');
 Route::post('/lab-requests-create', [LabRequestController::class, 'labRequestCreate'])->name('lab-requests.create');
 Route::get('/lab-tests', [LabRequestController::class, 'labTests'])->name('lab-tests');
-Route::get('/test-lab-request', function () {
-    $pdf = PDF::loadView('pdf.lab_request');
-    return $pdf->stream('sample-lab-request.pdf');
-})->name('laboratory-request');
+Route::get('/lab-requests/pdf', [LabRequestController::class, 'downloadLabRequestPdf'])->name('laboratory.request.pdf');
 
 Route::middleware('guest')->group(function () {
     Route::post('login/request-otp', [AuthenticatedSessionController::class, 'requestOtp'])
@@ -104,5 +101,7 @@ Route::post('/ai/prescription', function (Request $request) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
 });
+
+Route::post('/appointments/follow-up', [BookedAppointmentController::class, 'createFollowUpAppointment'])->name('appointments.follow-up');
 
 require __DIR__.'/auth.php';
