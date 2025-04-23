@@ -215,7 +215,7 @@ export default function ManageBookings() {
                                             aria-controls="pending-tab-pane" 
                                             aria-selected={activeTab === 'pending'}
                                         >
-                                            <i className="bi bi-hourglass-split me-2"></i>
+                                            <i className="bi bi-hourglass-split me-2" style={{ color: "black" }}></i>
                                             Pending
                                             <span className="badge bg-warning text-dark ms-2 rounded-pill">
                                                 {bookings.pending.length}
@@ -234,7 +234,7 @@ export default function ManageBookings() {
                                             aria-controls="confirmed-tab-pane" 
                                             aria-selected={activeTab === 'confirmed'}
                                         >
-                                            <i className="bi bi-check-circle me-2"></i>
+                                            <i className="bi bi-check-circle me-2" style={{ color: "black" }}></i>
                                             Confirmed
                                             <span className="badge bg-success ms-2 rounded-pill">
                                                 {bookings.confirmed.length}
@@ -253,7 +253,7 @@ export default function ManageBookings() {
                                             aria-controls="cancelled-tab-pane" 
                                             aria-selected={activeTab === 'cancelled'}
                                         >
-                                            <i className="bi bi-x-circle me-2"></i>
+                                            <i className="bi bi-x-circle me-2" style={{ color: "black" }}></i>
                                             Cancelled
                                             <span className="badge bg-danger ms-2 rounded-pill">
                                                 {bookings.cancelled.length}

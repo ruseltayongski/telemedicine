@@ -1,98 +1,99 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 
-export default function DoctorDashboard({ doctorStats = {} }) {
+export default function DoctorDashboard({ doctorStats = {}, data }) {
+    const defaultDoctorStats = data;
     // Provide default values for doctor stats
-    const defaultDoctorStats = {
-        doctorName: "Dr. Robert Johnson",
-        doctorSpecialty: "Cardiology",
-        totalPatients: 248,
-        newPatients: 12,
-        appointmentsToday: 8,
-        appointmentsTomorrow: 6,
-        completedAppointments: 842,
-        appointmentsByMonth: [65, 58, 70, 72, 75, 68, 80, 82, 78, 76, 72, 68],
-        appointmentsByType: {
-            new: 320,
-            followUp: 522
-        },
-        patientDemographics: {
-            age: {
-                labels: ["0-18", "19-35", "36-50", "51-65", "65+"],
-                data: [42, 78, 65, 45, 18]
-            },
-            gender: {
-                labels: ["Male", "Female", "Other"],
-                data: [115, 130, 3]
-            }
-        },
-        upcomingAppointments: [
-            {
-                patientName: "Jane Smith",
-                patientAge: 42,
-                appointmentType: "Follow-up",
-                time: "09:00 AM",
-                date: "2025-04-22",
-                status: "confirmed",
-                reason: "Hypertension follow-up",
-                patientImg: "admin/assets/images/faces/5.jpg"
-            },
-            {
-                patientName: "Thomas Anderson",
-                patientAge: 35,
-                appointmentType: "New",
-                time: "10:30 AM",
-                date: "2025-04-22",
-                status: "confirmed",
-                reason: "Chest pain evaluation",
-                patientImg: "admin/assets/images/faces/1.jpg"
-            },
-            {
-                patientName: "Emily Parker",
-                patientAge: 56,
-                appointmentType: "Follow-up",
-                time: "11:45 AM",
-                date: "2025-04-22",
-                status: "confirmed",
-                reason: "Medication review",
-                patientImg: "admin/assets/images/faces/2.jpg"
-            },
-            {
-                patientName: "Michael Brown",
-                patientAge: 48,
-                appointmentType: "Follow-up",
-                time: "02:15 PM",
-                date: "2025-04-22",
-                status: "confirmed",
-                reason: "Post-procedure checkup",
-                patientImg: "admin/assets/images/faces/3.jpg"
-            },
-            {
-                patientName: "Sarah Wilson",
-                patientAge: 33,
-                appointmentType: "New",
-                time: "03:30 PM",
-                date: "2025-04-22",
-                status: "confirmed",
-                reason: "Heart palpitations",
-                patientImg: "admin/assets/images/faces/4.jpg"
-            }
-        ],
-        referrals: {
-            sent: 35,
-            received: 22
-        },
-        prescriptionStats: {
-            total: 785,
-            thisMonth: 45
-        },
-        labRequestStats: {
-            total: 420,
-            pending: 12,
-            completed: 408
-        }
-    };
+    // const defaultDoctorStats = {
+    //     doctorName: "Dr. Robert Johnson",
+    //     doctorSpecialty: "Cardiology",
+    //     totalPatients: 248,
+    //     newPatients: 12,
+    //     appointmentsToday: 8,
+    //     appointmentsTomorrow: 6,
+    //     completedAppointments: 842,
+    //     appointmentsByMonth: [65, 58, 70, 72, 75, 68, 80, 82, 78, 76, 72, 68],
+    //     appointmentsByType: {
+    //         new: 320,
+    //         followUp: 522
+    //     },
+    //     patientDemographics: {
+    //         age: {
+    //             labels: ["0-18", "19-35", "36-50", "51-65", "65+"],
+    //             data: [42, 78, 65, 45, 18]
+    //         },
+    //         gender: {
+    //             labels: ["Male", "Female", "Other"],
+    //             data: [115, 130, 3]
+    //         }
+    //     },
+    //     upcomingAppointments: [
+    //         {
+    //             patientName: "Jane Smith",
+    //             patientAge: 42,
+    //             appointmentType: "Follow-up",
+    //             time: "09:00 AM",
+    //             date: "2025-04-22",
+    //             status: "confirmed",
+    //             reason: "Hypertension follow-up",
+    //             patientImg: "admin/assets/images/faces/5.jpg"
+    //         },
+    //         {
+    //             patientName: "Thomas Anderson",
+    //             patientAge: 35,
+    //             appointmentType: "New",
+    //             time: "10:30 AM",
+    //             date: "2025-04-22",
+    //             status: "confirmed",
+    //             reason: "Chest pain evaluation",
+    //             patientImg: "admin/assets/images/faces/1.jpg"
+    //         },
+    //         {
+    //             patientName: "Emily Parker",
+    //             patientAge: 56,
+    //             appointmentType: "Follow-up",
+    //             time: "11:45 AM",
+    //             date: "2025-04-22",
+    //             status: "confirmed",
+    //             reason: "Medication review",
+    //             patientImg: "admin/assets/images/faces/2.jpg"
+    //         },
+    //         {
+    //             patientName: "Michael Brown",
+    //             patientAge: 48,
+    //             appointmentType: "Follow-up",
+    //             time: "02:15 PM",
+    //             date: "2025-04-22",
+    //             status: "confirmed",
+    //             reason: "Post-procedure checkup",
+    //             patientImg: "admin/assets/images/faces/3.jpg"
+    //         },
+    //         {
+    //             patientName: "Sarah Wilson",
+    //             patientAge: 33,
+    //             appointmentType: "New",
+    //             time: "03:30 PM",
+    //             date: "2025-04-22",
+    //             status: "confirmed",
+    //             reason: "Heart palpitations",
+    //             patientImg: "admin/assets/images/faces/4.jpg"
+    //         }
+    //     ],
+    //     referrals: {
+    //         sent: 35,
+    //         received: 22
+    //     },
+    //     prescriptionStats: {
+    //         total: 785,
+    //         thisMonth: 45
+    //     },
+    //     labRequestStats: {
+    //         total: 420,
+    //         pending: 12,
+    //         completed: 408
+    //     }
+    // };
 
     // Merge provided stats with default stats
     const mergedDoctorStats = { ...defaultDoctorStats, ...doctorStats };
@@ -295,7 +296,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                     <div className="d-flex justify-content-between align-items-center">
                         <h3 style={styles.pageHeader}>Doctor Dashboard</h3>
                         <button className="btn btn-primary" style={{ backgroundColor: themeColor, borderColor: themeColor }}>
-                            <i className="bi bi-calendar-plus me-2"></i>
+                            <i className="bi bi-calendar-plus me-2" style={{ color: 'white'}}></i>
                             Add Appointment
                         </button>
                     </div>
@@ -400,7 +401,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                         <div className="card-header d-flex justify-content-between" style={styles.cardHeader}>
                             <h4 style={{ color: darkText }}>Today's Appointments</h4>
                             <div>
-                                <button className="btn btn-sm btn-outline-primary" style={{ borderColor: themeColor, color: themeColor }}>View All</button>
+                                <Link href={route('doctor.manage.booking')} className="btn btn-sm btn-outline-primary" style={{ borderColor: themeColor, color: themeColor }}>View All</Link>
                             </div>
                         </div>
                         <div className="card-body">
@@ -413,7 +414,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                         <th>Age</th>
                                         <th>Type</th>
                                         <th>Reason</th>
-                                        <th>Actions</th>
+                                        {/* <th>Actions</th> */}
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -439,7 +440,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                                 </span>
                                             </td>
                                             <td style={{ color: '#555' }}>{appointment.reason}</td>
-                                            <td>
+                                            {/* <td>
                                                 <div className="btn-group">
                                                     <button className="btn btn-sm" style={{ backgroundColor: themeColor, color: 'white' }}>
                                                         <i className="bi bi-file-medical"></i>
@@ -451,7 +452,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                                         <i className="bi bi-clock"></i>
                                                     </button>
                                                 </div>
-                                            </td>
+                                            </td> */}
                                         </tr>
                                     ))}
                                     </tbody>
@@ -473,11 +474,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Patient Demographics Charts */}
-                    <div className="row">
-                        <div className="col-12 col-xl-6">
+                        <div className="col-12">
                             <div className="card">
                                 <div className="card-header" style={styles.cardHeader}>
                                     <h4 style={{ color: darkText }}>Age Distribution</h4>
@@ -487,17 +484,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-12 col-xl-6">
-                            <div className="card">
-                                <div className="card-header" style={styles.cardHeader}>
-                                    <h4 style={{ color: darkText }}>Gender Distribution</h4>
-                                </div>
-                                <div className="card-body" style={styles.chartContainer}>
-                                    <div id="chart-patient-gender"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </div>                    
                 </div>
 
                 <div className="col-12 col-xl-4">
@@ -519,7 +506,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                             <h4 style={{ color: darkText }}>Medical Activities</h4>
                         </div>
                         <div className="card-content pb-4">
-                            <div className="px-4 py-3">
+                            {/* <div className="px-4 py-3">
                                 <div className="d-flex justify-content-between align-items-center">
                                     <h6 style={{ color: mediumText }}>Referrals Sent</h6>
                                     <h5 className="font-bold" style={{ color: darkText }}>{mergedDoctorStats.referrals.sent}</h5>
@@ -530,7 +517,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                     <h6 style={{ color: mediumText }}>Referrals Received</h6>
                                     <h5 className="font-bold" style={{ color: darkText }}>{mergedDoctorStats.referrals.received}</h5>
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="px-4 py-3">
                                 <div className="d-flex justify-content-between align-items-center">
                                     <h6 style={{ color: mediumText }}>Lab Requests</h6>
@@ -551,12 +538,24 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                     <small style={{ color: '#888' }}>{mergedDoctorStats.labRequestStats.pending} pending</small>
                                 </div>
                             </div>
-                            <div className="px-4 py-3 text-center">
+                            {/* <div className="px-4 py-3 text-center">
                                 <button className="btn btn-sm" style={{ backgroundColor: themeColor, color: 'white' }}>Generate Medical Report</button>
+                            </div> */}
+                        </div>
+                    </div>
+
+                    <div className="col-12">
+                        <div className="card">
+                            <div className="card-header" style={styles.cardHeader}>
+                                <h4 style={{ color: darkText }}>Gender Distribution</h4>
+                            </div>
+                            <div className="card-body" style={styles.chartContainer}>
+                                <div id="chart-patient-gender"></div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </section>
         </AuthenticatedLayout>
     );

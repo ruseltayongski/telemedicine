@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
             BookedAppointmentSeeders::class,
             LabTestSeeder::class,
             LabRequestSeeder::class,
-            PrescriptionSeeder::class
+            PrescriptionSeeder::class,
+            DoctorDashboardSeeder::class
         ]);
     }
 }
