@@ -105,7 +105,7 @@
         <!-- Header -->
         <div class="header">
             <img src="{{ public_path('assets/images/doh_logo.png') }}" class="logo" alt="DOH Logo">
-            <div class="clinic-name">Cebu Doctors' University Hospital</div>
+            <div class="clinic-name">{{ $lab_request->doctor->facility->name }}</div>
             <div class="subtext">Laboratory Request Form</div>
         </div>
 
@@ -114,18 +114,18 @@
         <!-- Patient Info -->
         <div class="section-title">Patient Information</div>
         <div class="info-box">
-            <p><strong>Name:</strong> Maria Santos</p>
-            <p><strong>Age / Sex:</strong> 34 / Female</p>
-            <p><strong>Contact:</strong> 0917-123-4567</p>
-            <p><strong>Booking ID:</strong> BK123456789</p>
-            <p><strong>Requested Date:</strong> April 15, 2025</p>
-            <p><strong>Scheduled Date:</strong> April 20, 2025</p>
+            <p><strong>Name:</strong> {{ $lab_request->patient->name }}</p>
+            <p><strong>Age / Sex:</strong> {{ $lab_request->patient->age }} / {{ $lab_request->patient->sex }}</p>
+            <p><strong>Contact:</strong> {{ $lab_request->patient->contact }}</p>
+            <p><strong>Booking ID:</strong> {{ $lab_request->booking->booking_code }}</p>
+            <p><strong>Requested Date:</strong> {{ date('F d, Y', strtotime($lab_request->requested_date)) }}</p>
+            <p><strong>Scheduled Date:</strong> {{ date('F d, Y', strtotime($lab_request->scheduled_date)) }}</p>
         </div>
 
         <!-- Doctor Notes -->
         <div class="section-title">Doctor's Notes</div>
         <div class="info-box">
-            Please perform CBC, FBS, and Urinalysis. Patient must fast for 8 hours before blood tests.
+            {{ $lab_request->doctor_notes }}
         </div>
 
         <!-- Lab Test Table -->
@@ -140,7 +140,15 @@
                 </tr>
             </thead>
             <tbody>
+                @foreach($lab_request->labTests as $lab_test)
                 <tr>
+                    <td>{{ $lab_test->name }}</td>
+                    <td>{{ $lab_test->code }}</td>
+                    <td>{{ $lab_test->category }}</td>
+                    <td>{{ $lab_test->requires_fasting ? 'Yes' : 'No' }}</td>
+                </tr>
+                @endforeach
+                {{-- <tr>
                     <td>Complete Blood Count</td>
                     <td>CBC001</td>
                     <td>Hematology</td>
@@ -157,24 +165,24 @@
                     <td>UR003</td>
                     <td>Clinical Microscopy</td>
                     <td>No</td>
-                </tr>
+                </tr> --}}
             </tbody>
         </table>
 
         <!-- Result -->
         <div class="section-title">Result Summary</div>
         <div class="info-box">
-            <p><strong>Updated At:</strong> April 20, 2025</p>
-            <p><strong>Result:</strong> Test completed. Results indicate slightly elevated cholesterol.</p>
-            <p><strong>Result Comments:</strong> Recommend low-fat diet and follow-up in 3 months.</p>
-            <p><strong>Is Abnormal:</strong> Yes</p>
+            <p><strong>Updated At:</strong> N/A</p>
+            <p><strong>Result:</strong> Test has been requested. Results are not yet available.</p>
+            <p><strong>Result Comments:</strong> N/A</p>
+            <p><strong>Is Abnormal:</strong> N/A</p>
         </div>
 
         <!-- Doctor Signature -->
         <div class="signature-section">
             <div class="signature-line"></div>
-            <p><strong>Dr. Juan Dela Cruz</strong></p>
-            <p>License No. 1234567</p>
+            <p><strong>{{ $lab_request->doctor->name }}, MD</strong></p>
+            <p>License No. {{ $lab_request->doctor->license_no }}</p>
         </div>
 
         <!-- Footer -->

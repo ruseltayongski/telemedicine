@@ -28,7 +28,7 @@ class BookedAppointmentSeeders extends Seeder
                     'booking_code' => $bookingCode,
                     'appointment_id' => 1,
                     'patient_id' => $patient->id,
-                    'status' => 'pending',
+                    'status' => 'confirmed',
                     'selected_time' => now()->addHours(4)->format('H:i:s'),
                     'remarks' => 'Consultation for general check-up.',
                     'created_at' => now(),

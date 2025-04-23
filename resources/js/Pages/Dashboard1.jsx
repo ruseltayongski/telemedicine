@@ -12,6 +12,36 @@ export default function DoctorDashboard({ doctorStats = {} }) {
         appointmentsToday: 8,
         appointmentsTomorrow: 6,
         completedAppointments: 842,
+        averageRating: 4.8,
+        totalReviews: 156,
+        upcomingLeave: {
+            start: "2025-05-15",
+            end: "2025-05-18",
+            reason: "Conference"
+        },
+        recentReviews: [
+            {
+                patientName: "Jane Smith",
+                rating: 5,
+                comment: "Dr. Johnson is very thorough and takes time to explain everything.",
+                date: "2025-04-18",
+                patientImg: "admin/assets/images/faces/5.jpg"
+            },
+            {
+                patientName: "Michael Brown",
+                rating: 4,
+                comment: "Great doctor, but had to wait a bit longer than expected.",
+                date: "2025-04-16",
+                patientImg: "admin/assets/images/faces/3.jpg"
+            },
+            {
+                patientName: "Sarah Wilson",
+                rating: 5,
+                comment: "Excellent care and follow-up. Highly recommended!",
+                date: "2025-04-12",
+                patientImg: "admin/assets/images/faces/4.jpg"
+            }
+        ],
         appointmentsByMonth: [65, 58, 70, 72, 75, 68, 80, 82, 78, 76, 72, 68],
         appointmentsByType: {
             new: 320,
@@ -97,19 +127,12 @@ export default function DoctorDashboard({ doctorStats = {} }) {
     // Merge provided stats with default stats
     const mergedDoctorStats = { ...defaultDoctorStats, ...doctorStats };
     
-    // Define the theme color
-    const themeColor = '#006838'; // Deep green theme color
-    const secondaryColor = '#4CAF50'; // Lighter green for contrast
-    const accentColor = '#8BC34A'; // Light green accent
-    const darkText = '#004025'; // Darker shade for text
-    const mediumText = '#006838'; // Main theme for headings
-    const lightText = '#3c9f63'; // Lighter shade for subheadings
-    
     const chartsRef = useRef({
         monthlyAppointmentsChart: null,
         appointmentTypesChart: null,
         patientAgeChart: null,
         patientGenderChart: null,
+        ratingChart: null
     });
 
     useEffect(() => {
@@ -139,20 +162,10 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                 name: 'Appointments',
                 data: mergedDoctorStats.appointmentsByMonth
             }],
-            colors: [themeColor], // Using the theme color
+            colors: ['#435ebe'],
             xaxis: {
                 categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
             },
-            theme: {
-                mode: 'light',
-                palette: 'palette1',
-                monochrome: {
-                    enabled: true,
-                    color: themeColor,
-                    shadeTo: 'light',
-                    shadeIntensity: 0.65
-                }
-            }
         };
         
         // Appointment Types Chart
@@ -162,7 +175,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                 mergedDoctorStats.appointmentsByType.followUp
             ],
             labels: ['New Patients', 'Follow-ups'],
-            colors: [themeColor, secondaryColor], // Theme color and secondary color
+            colors: ['#435ebe', '#55c6e8'],
             chart: {
                 type: 'donut',
                 width: '100%',
@@ -196,7 +209,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                     horizontal: true,
                 }
             },
-            colors: [themeColor], // Using the theme color
+            colors: ['#435ebe'],
             dataLabels: {
                 enabled: false
             },
@@ -209,7 +222,7 @@ export default function DoctorDashboard({ doctorStats = {} }) {
         const optionsPatientGender = {
             series: mergedDoctorStats.patientDemographics.gender.data,
             labels: mergedDoctorStats.patientDemographics.gender.labels,
-            colors: [themeColor, secondaryColor, accentColor], // Theme colors
+            colors: ['#435ebe', '#55c6e8', '#ffc107'],
             chart: {
                 type: 'pie',
                 width: '100%',
@@ -220,6 +233,65 @@ export default function DoctorDashboard({ doctorStats = {} }) {
             }
         };
         
+        // Rating Chart
+        const optionsRatingChart = {
+            series: [{
+                name: "Rating",
+                data: [mergedDoctorStats.averageRating]
+            }],
+            chart: {
+                height: 150,
+                type: 'bar',
+                toolbar: {
+                    show: false,
+                }
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 10,
+                    dataLabels: {
+                        position: 'top',
+                    },
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function (val) {
+                    return val + "/5";
+                },
+                offsetY: -20,
+                style: {
+                    fontSize: '12px',
+                    colors: ["#304758"]
+                }
+            },
+            colors: ['#198754'],
+            xaxis: {
+                categories: ["Average Rating"],
+                position: 'bottom',
+                axisBorder: {
+                    show: false
+                },
+                axisTicks: {
+                    show: false
+                },
+                tooltip: {
+                    enabled: false,
+                }
+            },
+            yaxis: {
+                axisBorder: {
+                    show: false
+                },
+                axisTicks: {
+                    show: false,
+                },
+                labels: {
+                    show: false,
+                },
+                max: 5
+            }
+        };
 
         setTimeout(() => {
             if (!chartsRef.current.monthlyAppointmentsChart) {
@@ -239,11 +311,16 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                     document.querySelector("#chart-patient-gender"), 
                     optionsPatientGender
                 );
+                chartsRef.current.ratingChart = new ApexCharts(
+                    document.querySelector("#chart-rating"), 
+                    optionsRatingChart
+                );
     
                 chartsRef.current.monthlyAppointmentsChart.render();
                 chartsRef.current.appointmentTypesChart.render();
                 chartsRef.current.patientAgeChart.render();
                 chartsRef.current.patientGenderChart.render();
+                chartsRef.current.ratingChart.render();
             }
         }, 100);
 
@@ -253,39 +330,18 @@ export default function DoctorDashboard({ doctorStats = {} }) {
 
     }, [mergedDoctorStats]);
     
-    // Custom CSS styles
-    const styles = {
-        pageHeader: {
-            color: darkText
-        },
-        cardHeader: {
-            color: mediumText,
-            borderBottom: `1px solid ${themeColor}20`
-        },
-        statTitle: {
-            color: lightText
-        },
-        statValue: {
-            color: darkText,
-            fontWeight: 'bold'
-        },
-        tableHeader: {
-            backgroundColor: `${themeColor}10`,
-            color: darkText
-        },
-        patientName: {
-            color: mediumText,
-            fontWeight: '600'
-        },
-        sectionTitle: {
-            color: darkText,
-            borderLeft: `4px solid ${themeColor}`,
-            paddingLeft: '10px'
-        },
-        chartContainer: {
-            padding: '15px',
-            backgroundColor: '#ffffff'
+    const renderStars = (rating) => {
+        const stars = [];
+        for(let i = 1; i <= 5; i++) {
+            if(i <= rating) {
+                stars.push(<i key={i} className="bi bi-star-fill text-warning"></i>);
+            } else if(i - 0.5 <= rating) {
+                stars.push(<i key={i} className="bi bi-star-half text-warning"></i>);
+            } else {
+                stars.push(<i key={i} className="bi bi-star text-warning"></i>);
+            }
         }
+        return stars;
     };
     
     return (
@@ -293,8 +349,8 @@ export default function DoctorDashboard({ doctorStats = {} }) {
             header={
                 <div className="page-heading">
                     <div className="d-flex justify-content-between align-items-center">
-                        <h3 style={styles.pageHeader}>Doctor Dashboard</h3>
-                        <button className="btn btn-primary" style={{ backgroundColor: themeColor, borderColor: themeColor }}>
+                        <h3>Doctor Dashboard</h3>
+                        <button className="btn btn-primary">
                             <i className="bi bi-calendar-plus me-2"></i>
                             Add Appointment
                         </button>
@@ -303,6 +359,39 @@ export default function DoctorDashboard({ doctorStats = {} }) {
             }
         >
             <Head title="Doctor Dashboard" />
+            
+            {/* Doctor Profile and Status */}
+            <section className="row">
+                <div className="col-12">
+                    <div className="card">
+                        <div className="card-body py-4 px-5">
+                            <div className="d-flex align-items-center">
+                                <div className="avatar avatar-xl">
+                                    <img src="admin/assets/images/faces/2.jpg" alt="Doctor" />
+                                </div>
+                                <div className="ms-3 name">
+                                    <h2 className="font-bold">{mergedDoctorStats.doctorName}</h2>
+                                    <h5 className="text-muted mb-0">{mergedDoctorStats.doctorSpecialty}</h5>
+                                </div>
+                                <div className="ms-auto text-end">
+                                    <div className="d-flex align-items-center mb-2">
+                                        <div className="me-3">
+                                            {renderStars(mergedDoctorStats.averageRating)}
+                                        </div>
+                                        <h5 className="mb-0">{mergedDoctorStats.averageRating}/5 ({mergedDoctorStats.totalReviews} reviews)</h5>
+                                    </div>
+                                    {mergedDoctorStats.upcomingLeave && (
+                                        <div className="badge bg-light-warning p-2">
+                                            <i className="bi bi-calendar-x me-1"></i>
+                                            Leave Scheduled: {mergedDoctorStats.upcomingLeave.start} to {mergedDoctorStats.upcomingLeave.end}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
             
             {/* Key Statistics Cards */}
             <section className="row">
@@ -313,15 +402,15 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                 <div className="card-body px-3 py-4-5">
                                     <div className="row">
                                         <div className="col-md-4">
-                                            <div className="stats-icon" style={{ backgroundColor: themeColor }}>
+                                            <div className="stats-icon blue">
                                                 <i className="iconly-boldProfile"></i>
                                             </div>
                                         </div>
                                         <div className="col-md-8">
-                                            <h6 className="text-muted font-semibold" style={styles.statTitle}>Total Patients</h6>
-                                            <h6 className="font-extrabold mb-0" style={styles.statValue}>{mergedDoctorStats.totalPatients}</h6>
-                                            <p className="text-sm mb-0">
-                                                <span style={{ color: secondaryColor, fontWeight: 'bold' }}>+{mergedDoctorStats.newPatients}</span> new this month
+                                            <h6 className="text-muted font-semibold">Total Patients</h6>
+                                            <h6 className="font-extrabold mb-0">{mergedDoctorStats.totalPatients}</h6>
+                                            <p className="text-muted text-sm mb-0">
+                                                <span className="text-success">+{mergedDoctorStats.newPatients}</span> new this month
                                             </p>
                                         </div>
                                     </div>
@@ -333,15 +422,15 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                 <div className="card-body px-3 py-4-5">
                                     <div className="row">
                                         <div className="col-md-4">
-                                            <div className="stats-icon" style={{ backgroundColor: secondaryColor }}>
+                                            <div className="stats-icon purple">
                                                 <i className="iconly-boldCalendar"></i>
                                             </div>
                                         </div>
                                         <div className="col-md-8">
-                                            <h6 className="text-muted font-semibold" style={styles.statTitle}>Today's Appointments</h6>
-                                            <h6 className="font-extrabold mb-0" style={styles.statValue}>{mergedDoctorStats.appointmentsToday}</h6>
-                                            <p className="text-sm mb-0">
-                                                <span style={{ color: themeColor, fontWeight: 'bold' }}>{mergedDoctorStats.appointmentsTomorrow}</span> scheduled tomorrow
+                                            <h6 className="text-muted font-semibold">Today's Appointments</h6>
+                                            <h6 className="font-extrabold mb-0">{mergedDoctorStats.appointmentsToday}</h6>
+                                            <p className="text-muted text-sm mb-0">
+                                                <span className="text-info">{mergedDoctorStats.appointmentsTomorrow}</span> scheduled tomorrow
                                             </p>
                                         </div>
                                     </div>
@@ -353,14 +442,14 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                 <div className="card-body px-3 py-4-5">
                                     <div className="row">
                                         <div className="col-md-4">
-                                            <div className="stats-icon" style={{ backgroundColor: accentColor }}>
+                                            <div className="stats-icon green">
                                                 <i className="iconly-boldTicket"></i>
                                             </div>
                                         </div>
                                         <div className="col-md-8">
-                                            <h6 className="text-muted font-semibold" style={styles.statTitle}>Completed</h6>
-                                            <h6 className="font-extrabold mb-0" style={styles.statValue}>{mergedDoctorStats.completedAppointments}</h6>
-                                            <p className="text-sm mb-0" style={{ color: '#666' }}>
+                                            <h6 className="text-muted font-semibold">Completed</h6>
+                                            <h6 className="font-extrabold mb-0">{mergedDoctorStats.completedAppointments}</h6>
+                                            <p className="text-muted text-sm mb-0">
                                                 Total completed appointments
                                             </p>
                                         </div>
@@ -373,15 +462,15 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                 <div className="card-body px-3 py-4-5">
                                     <div className="row">
                                         <div className="col-md-4">
-                                            <div className="stats-icon" style={{ backgroundColor: themeColor }}>
+                                            <div className="stats-icon red">
                                                 <i className="iconly-boldDocument"></i>
                                             </div>
                                         </div>
                                         <div className="col-md-8">
-                                            <h6 className="text-muted font-semibold" style={styles.statTitle}>Prescriptions</h6>
-                                            <h6 className="font-extrabold mb-0" style={styles.statValue}>{mergedDoctorStats.prescriptionStats.total}</h6>
-                                            <p className="text-sm mb-0">
-                                                <span style={{ color: secondaryColor, fontWeight: 'bold' }}>{mergedDoctorStats.prescriptionStats.thisMonth}</span> this month
+                                            <h6 className="text-muted font-semibold">Prescriptions</h6>
+                                            <h6 className="font-extrabold mb-0">{mergedDoctorStats.prescriptionStats.total}</h6>
+                                            <p className="text-muted text-sm mb-0">
+                                                <span className="text-primary">{mergedDoctorStats.prescriptionStats.thisMonth}</span> this month
                                             </p>
                                         </div>
                                     </div>
@@ -397,16 +486,16 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                 <div className="col-12 col-xl-8">
                     {/* Today's Appointments Table */}
                     <div className="card">
-                        <div className="card-header d-flex justify-content-between" style={styles.cardHeader}>
-                            <h4 style={{ color: darkText }}>Today's Appointments</h4>
+                        <div className="card-header d-flex justify-content-between">
+                            <h4>Today's Appointments</h4>
                             <div>
-                                <button className="btn btn-sm btn-outline-primary" style={{ borderColor: themeColor, color: themeColor }}>View All</button>
+                                <button className="btn btn-sm btn-outline-primary">View All</button>
                             </div>
                         </div>
                         <div className="card-body">
                             <div className="table-responsive">
                                 <table className="table table-hover">
-                                    <thead style={styles.tableHeader}>
+                                    <thead>
                                     <tr>
                                         <th>Time</th>
                                         <th>Patient</th>
@@ -419,32 +508,28 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                                     <tbody>
                                     {mergedDoctorStats.upcomingAppointments.map((appointment, index) => (
                                         <tr key={index}>
-                                            <td style={{ color: lightText, fontWeight: '500' }}>{appointment.time}</td>
+                                            <td>{appointment.time}</td>
                                             <td>
                                                 <div className="d-flex align-items-center">
                                                     <div className="avatar avatar-sm">
                                                         <img src={appointment.patientImg} alt={appointment.patientName} />
                                                     </div>
-                                                    <p className="font-bold ms-2 mb-0" style={styles.patientName}>{appointment.patientName}</p>
+                                                    <p className="font-bold ms-2 mb-0">{appointment.patientName}</p>
                                                 </div>
                                             </td>
                                             <td>{appointment.patientAge}</td>
                                             <td>
-                                                <span className={`badge`} 
-                                                      style={{ 
-                                                          backgroundColor: appointment.appointmentType === 'New' ? themeColor : secondaryColor,
-                                                          color: 'white'
-                                                      }}>
+                                                <span className={`badge bg-${appointment.appointmentType === 'New' ? 'primary' : 'info'}`}>
                                                     {appointment.appointmentType}
                                                 </span>
                                             </td>
-                                            <td style={{ color: '#555' }}>{appointment.reason}</td>
+                                            <td>{appointment.reason}</td>
                                             <td>
                                                 <div className="btn-group">
-                                                    <button className="btn btn-sm" style={{ backgroundColor: themeColor, color: 'white' }}>
+                                                    <button className="btn btn-sm btn-primary">
                                                         <i className="bi bi-file-medical"></i>
                                                     </button>
-                                                    <button className="btn btn-sm" style={{ backgroundColor: secondaryColor, color: 'white' }}>
+                                                    <button className="btn btn-sm btn-success">
                                                         <i className="bi bi-check-circle"></i>
                                                     </button>
                                                     <button className="btn btn-sm btn-secondary">
@@ -465,10 +550,10 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                         <div className="col-12">
                             {/* Monthly Appointments Chart */}
                             <div className="card">
-                                <div className="card-header" style={styles.cardHeader}>
-                                    <h4 style={{ color: darkText }}>Monthly Appointments</h4>
+                                <div className="card-header">
+                                    <h4>Monthly Appointments</h4>
                                 </div>
-                                <div className="card-body" style={styles.chartContainer}>
+                                <div className="card-body">
                                     <div id="chart-monthly-appointments"></div>
                                 </div>
                             </div>
@@ -479,20 +564,20 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                     <div className="row">
                         <div className="col-12 col-xl-6">
                             <div className="card">
-                                <div className="card-header" style={styles.cardHeader}>
-                                    <h4 style={{ color: darkText }}>Age Distribution</h4>
+                                <div className="card-header">
+                                    <h4>Age Distribution</h4>
                                 </div>
-                                <div className="card-body" style={styles.chartContainer}>
+                                <div className="card-body">
                                     <div id="chart-patient-age"></div>
                                 </div>
                             </div>
                         </div>
                         <div className="col-12 col-xl-6">
                             <div className="card">
-                                <div className="card-header" style={styles.cardHeader}>
-                                    <h4 style={{ color: darkText }}>Gender Distribution</h4>
+                                <div className="card-header">
+                                    <h4>Gender Distribution</h4>
                                 </div>
-                                <div className="card-body" style={styles.chartContainer}>
+                                <div className="card-body">
                                     <div id="chart-patient-gender"></div>
                                 </div>
                             </div>
@@ -501,58 +586,95 @@ export default function DoctorDashboard({ doctorStats = {} }) {
                 </div>
 
                 <div className="col-12 col-xl-4">
+                    {/* Rating Chart Card */}
+                    <div className="card">
+                        <div className="card-header">
+                            <h4>Rating</h4>
+                        </div>
+                        <div className="card-body d-flex flex-column align-items-center">
+                            <div id="chart-rating" className="w-100"></div>
+                            <p className="text-center mt-2">Based on {mergedDoctorStats.totalReviews} patient reviews</p>
+                        </div>
+                    </div>
 
                     {/* Appointment Types Chart */}
                     <div className="card">
-                        <div className="card-header" style={styles.cardHeader}>
-                            <h4 style={{ color: darkText }}>Appointment Types</h4>
+                        <div className="card-header">
+                            <h4>Appointment Types</h4>
                         </div>
-                        <div className="card-body" style={styles.chartContainer}>
+                        <div className="card-body">
                             <div id="chart-appointment-types"></div>
                         </div>
                     </div>
                     
+                    {/* Recent Patient Reviews */}
+                    <div className="card">
+                        <div className="card-header">
+                            <h4>Recent Reviews</h4>
+                        </div>
+                        <div className="card-content pb-4">
+                            {mergedDoctorStats.recentReviews.map((review, index) => (
+                                <div key={index} className="px-4 py-3 border-bottom">
+                                    <div className="d-flex align-items-center mb-2">
+                                        <div className="avatar avatar-sm me-2">
+                                            <img src={review.patientImg} alt={review.patientName} />
+                                        </div>
+                                        <div>
+                                            <h6 className="mb-0">{review.patientName}</h6>
+                                            <p className="text-muted text-sm mb-0">{review.date}</p>
+                                        </div>
+                                        <div className="ms-auto">
+                                            <div className="d-flex">
+                                                {renderStars(review.rating)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-muted mb-0">{review.comment}</p>
+                                </div>
+                            ))}
+                            <div className="px-4 py-3 text-center">
+                                <button className="btn btn-sm btn-outline-primary">View All Reviews</button>
+                            </div>
+                        </div>
+                    </div>
                     
                     {/* Quick Stats */}
                     <div className="card">
-                        <div className="card-header" style={styles.cardHeader}>
-                            <h4 style={{ color: darkText }}>Medical Activities</h4>
+                        <div className="card-header">
+                            <h4>Medical Activities</h4>
                         </div>
                         <div className="card-content pb-4">
                             <div className="px-4 py-3">
                                 <div className="d-flex justify-content-between align-items-center">
-                                    <h6 style={{ color: mediumText }}>Referrals Sent</h6>
-                                    <h5 className="font-bold" style={{ color: darkText }}>{mergedDoctorStats.referrals.sent}</h5>
+                                    <h6 className="text-muted">Referrals Sent</h6>
+                                    <h5 className="font-bold">{mergedDoctorStats.referrals.sent}</h5>
                                 </div>
                             </div>
                             <div className="px-4 py-3">
                                 <div className="d-flex justify-content-between align-items-center">
-                                    <h6 style={{ color: mediumText }}>Referrals Received</h6>
-                                    <h5 className="font-bold" style={{ color: darkText }}>{mergedDoctorStats.referrals.received}</h5>
+                                    <h6 className="text-muted">Referrals Received</h6>
+                                    <h5 className="font-bold">{mergedDoctorStats.referrals.received}</h5>
                                 </div>
                             </div>
                             <div className="px-4 py-3">
                                 <div className="d-flex justify-content-between align-items-center">
-                                    <h6 style={{ color: mediumText }}>Lab Requests</h6>
-                                    <h5 className="font-bold" style={{ color: darkText }}>{mergedDoctorStats.labRequestStats.total}</h5>
+                                    <h6 className="text-muted">Lab Requests</h6>
+                                    <h5 className="font-bold">{mergedDoctorStats.labRequestStats.total}</h5>
                                 </div>
                                 <div className="progress progress-sm mt-2">
                                     <div 
-                                        className="progress-bar" 
+                                        className="progress-bar bg-success" 
                                         role="progressbar" 
-                                        style={{ 
-                                            width: `${(mergedDoctorStats.labRequestStats.completed / mergedDoctorStats.labRequestStats.total) * 100}%`,
-                                            backgroundColor: themeColor 
-                                        }}
+                                        style={{ width: `${(mergedDoctorStats.labRequestStats.completed / mergedDoctorStats.labRequestStats.total) * 100}%` }}
                                     ></div>
                                 </div>
                                 <div className="d-flex justify-content-between mt-1">
-                                    <small style={{ color: secondaryColor }}>{mergedDoctorStats.labRequestStats.completed} completed</small>
-                                    <small style={{ color: '#888' }}>{mergedDoctorStats.labRequestStats.pending} pending</small>
+                                    <small>{mergedDoctorStats.labRequestStats.completed} completed</small>
+                                    <small>{mergedDoctorStats.labRequestStats.pending} pending</small>
                                 </div>
                             </div>
                             <div className="px-4 py-3 text-center">
-                                <button className="btn btn-sm" style={{ backgroundColor: themeColor, color: 'white' }}>Generate Medical Report</button>
+                                <button className="btn btn-sm btn-primary">Generate Medical Report</button>
                             </div>
                         </div>
                     </div>

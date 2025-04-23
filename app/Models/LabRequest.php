@@ -23,4 +23,9 @@ class LabRequest extends Model
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
+
+    public function booking()
+    {
+        return $this->belongsTo(BookedAppointment::class, 'booking_id');
+    }
 }

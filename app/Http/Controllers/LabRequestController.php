@@ -108,33 +108,18 @@ class LabRequestController extends Controller
 
     public function downloadLabRequestPdf(Request $request)
     {
-        $pdf = PDF::loadView('pdf.lab_request');
-        return $pdf->stream('sample-lab-request.pdf');
-        return $lab_request = LabRequest::with(['labTests', 'patient', 'doctor'])->where('patient_id', $request->patient_id)
+        // $pdf = PDF::loadView('pdf.lab_request');
+        // return $pdf->stream('sample-lab-request.pdf');
+        $lab_request = LabRequest::with(['booking', 'labTests', 'patient', 'doctor.facility'])
+            ->where('patient_id', $request->patient_id)
             ->where('doctor_id', $request->doctor_id)
             ->where('booking_id', $request->booking_id)
             ->first();
-
-        $lab_request_data = [
-            'content' => $lab_request->content,
-            'doctorName' => $lab_request->doctor->name,
-            'specialty' => $lab_request->doctor->specialization->name,
-            'clinicName' => $lab_request->doctor->facility->name,
-            'location' => $lab_request->doctor->address,
-            'phone' => $lab_request->doctor->contact,
-            'patientName' => $lab_request->patient->name,
-            'age' => Carbon::parse($lab_request->patient->dob)->age,
-            'address' => $lab_request->patient->address,
-            'date' => now()->format('m/d/Y'),
-            'dob' => Carbon::parse($lab_request->patient->dob)->format('F d, Y'),
-            'gender' => ucfirst($lab_request->patient->sex),
-            'labRequestNumber' => $lab_request->lab_request_no,
-            'licenseNumber' => $lab_request->doctor->license_no,
-            'ptrNumber' => $lab_request->doctor->ptr_number,
-        ];
-        
-        $pdf = Pdf::loadView('pdf.lab_request', $lab_request_data);
+        //return $lab_request->labTests;
+        $pdf = Pdf::loadView('pdf.lab_request', [
+            'lab_request' => $lab_request,
+        ]);
         $pdf->setPaper('a4');
-        return $pdf->stream('Lab Request - ' . $labRequest->booking->booking_code . '.pdf');
+        return $pdf->stream('Lab Request - ' . $lab_request->patient->name . '.pdf');
     }
 }
