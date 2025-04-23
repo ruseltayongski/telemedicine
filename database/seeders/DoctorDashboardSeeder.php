@@ -124,22 +124,22 @@ class DoctorDashboardSeeder extends Seeder
                 $statusIndex = array_rand($statuses);
                 $reasonIndex = array_rand($reasons);
                 
-                $bookingId = DB::table('booked_appointments')->insertGetId([
-                    'booking_code' => 'BK' . mt_rand(10000, 99999),
-                    'appointment_id' => $appointmentSlots[array_rand($appointmentSlots)],
-                    'patient_id' => $patients[$patientIndex],
-                    'status' => $month > 0 ? 'confirmed' : $statuses[$statusIndex],
-                    'type' => $types[$typeIndex],
-                    'selected_time' => $times[$timeIndex],
-                    'remarks' => $reasons[$reasonIndex],
-                    'created_at' => $date,
-                    'updated_at' => $date,
-                ]);
-                
-                $bookedAppointments[] = $bookingId;
-                
                 // Add prescriptions for completed appointments (80% chance)
                 if ($month > 0 && $statuses[$statusIndex] === 'confirmed' && rand(1, 100) <= 64) {
+                    $bookingId = DB::table('booked_appointments')->insertGetId([
+                        'booking_code' => 'BK' . mt_rand(10000, 99999),
+                        'appointment_id' => $appointmentSlots[array_rand($appointmentSlots)],
+                        'patient_id' => $patients[$patientIndex],
+                        'status' => $month > 0 ? 'confirmed' : $statuses[$statusIndex],
+                        'type' => $types[$typeIndex],
+                        'selected_time' => $times[$timeIndex],
+                        'remarks' => $reasons[$reasonIndex],
+                        'created_at' => $date,
+                        'updated_at' => $date,
+                    ]);
+                    
+                    $bookedAppointments[] = $bookingId;
+
                     DB::table('prescriptions')->insert([
                         'prescription_no' => 'RX' . mt_rand(100000, 999999),
                         'doctor_id' => $doctorId,

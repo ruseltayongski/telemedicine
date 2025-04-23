@@ -16,6 +16,7 @@ use App\Models\Appointment;
 use App\Models\Prescription;
 use App\Models\LabTest;
 use App\Models\LabRequest;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class HomeController extends Controller
 {
@@ -41,6 +42,14 @@ class HomeController extends Controller
             'facilities' => $facilities,
             'doctors' => $doctors,
         ]);
+    }
+
+    public function doctorReport() {        
+        $data = $this->dashboardData();
+        $pdf = PDF::loadView('pdf.doctor_report', [
+            'data' => $data
+        ]);
+        return $pdf->stream('Doctor Report.pdf');
     }
 
     public function dashboardData() {

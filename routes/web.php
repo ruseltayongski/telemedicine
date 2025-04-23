@@ -63,6 +63,7 @@ Route::match(['POST','GET'],'/video-call', [VideoCallController::class, 'index']
 Route::post('/lab-requests-create', [LabRequestController::class, 'labRequestCreate'])->name('lab-requests.create');
 Route::get('/lab-tests', [LabRequestController::class, 'labTests'])->name('lab-tests');
 Route::get('/lab-requests/pdf', [LabRequestController::class, 'downloadLabRequestPdf'])->name('laboratory.request.pdf');
+Route::get('/doctor/report', [HomeController::class, 'doctorReport'])->name('doctor.report');
 
 Route::middleware('guest')->group(function () {
     Route::post('login/request-otp', [AuthenticatedSessionController::class, 'requestOtp'])

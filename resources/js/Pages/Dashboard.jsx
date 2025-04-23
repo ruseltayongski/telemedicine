@@ -288,6 +288,11 @@ export default function DoctorDashboard({ doctorStats = {}, data }) {
             backgroundColor: '#ffffff'
         }
     };
+
+    const handleGenerateReport = () => {
+        const url = route('doctor.report'); // Assuming `route()` is globally available, like via Ziggy
+        window.open(url, '_blank');
+      };
     
     return (
         <AuthenticatedLayout
@@ -295,9 +300,9 @@ export default function DoctorDashboard({ doctorStats = {}, data }) {
                 <div className="page-heading">
                     <div className="d-flex justify-content-between align-items-center">
                         <h3 style={styles.pageHeader}>Doctor Dashboard</h3>
-                        <button className="btn btn-primary" style={{ backgroundColor: themeColor, borderColor: themeColor }}>
-                            <i className="bi bi-calendar-plus me-2" style={{ color: 'white'}}></i>
-                            Add Appointment
+                        <button onClick={handleGenerateReport} className="btn btn-primary" style={{ backgroundColor: themeColor, borderColor: themeColor }}>
+                            <i class="bi bi-file-earmark" style={{ marginRight: '5px',}}></i>
+                            Generate Report
                         </button>
                     </div>
                 </div>
