@@ -1,11 +1,13 @@
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import React, { useEffect, useRef, useState } from "react";
+import { set } from 'firebase/database';
 
 export default function Welcome({ canLogin, canRegister, auth, laravelVersion, phpVersion }) {
     const sliderRef = useRef(null);
     const [loadingFacilities, setLoadingFacilities] = useState(false);
     const [loadingDoctors, setLoadingDoctors] = useState(false);
+    const [showHero, setShowHero] = useState(false);
     useEffect(() => {
         setTimeout(() => {
             if (sliderRef.current) {
@@ -29,8 +31,9 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                         0: { items: 1 }
                     }
                 });
+                setShowHero(true);
             }
-        }, 100);
+        }, 300);
     }, []);
 
     // useEffect(() => {
@@ -172,9 +175,9 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                         }
                     ].map((slide, index) => (
                         <div className="single-slider" key={index} style={{ 
-                            height: "50vh",
+                            height: "50vh"
                         }}>
-                            <div className="container">
+                            <div className="container" style={{ display: showHero ? 'block' : 'none' }}>
                                 <div className="row">
                                     <div className="col-lg-6 col-md-12 col-12">
                                         <div className="hero-text wow fadeInLeft" data-wow-delay=".3s">
@@ -201,7 +204,7 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                             </div>
                         </div>
                     ))}
-                </div>
+                </div> 
             </section>
 
             <section className="appointment">
