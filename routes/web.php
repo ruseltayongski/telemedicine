@@ -64,6 +64,7 @@ Route::post('/lab-requests-create', [LabRequestController::class, 'labRequestCre
 Route::get('/lab-tests', [LabRequestController::class, 'labTests'])->name('lab-tests');
 Route::get('/lab-requests/pdf', [LabRequestController::class, 'downloadLabRequestPdf'])->name('laboratory.request.pdf');
 Route::get('/doctor/report', [HomeController::class, 'doctorReport'])->name('doctor.report');
+Route::get('/test/firebase', [HomeController::class, 'testFirebase'])->name('test.firebase');
 
 Route::middleware('guest')->group(function () {
     Route::post('login/request-otp', [AuthenticatedSessionController::class, 'requestOtp'])

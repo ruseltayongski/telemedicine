@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Mail;
+use Kreait\Laravel\Firebase\Facades\Firebase;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -82,7 +83,17 @@ class AuthenticatedSessionController extends Controller
 
         // Send OTP via email
         // $user->notify(new LoginOtpNotification($otp));
-        Mail::to($user->email)->send(new \App\Mail\OtpCodeMail($otp, $user->name));
+        if($request->otp_method == 'email') {
+            Mail::to($user->email)->send(new \App\Mail\OtpCodeMail($otp, $user->name));
+        }
+        else {
+            $database = Firebase::database();
+            $otpData = [
+                'message' => 'Hi '.$user->name.', your Telemedicine verification code is: '.$otp.'. This code will expire in 10 minutes. Do not share this code with anyone.',
+                'contact' => $user->contact,
+            ];
+            $database->getReference('otp')->push($otpData);
+        }
 
         return back()->with([
             'status' => 'We have sent a verification code to your email.',

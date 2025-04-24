@@ -17,9 +17,27 @@ use App\Models\Prescription;
 use App\Models\LabTest;
 use App\Models\LabRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Kreait\Laravel\Firebase\Facades\Firebase;
 
 class HomeController extends Controller
 {
+    public function testFirebase()
+    {
+        $database = Firebase::database();
+
+        $newData = [
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+            'role' => 'admin',
+        ];
+
+        // Set to a specific path
+        $database->getReference('users')->push($newData); // Auto-generated key
+        // Or use set() for specific key: $database->getReference('users/user123')->set($newData);
+
+        return response()->json(['message' => 'Data inserted to Firebase']);
+    }
+
     public function index(): Response
     {
         $specializations = DB::table('specializations')->select('id', 'name')->get();
