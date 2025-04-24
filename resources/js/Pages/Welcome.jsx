@@ -8,32 +8,103 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
     const [loadingFacilities, setLoadingFacilities] = useState(false);
     const [loadingDoctors, setLoadingDoctors] = useState(false);
     const [showHero, setShowHero] = useState(false);
+    // useEffect(() => {
+    //     const timer = setTimeout(() => {
+    //         if (sliderRef.current) {
+    //             tns({
+    //                 container: sliderRef.current,
+    //                 slideBy: "page",
+    //                 autoplay: true,
+    //                 autoplayButtonOutput: false,
+    //                 mouseDrag: true,
+    //                 gutter: 0,
+    //                 items: 1,
+    //                 nav: false,
+    //                 controls: true,
+    //                 controlsText: [
+    //                 '<i class="lni lni-chevron-left"></i>',
+    //                 '<i class="lni lni-chevron-right"></i>'
+    //                 ],
+    //                 responsive: {
+    //                     1200: { items: 1 },
+    //                     992: { items: 1 },
+    //                     0: { items: 1 }
+    //                 }
+    //             });
+    //             setShowHero(true);
+    //         }
+    //     }, 300);
+    // }, []);
     useEffect(() => {
-        setTimeout(() => {
-            if (sliderRef.current) {
-                tns({
-                    container: sliderRef.current,
-                    slideBy: "page",
-                    autoplay: true,
-                    autoplayButtonOutput: false,
-                    mouseDrag: true,
-                    gutter: 0,
-                    items: 1,
-                    nav: false,
-                    controls: true,
-                    controlsText: [
-                    '<i class="lni lni-chevron-left"></i>',
-                    '<i class="lni lni-chevron-right"></i>'
-                    ],
-                    responsive: {
-                        1200: { items: 1 },
-                        992: { items: 1 },
-                        0: { items: 1 }
-                    }
-                });
-                setShowHero(true);
+        // Make sure we only run this once
+        let sliderInstance = null;
+        
+        // Try to initialize the slider if ref is available
+        const initializeSlider = () => {
+          if (sliderRef.current && !sliderInstance) {
+            try {
+              sliderInstance = tns({
+                container: sliderRef.current,
+                slideBy: "page",
+                autoplay: true,
+                autoplayButtonOutput: false,
+                mouseDrag: true,
+                gutter: 0,
+                items: 1,
+                nav: false,
+                controls: true,
+                controlsText: [
+                  '<i class="lni lni-chevron-left"></i>',
+                  '<i class="lni lni-chevron-right"></i>'
+                ],
+                responsive: {
+                  1200: { items: 1 },
+                  992: { items: 1 },
+                  0: { items: 1 }
+                }
+              });
+              setShowHero(true);
+              console.log("Slider initialized successfully");
+            } catch (error) {
+              console.error("Failed to initialize slider:", error);
             }
-        }, 300);
+          }
+        };
+      
+        // Try immediately
+        initializeSlider();
+        
+        // Then try again with a longer delay for production environments
+        const timer = setTimeout(initializeSlider, 500);
+        
+        // If that doesn't work, try with MutationObserver to watch for DOM changes
+        const observer = new MutationObserver((mutations, obs) => {
+          if (sliderRef.current && !sliderInstance) {
+            initializeSlider();
+            if (sliderInstance) {
+              obs.disconnect(); // Stop observing once initialized
+            }
+          }
+        });
+        
+        // Start observing with a delay to ensure DOM is ready to be watched
+        setTimeout(() => {
+          if (document.body && !sliderInstance) {
+            observer.observe(document.body, { 
+              childList: true, 
+              subtree: true 
+            });
+          }
+        }, 100);
+        
+        // Clean up
+        return () => {
+          clearTimeout(timer);
+          observer.disconnect();
+          if (sliderInstance && typeof sliderInstance.destroy === 'function') {
+            sliderInstance.destroy();
+          }
+        };
     }, []);
 
     // useEffect(() => {
