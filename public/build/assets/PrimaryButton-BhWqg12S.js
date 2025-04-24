@@ -1,1 +1,0 @@
-import{j as p}from"./app-C96jTQFL.js";function a({className:r="",disabled:t,children:o,...n}){return p.jsx("button",{...n,className:`btn btn-dark text-uppercase fw-semibold px-4 py-2 ${t?"opacity-50":""} `+r,disabled:t,children:o})}export{a as P};
