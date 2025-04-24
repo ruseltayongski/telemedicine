@@ -51,6 +51,11 @@ class HomeController extends Controller
             ->select('id', 'name', 'specialization_id', 'facility_id')
             ->get();
 
+        $patients = DB::table('users')
+        ->where('role_id', 3)
+        ->select('id', 'name', 'specialization_id', 'facility_id')
+        ->get();
+
         return Inertia::render('Welcome', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
@@ -59,6 +64,7 @@ class HomeController extends Controller
             'specializations' => $specializations,
             'facilities' => $facilities,
             'doctors' => $doctors,
+            'patients' => $patients,
         ]);
     }
 

@@ -74,9 +74,11 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
             }, 100);
         }
     }, []);
+
+    const { specializations, facilities, doctors, selected, patients } = usePage().props;
     
     const counters = [1250, 350, 2500, 35];
-    const [counts, setCounts] = useState([0, 0, 0, 0]);
+    const [counts, setCounts] = useState([facilities.length, specializations.length, patients.length, 7]);
     // useEffect(() => {
     //     const interval = setInterval(() => {
     //     setCounts((prevCounts) =>
@@ -92,8 +94,6 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
     const bookAppointment = () => {
         router.get(route('calendar'));
     };
-
-    const { specializations, facilities, doctors, selected } = usePage().props;
 
     const [selectedSpecialization, setSelectedSpecialization] = useState(selected?.specialization ?? '');
     const [selectedType, setSelectedType] = useState(selected?.hospital_type ?? '');
@@ -350,7 +350,7 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                                 ["lni lni-apartment", "lni lni-sthethoscope", "lni lni-emoji-smile", "lni lni-certificate"][index]
                             }></i>
                             <h3 className="counter">{counts[index]}</h3>
-                            <p>{["Hospital Rooms", "Specialist Doctors", "Happy Patients", "Years of Experience"][index]}</p>
+                            <p>{["Hospitals", "Specialist Doctors", "Happy Patients", "Years of Experience"][index]}</p>
                             </div>
                         </div>
                         ))}

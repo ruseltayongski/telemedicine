@@ -6,18 +6,42 @@ Dear **{{ $booking->patient->name }}**,
 Your **follow-up appointment** has been successfully confirmed. Here are the details of your upcoming consultation:
 
 @component('mail::panel')
-<div style="text-align: center;">
-  <h2 style="margin-bottom: 5px; color: #4CAF50;">{{ $booking->appointment->title }}</h2>
-  <div style="font-size: 18px; font-weight: bold; margin: 10px 0;">
-      {{ \Carbon\Carbon::parse($booking->appointment->date_start)->format('l, F j, Y') }}
-  </div>
-  <div style="font-size: 20px; color: #2563EB; font-weight: bold; margin: 10px 0;">
-      {{ \Carbon\Carbon::parse($booking->selected_time)->format('h:i A') }}
-  </div>
-  <div style="margin-top: 10px;">
-      with <strong>Dr. {{ $booking->appointment->doctor->name }}</strong>
-  </div>
-</div>
+  {{-- <div style="text-align: center;">
+    <h2 style="margin-bottom: 5px; color: #4CAF50;">{{ $booking->appointment->title }}</h2>
+    <div style="font-size: 18px; font-weight: bold; margin: 10px 0;">
+        {{ \Carbon\Carbon::parse($booking->appointment->date_start)->format('l, F j, Y') }}
+    </div>
+    <div style="font-size: 20px; color: #2563EB; font-weight: bold; margin: 10px 0;">
+        {{ \Carbon\Carbon::parse($booking->selected_time)->format('h:i A') }}
+    </div>
+    <div style="margin-top: 10px;">
+        with <strong>Dr. {{ $booking->appointment->doctor->name }}</strong>
+    </div>
+  </div> --}}
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td align="center">
+        <table cellpadding="0" cellspacing="0" border="0" style="text-align: center;">
+          <tr>
+            <td>
+              <h2 style="margin-bottom: 5px; color: #4CAF50;">
+                {{ $booking->appointment->title }}
+              </h2>
+              <div style="font-size: 18px; font-weight: bold; margin: 10px 0;">
+                {{ \Carbon\Carbon::parse($booking->appointment->date_start)->format('l, F j, Y') }}
+              </div>
+              <div style="font-size: 20px; color: #2563EB; font-weight: bold; margin: 10px 0;">
+                {{ \Carbon\Carbon::parse($booking->selected_time)->format('h:i A') }}
+              </div>
+              <div style="margin-top: 10px;">
+                with <strong>Dr. {{ $booking->appointment->doctor->name }}</strong>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>   
 @endcomponent
 
 @if($booking->appointment->location)

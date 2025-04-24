@@ -18,8 +18,9 @@ export default function PrimaryButton({
         // </button>
         <button
             {...props}
-            className={`btn btn-dark text-uppercase fw-semibold px-4 py-2 ${disabled ? 'opacity-50' : ''} ` + className}
+            className={`btn text-uppercase fw-semibold px-4 py-2 ${disabled ? 'opacity-50' : ''} ` + className}
             disabled={disabled}
+            style={{ backgroundColor: '#006838', borderColor: '#004025' }}
         >
             {children}
         </button>
