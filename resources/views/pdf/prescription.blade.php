@@ -123,16 +123,24 @@
         
         <!-- Patient Information -->
         <div class="patient-info">
-            <div class="patient-info-left">
-                <p class="mb-2"><span class="fw-bold">NAME:</span> {{ $patientName }}</p>
-                <p class="mb-2"><span class="fw-bold">AGE:</span> {{ $age }}</p>
-                <p class="mb-0"><span class="fw-bold">ADDRESS:</span> {{ $address }}</p>
-            </div>
-            <div class="patient-info-right">
-                <p class="mb-2"><span class="fw-bold">DATE OF BIRTH:</span> <span style="color:#006838;">{{ $dob }}</span></p>
-                <p class="mb-2"><span class="fw-bold">SEX:</span> {{ $gender }}</p>
-                <p class="mb-0"><span class="fw-bold">PRESCRIPTION #:</span> <span style="color: #006838;">{{ $prescriptionNumber }}</span></p>
-            </div>
+            <table width="100%">
+                <tr>
+                    <td>
+                        <div class="patient-info-left">
+                            <p class="mb-2"><span class="fw-bold">NAME:</span> {{ $patientName }}</p>
+                            <p class="mb-2"><span class="fw-bold">AGE:</span> {{ $age }}</p>
+                            <p class="mb-0"><span class="fw-bold">ADDRESS:</span> {{ $address }}</p>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="patient-info-right">
+                            <p class="mb-2"><span class="fw-bold">DATE OF BIRTH:</span> <span style="color:#006838;">{{ $dob }}</span></p>
+                            <p class="mb-2"><span class="fw-bold">SEX:</span> {{ $gender }}</p>
+                            <p class="mb-0"><span class="fw-bold">PRESCRIPTION #:</span> <span style="color: #006838;">{{ $prescriptionNumber }}</span></p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
         
         <!-- Prescription -->

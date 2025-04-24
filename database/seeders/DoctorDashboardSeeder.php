@@ -65,7 +65,7 @@ class DoctorDashboardSeeder extends Seeder
         
         // Create availability for next 30 days
         for ($i = 0; $i < 30; $i++) {
-            $date = $now->copy()->addDays($i);
+            $date = $now->copy()->addDays($i+1);
             
             // Skip weekends
             if ($date->isWeekend()) {

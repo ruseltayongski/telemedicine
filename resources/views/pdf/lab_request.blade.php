@@ -114,12 +114,20 @@
         <!-- Patient Info -->
         <div class="section-title">Patient Information</div>
         <div class="info-box">
-            <p><strong>Name:</strong> {{ $lab_request->patient->name }}</p>
-            <p><strong>Age / Sex:</strong> {{ $lab_request->patient->age }} / {{ $lab_request->patient->sex }}</p>
-            <p><strong>Contact:</strong> {{ $lab_request->patient->contact }}</p>
-            <p><strong>Booking ID:</strong> {{ $lab_request->booking->booking_code }}</p>
-            <p><strong>Requested Date:</strong> {{ date('F d, Y', strtotime($lab_request->requested_date)) }}</p>
-            <p><strong>Scheduled Date:</strong> {{ date('F d, Y', strtotime($lab_request->scheduled_date)) }}</p>
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border: none;">
+                <tr>
+                    <td style="border: none;">
+                        <p><strong>Name:</strong> {{ $lab_request->patient->name }}</p>
+                        <p><strong>Age / Sex:</strong> {{ $lab_request->patient->age }} / {{ $lab_request->patient->sex }}</p>
+                        <p><strong>Contact:</strong> {{ $lab_request->patient->contact }}</p>
+                    </td>
+                    <td style="text-align: right;border: none;">
+                        <p><strong>Booking ID:</strong> {{ $lab_request->booking->booking_code }}</p>
+                        <p><strong>Requested Date:</strong> {{ date('F d, Y', strtotime($lab_request->requested_date)) }}</p>
+                        <p><strong>Scheduled Date:</strong> {{ date('F d, Y', strtotime($lab_request->scheduled_date)) }}</p>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <!-- Doctor Notes -->
