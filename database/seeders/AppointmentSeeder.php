@@ -88,8 +88,8 @@ class AppointmentSeeder extends Seeder
             Appointment::create([
                 'title' => $title,
                 'description' => 'Dermatology appointment for ' . strtolower($title) . '.',
-                'date_start' => $startDate->copy()->addDays($i)->format('Y-m-d'),
-                'date_end' => $startDate->copy()->addDays($i)->format('Y-m-d'),
+                'date_start' => $startDate->copy()->addDays($i-1)->format('Y-m-d'),
+                'date_end' => $startDate->copy()->addDays($i-1)->format('Y-m-d'),
                 'slot' => 10,
                 'doctor_id' => 3,
             ]);

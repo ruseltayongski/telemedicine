@@ -40,7 +40,7 @@ class UserSeeder extends Seeder
                 'role_id' => 3, // for patient
                 'email_verified_at' => now(),
                 'address' => 'Patient Street, City',
-                'contact' => '09234567890',
+                'contact' => '09564259618',
                 'sex' => 'male',
                 'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
                 'license_no' => null,
