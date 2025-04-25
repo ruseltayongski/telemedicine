@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/test-api', [HomeController::class, 'forReminders'])->name('test-api');
+Route::get('/dashboard-data', [HomeController::class, 'dashboardData'])->name('dashboard-data');
 
 Route::get('/dashboard', [HomeController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 

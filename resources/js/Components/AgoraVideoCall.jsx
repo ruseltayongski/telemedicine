@@ -253,14 +253,14 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
         setMessage(e.target.value);
         
         // Simulate typing indicator
-        if (e.target.value.length > 0) {
-          setIsTyping(true);
-          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-          typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 3000);
-        } else {
-          setIsTyping(false);
-          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-        }
+        // if (e.target.value.length > 0) {
+        //   setIsTyping(true);
+        //   if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        //   typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 3000);
+        // } else {
+        //   setIsTyping(false);
+        //   if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        // }
     };
     
     const toggleChat = () => {

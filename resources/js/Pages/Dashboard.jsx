@@ -246,7 +246,7 @@ export default function DoctorDashboard({ doctorStats = {}, data }) {
                 chartsRef.current.patientAgeChart.render();
                 chartsRef.current.patientGenderChart.render();
             }
-        }, 100);
+        }, 500);
 
         return () => {
             Object.values(chartsRef.current).forEach((chart) => chart?.destroy());
