@@ -423,7 +423,7 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
             }
         };
         
-        //joinChannel();
+        joinChannel();
         
         // Cleanup function
         return () => {
