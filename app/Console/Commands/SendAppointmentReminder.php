@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AppointmentReminder;
 use Illuminate\Support\Facades\DB;
+use Kreait\Laravel\Firebase\Facades\Firebase;
 
 class SendAppointmentReminder extends Command
 {
@@ -31,14 +32,36 @@ class SendAppointmentReminder extends Command
                 ->get();
 
         foreach ($appointments as $booking) {
-            $startTime = Carbon::parse($booking->appointment->date_start);
+            try {
+                $startTime = Carbon::parse($booking->appointment->date_start);
 
-            Mail::to($booking->patient->email)->send(new AppointmentReminder($booking, 'patient', $booking->patient->name));
-            Log::debug("Reminder sent to patient: {$booking->patient->email}");
-            Mail::to($booking->appointment->doctor->email)->send(new AppointmentReminder($booking, 'doctor', $booking->appointment->doctor->name));
+                Mail::to($booking->patient->email)->send(new AppointmentReminder($booking, 'patient', $booking->patient->name));
+                $message = "REMINDER: ".$booking->patient->name.", your online telemedicine virtual consultation begins in 15 minutes. Ensure your device is charged and your internet connection is stable";
+                $contact = $booking->patient->contact;
+                $this->sendBookingRemindersSms($message, $contact);
+                
+                
+                Log::debug("Reminder sent to patient: {$booking->patient->email}");
+                Mail::to($booking->appointment->doctor->email)->send(new AppointmentReminder($booking, 'doctor', $booking->appointment->doctor->name));
+                $message = "REMINDER: Dr. ".$booking->appointment->doctor->name.", your online telemedicine virtual consultation with patient ".$booking->patient->name." begins in 15 minutes. Please ensure your device is charged and your internet connection is stable.";
+                $contact = $booking->patient->contact;
+                $this->sendBookingRemindersSms($message, $contact);
+            } catch (\Exception $e) {
+                Log::error("Failed to send reminder for booking ID {$booking->id}: " . $e->getMessage());
+            }
         }
 
         $this->info('Appointment reminders sent.');
         Log::debug('Appointment reminder command completed');
+    }
+
+    public function sendBookingRemindersSms($message, $contact)
+    {
+        $database = Firebase::database();
+        $otpData = [
+            'message' => $message,
+            'contact' => $contact,
+        ];
+        $database->getReference('otp')->push($otpData);
     }
 }
