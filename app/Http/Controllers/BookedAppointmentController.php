@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BookedAppointment;
 use App\Models\Appointment;
+use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
