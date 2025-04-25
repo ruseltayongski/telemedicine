@@ -34,8 +34,8 @@ class UserSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Rusel Tayong',
-                'email' => 'ruseltayong@gmail.com',
+                'name' => 'Rodfil Tayong',
+                'email' => 'trodfil@gmail.com',
                 'password' => Hash::make('password'),
                 'role_id' => 3, // for patient
                 'email_verified_at' => now(),
@@ -46,7 +46,21 @@ class UserSeeder extends Seeder
                 'license_no' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
+            // [
+            //     'name' => 'Rusel Tayong',
+            //     'email' => 'ruseltayong@gmail.com',
+            //     'password' => Hash::make('password'),
+            //     'role_id' => 3, // for patient
+            //     'email_verified_at' => now(),
+            //     'address' => 'Patient Street, City',
+            //     'contact' => '09564259618',
+            //     'sex' => 'male',
+            //     'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
+            //     'license_no' => null,
+            //     'created_at' => now(),
+            //     'updated_at' => now(),
+            // ]
         ]);
 
         User::insert([
@@ -59,7 +73,7 @@ class UserSeeder extends Seeder
                 'facility_id' => 3,
                 'email_verified_at' => now(),
                 'address' => $faker->address,
-                'contact' => $faker->phoneNumber,
+                'contact' => '09682455120',
                 'sex' => 'female',
                 'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
                 'license_no' => strtoupper($faker->bothify('DOC-#####')),

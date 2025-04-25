@@ -384,17 +384,6 @@
         
         <div class="summary-container">
             <h3 class="summary-title">Medical Workflow Statistics</h3>
-            
-            <div class="summary-row">
-                <span class="summary-label">Referrals Sent</span>
-                <span class="summary-value">{{ $data['referrals']['sent'] }}</span>
-            </div>
-            
-            <div class="summary-row">
-                <span class="summary-label">Referrals Received</span>
-                <span class="summary-value">{{ $data['referrals']['received'] }}</span>
-            </div>
-            
             <div class="summary-row">
                 <span class="summary-label">Total Prescriptions</span>
                 <span class="summary-value">{{ $data['prescriptionStats']['total'] }}</span>
@@ -404,27 +393,11 @@
                 <span class="summary-label">Prescriptions This Month</span>
                 <span class="summary-value">{{ $data['prescriptionStats']['thisMonth'] }}</span>
             </div>
-            
-            <div class="summary-row">
-                <span class="summary-label">Lab Requests (Total)</span>
-                <span class="summary-value">{{ $data['labRequestStats']['total'] }}</span>
-            </div>
-            
-            <div class="summary-row">
-                <span class="summary-label">Lab Requests (Pending)</span>
-                <span class="summary-value">{{ $data['labRequestStats']['pending'] }}</span>
-            </div>
-            
-            <div class="summary-row">
-                <span class="summary-label">Lab Requests (Completed)</span>
-                <span class="summary-value">{{ $data['labRequestStats']['completed'] }}</span>
-            </div>
         </div>
     </div>
     
     <div class="footer">
         <p>This report was automatically generated for Dr. {{ $data['doctorName'] }}.</p>
-        <p>© {{ date('Y') }} HealthFlow Medical Practice Management System</p>
     </div>
 </body>
 </html>

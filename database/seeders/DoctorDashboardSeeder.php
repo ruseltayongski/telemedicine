@@ -73,11 +73,11 @@ class DoctorDashboardSeeder extends Seeder
             }
             
             $appointmentId = DB::table('appointments')->insertGetId([
-                'title' => 'Dr. Johnson\'s Appointments',
-                'description' => 'Regular consultation hours',
+                'title' => 'Dermatology Consultation',
+                'description' => 'Regular skin consultation hours with Dr. Johnson',
                 'date_start' => $date->format('Y-m-d'),
                 'date_end' => $date->format('Y-m-d'),
-                'slot' => 8, // 8 slots per day
+                'slot' => 8,
                 'doctor_id' => $doctorId,
                 'created_at' => now(),
                 'updated_at' => now(),
