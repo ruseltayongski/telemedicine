@@ -7036,6 +7036,11 @@ blockquote .shape {
 
 @media (max-width: 640px) {
   #hero-section-heading {
-    margin-top: 4rem !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    height: 100% !important;
+    margin-top: 0 !important;
   }
 }

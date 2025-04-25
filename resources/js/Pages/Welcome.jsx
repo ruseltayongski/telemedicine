@@ -246,7 +246,7 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                         }
                     ].map((slide, index) => (
                         <div className="single-slider" key={index} style={{ 
-                            height: "50vh"
+                            height: "50vh",
                         }}>
                             <div className="container" style={{ display: showHero ? 'block' : 'none' }}>
                                 <div className="row">
