@@ -217,7 +217,8 @@ class BookedAppointmentController extends Controller
             'remarks' => $request->remarks,
         ]);
 
-        Mail::to('ruseltayong@gmail.com')->send(new AppointmentConfirmed($booked));
+        $patient = User::find($request->patient_id);
+        Mail::to($patient->email)->send(new AppointmentConfirmed($booked));
 
         return response()->json([
             'message' => 'Follow-up appointment successfully saved.',

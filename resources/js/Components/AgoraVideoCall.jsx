@@ -1216,24 +1216,26 @@ const AgoraVideoCall = ({ channelName, appId, token, uid, patient_id, doctor_id,
                                 </div>
                             )}
 
-                            <div className="tooltip-container">
-                                <button 
-                                    onClick={openModalFollowUp}
-                                    className="btn btn-lg rounded-circle shadow"
-                                    style={{ 
-                                        width: '60px', 
-                                        height: '60px', 
-                                        display: 'flex', 
-                                        justifyContent: 'center', 
-                                        alignItems: 'center',
-                                        backgroundColor: '#4CAF50',
-                                        color: 'white'
-                                    }}
-                                >
-                                    <svg width="64px" height="64px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="none" d="M0 0H24V24H0z"></path> <path d="M21 3c.552 0 1 .448 1 1v14c0 .552-.448 1-1 1H6.455L2 22.5V4c0-.552.448-1 1-1h18zm-1 2H4v13.385L5.763 17H20V5zm-3 2v8h-2V7h2zm-6 1v1.999L13 10v2l-2-.001V14H9v-2.001L7 12v-2l2-.001V8h2z"></path> </g> </g></svg>
-                                    <span className="tooltip-text">Follow-up Appointment</span>
-                                </button>
-                            </div>
+                            {recipient === 'doctor' && (
+                                <div className="tooltip-container">
+                                    <button 
+                                        onClick={openModalFollowUp}
+                                        className="btn btn-lg rounded-circle shadow"
+                                        style={{ 
+                                            width: '60px', 
+                                            height: '60px', 
+                                            display: 'flex', 
+                                            justifyContent: 'center', 
+                                            alignItems: 'center',
+                                            backgroundColor: '#4CAF50',
+                                            color: 'white'
+                                        }}
+                                    >
+                                        <svg width="64px" height="64px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="none" d="M0 0H24V24H0z"></path> <path d="M21 3c.552 0 1 .448 1 1v14c0 .552-.448 1-1 1H6.455L2 22.5V4c0-.552.448-1 1-1h18zm-1 2H4v13.385L5.763 17H20V5zm-3 2v8h-2V7h2zm-6 1v1.999L13 10v2l-2-.001V14H9v-2.001L7 12v-2l2-.001V8h2z"></path> </g> </g></svg>
+                                        <span className="tooltip-text">Follow-up Appointment</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
