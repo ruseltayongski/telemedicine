@@ -41,34 +41,34 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
         
         // Try to initialize the slider if ref is available
         const initializeSlider = () => {
-          if (sliderRef.current && !sliderInstance) {
-            try {
-              sliderInstance = tns({
-                container: sliderRef.current,
-                slideBy: "page",
-                autoplay: true,
-                autoplayButtonOutput: false,
-                mouseDrag: true,
-                gutter: 0,
-                items: 1,
-                nav: false,
-                controls: true,
-                controlsText: [
-                  '<i class="lni lni-chevron-left"></i>',
-                  '<i class="lni lni-chevron-right"></i>'
-                ],
-                responsive: {
-                  1200: { items: 1 },
-                  992: { items: 1 },
-                  0: { items: 1 }
+            if (sliderRef.current && !sliderInstance) {
+                try {
+                    sliderInstance = tns({
+                        container: sliderRef.current,
+                        slideBy: "page",
+                        autoplay: true,
+                        autoplayButtonOutput: false,
+                        mouseDrag: true,
+                        gutter: 0,
+                        items: 1,
+                        nav: false,
+                        controls: true,
+                        controlsText: [
+                        '<i class="lni lni-chevron-left"></i>',
+                        '<i class="lni lni-chevron-right"></i>'
+                        ],
+                        responsive: {
+                        1200: { items: 1 },
+                        992: { items: 1 },
+                        0: { items: 1 }
+                        }
+                    });
+                    setShowHero(true);
+                    console.log("Slider initialized successfully");
+                } catch (error) {
+                    console.error("Failed to initialize slider:", error);
                 }
-              });
-              setShowHero(true);
-              console.log("Slider initialized successfully");
-            } catch (error) {
-              console.error("Failed to initialize slider:", error);
             }
-          }
         };
       
         // Try immediately
@@ -252,7 +252,7 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                                 <div className="row">
                                     <div className="col-lg-6 col-md-12 col-12">
                                         <div className="hero-text wow fadeInLeft" data-wow-delay=".3s">
-                                            <div className="section-heading" style={{ marginTop: '-100px' }}>
+                                            <div className="section-heading" id='hero-section-heading' style={{ marginTop: '-100px' }}>
                                                 <h2>{slide.title}</h2>
                                                 <p>{slide.text}</p>
                                                 {/* <div className="button">
@@ -283,11 +283,11 @@ export default function Welcome({ canLogin, canRegister, auth, laravelVersion, p
                     <div className="appointment-form">
                         <div className="row">
                             <div className="col-lg-6 col-12">
-                            <div className="appointment-title">
-                                <span>Appointment</span>
-                                <h2>Book An Appointment</h2>
-                                <p>Select your preferred specialization, hospital, and doctor to book an appointment.</p>
-                            </div>
+                                <div className="appointment-title">
+                                    <span>Appointment</span>
+                                    <h2>Book An Appointment</h2>
+                                    <p>Select your preferred specialization, hospital, and doctor to book an appointment.</p>
+                                </div>
                             </div>
                         </div>
                         <form onSubmit={handleSubmit}>

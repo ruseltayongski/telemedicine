@@ -506,23 +506,11 @@ export default function DoctorDashboard({ doctorStats = {}, data }) {
                     
                     
                     {/* Quick Stats */}
-                    <div className="card">
+                    {/* <div className="card">
                         <div className="card-header" style={styles.cardHeader}>
                             <h4 style={{ color: darkText }}>Medical Activities</h4>
                         </div>
                         <div className="card-content pb-4">
-                            {/* <div className="px-4 py-3">
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <h6 style={{ color: mediumText }}>Referrals Sent</h6>
-                                    <h5 className="font-bold" style={{ color: darkText }}>{mergedDoctorStats.referrals.sent}</h5>
-                                </div>
-                            </div>
-                            <div className="px-4 py-3">
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <h6 style={{ color: mediumText }}>Referrals Received</h6>
-                                    <h5 className="font-bold" style={{ color: darkText }}>{mergedDoctorStats.referrals.received}</h5>
-                                </div>
-                            </div> */}
                             <div className="px-4 py-3">
                                 <div className="d-flex justify-content-between align-items-center">
                                     <h6 style={{ color: mediumText }}>Lab Requests</h6>
@@ -543,11 +531,8 @@ export default function DoctorDashboard({ doctorStats = {}, data }) {
                                     <small style={{ color: '#888' }}>{mergedDoctorStats.labRequestStats.pending} pending</small>
                                 </div>
                             </div>
-                            {/* <div className="px-4 py-3 text-center">
-                                <button className="btn btn-sm" style={{ backgroundColor: themeColor, color: 'white' }}>Generate Medical Report</button>
-                            </div> */}
                         </div>
-                    </div>
+                    </div> */}
 
                     <div className="col-12">
                         <div className="card">

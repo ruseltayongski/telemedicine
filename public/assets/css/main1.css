@@ -7033,3 +7033,9 @@ blockquote .shape {
   visibility: visible;
   opacity: 1;
 }
+
+@media (max-width: 640px) {
+  #hero-section-heading {
+    margin-top: 4rem !important;
+  }
+}
