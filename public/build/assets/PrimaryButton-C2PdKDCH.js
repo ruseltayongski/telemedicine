@@ -1,1 +1,0 @@
-import{j as s}from"./app-DqX7Rd44.js";function p({className:t="",disabled:o,children:r,...e}){return s.jsx("button",{...e,className:`btn text-uppercase fw-semibold px-4 py-2 ${o?"opacity-50":""} `+t,disabled:o,style:{backgroundColor:"#006838",borderColor:"#004025"},children:r})}export{p as P};

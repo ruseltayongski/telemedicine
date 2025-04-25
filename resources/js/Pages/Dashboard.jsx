@@ -220,36 +220,86 @@ export default function DoctorDashboard({ doctorStats = {}, data }) {
                 position: 'bottom'
             }
         };
-        
-
-        setTimeout(() => {
-            if (!chartsRef.current.monthlyAppointmentsChart) {
-                chartsRef.current.monthlyAppointmentsChart = new ApexCharts(
-                    document.querySelector("#chart-monthly-appointments"), 
-                    optionsMonthlyAppointments
-                );
-                chartsRef.current.appointmentTypesChart = new ApexCharts(
-                    document.querySelector("#chart-appointment-types"), 
-                    optionsAppointmentTypes
-                );
-                chartsRef.current.patientAgeChart = new ApexCharts(
-                    document.querySelector("#chart-patient-age"), 
-                    optionsPatientAge
-                );
-                chartsRef.current.patientGenderChart = new ApexCharts(
-                    document.querySelector("#chart-patient-gender"), 
-                    optionsPatientGender
-                );
     
-                chartsRef.current.monthlyAppointmentsChart.render();
-                chartsRef.current.appointmentTypesChart.render();
-                chartsRef.current.patientAgeChart.render();
-                chartsRef.current.patientGenderChart.render();
+        // setTimeout(() => {
+        //     if (!chartsRef.current.monthlyAppointmentsChart) {
+        //         chartsRef.current.monthlyAppointmentsChart = new ApexCharts(
+        //             document.querySelector("#chart-monthly-appointments"), 
+        //             optionsMonthlyAppointments
+        //         );
+        //         chartsRef.current.appointmentTypesChart = new ApexCharts(
+        //             document.querySelector("#chart-appointment-types"), 
+        //             optionsAppointmentTypes
+        //         );
+        //         chartsRef.current.patientAgeChart = new ApexCharts(
+        //             document.querySelector("#chart-patient-age"), 
+        //             optionsPatientAge
+        //         );
+        //         chartsRef.current.patientGenderChart = new ApexCharts(
+        //             document.querySelector("#chart-patient-gender"), 
+        //             optionsPatientGender
+        //         );
+    
+        //         chartsRef.current.monthlyAppointmentsChart.render();
+        //         chartsRef.current.appointmentTypesChart.render();
+        //         chartsRef.current.patientAgeChart.render();
+        //         chartsRef.current.patientGenderChart.render();
+        //     }
+        // }, 100);
+
+        // Create a function to initialize charts when DOM elements are available
+        const initializeCharts = () => {
+            if (!chartsRef.current.monthlyAppointmentsChart && 
+                document.querySelector("#chart-monthly-appointments") &&
+                document.querySelector("#chart-appointment-types") &&
+                document.querySelector("#chart-patient-age") &&
+                document.querySelector("#chart-patient-gender")) {
+            
+            chartsRef.current.monthlyAppointmentsChart = new ApexCharts(
+                document.querySelector("#chart-monthly-appointments"), 
+                optionsMonthlyAppointments
+            );
+            chartsRef.current.appointmentTypesChart = new ApexCharts(
+                document.querySelector("#chart-appointment-types"), 
+                optionsAppointmentTypes
+            );
+            chartsRef.current.patientAgeChart = new ApexCharts(
+                document.querySelector("#chart-patient-age"), 
+                optionsPatientAge
+            );
+            chartsRef.current.patientGenderChart = new ApexCharts(
+                document.querySelector("#chart-patient-gender"), 
+                optionsPatientGender
+            );
+        
+            chartsRef.current.monthlyAppointmentsChart.render();
+            chartsRef.current.appointmentTypesChart.render();
+            chartsRef.current.patientAgeChart.render();
+            chartsRef.current.patientGenderChart.render();
+            
+            // Disconnect observer once charts are initialized
+            observer.disconnect();
             }
-        }, 500);
+        };
+        
+        // Create a MutationObserver to watch for DOM changes
+        const observer = new MutationObserver(initializeCharts);
+        
+        // Start observing the document body for DOM changes
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+        
+        // Try initializing immediately in case elements are already present
+        initializeCharts();
 
         return () => {
+            // Disconnect the observer when component unmounts
+            observer.disconnect();
+            // Destroy charts
             Object.values(chartsRef.current).forEach((chart) => chart?.destroy());
+            // Object.values(chartsRef.current).forEach((chart) => chart?.destroy());
         };
 
     }, [mergedDoctorStats]);
