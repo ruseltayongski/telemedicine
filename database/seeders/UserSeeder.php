@@ -34,13 +34,13 @@ class UserSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Rodfil Tayong',
+                'name' => 'Alex Jumao-as',
                 'email' => 'trodfil@gmail.com',
                 'password' => Hash::make('password'),
                 'role_id' => 3, // for patient
                 'email_verified_at' => now(),
                 'address' => 'Patient Street, City',
-                'contact' => '09998901910',
+                'contact' => '09454073739',
                 'sex' => 'male',
                 'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
                 'license_no' => null,
