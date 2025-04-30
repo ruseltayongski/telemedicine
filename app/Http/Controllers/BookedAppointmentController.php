@@ -15,6 +15,7 @@ use App\Mail\AppointmentConfirmed;
 use App\Mail\AppointmentCancelled;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class BookedAppointmentController extends Controller
 {
@@ -67,12 +68,27 @@ class BookedAppointmentController extends Controller
             return Redirect::back()->withErrors(['error' => 'Appointment slot not available']);
         }
 
+        // Check for overlapping appointments within ±30 mins on the same date
+        $selectedTime = Carbon::parse($request->selected_time);
+        $conflictingBooking = BookedAppointment::
+            where('appointment_id', $appointment->id)
+            ->get()
+            ->filter(function ($booking) use ($selectedTime) {
+                $existingTime = Carbon::parse($booking->selected_time);
+                return abs($existingTime->diffInMinutes($selectedTime)) < 30;
+            })
+            ->first();
+
+        if ($conflictingBooking) {
+            return Redirect::back()->withErrors(['error' => 'Theres another appointment within 30 minutes of the selected time. Please choose a different slot.', 'title' => 'Appointment Slot Conflict']);
+        }
+
         $existingBooking = BookedAppointment::where('appointment_id', $appointment->id)
             ->where('patient_id', Auth::id())
             ->first();
 
         if ($existingBooking && $type !== 'follow_up') {
-            return Redirect::back()->withErrors(['error' => 'You have already booked this appointment']);
+            return Redirect::back()->withErrors(['error' => 'You have already booked this appointment. Please check your schedule for details.', 'title' => 'Appointment Already Booked']);
         }
         
         $bookingCode = null;

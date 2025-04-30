@@ -33,34 +33,34 @@ class UserSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
-                'name' => 'Alex Jumao-as',
-                'email' => 'trodfil@gmail.com',
-                'password' => Hash::make('password'),
-                'role_id' => 3, // for patient
-                'email_verified_at' => now(),
-                'address' => 'Patient Street, City',
-                'contact' => '09454073739',
-                'sex' => 'male',
-                'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
-                'license_no' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
             // [
-            //     'name' => 'Rusel Tayong',
-            //     'email' => 'ruseltayong@gmail.com',
+            //     'name' => 'Alex Jumao-as',
+            //     'email' => 'trodfil@gmail.com',
             //     'password' => Hash::make('password'),
             //     'role_id' => 3, // for patient
             //     'email_verified_at' => now(),
             //     'address' => 'Patient Street, City',
-            //     'contact' => '09564259618',
+            //     'contact' => '09454073739',
             //     'sex' => 'male',
             //     'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
             //     'license_no' => null,
             //     'created_at' => now(),
             //     'updated_at' => now(),
-            // ]
+            // ],
+            [
+                'name' => 'Rusel Tayong',
+                'email' => 'ruseltayong@gmail.com',
+                'password' => Hash::make('password'),
+                'role_id' => 3, // for patient
+                'email_verified_at' => now(),
+                'address' => 'Patient Street, City',
+                'contact' => '09564259618',
+                'sex' => 'male',
+                'dob' => $faker->dateTimeBetween('-60 years', '-25 years')->format('Y-m-d'),
+                'license_no' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
 
         User::insert([

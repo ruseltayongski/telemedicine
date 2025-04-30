@@ -104,5 +104,10 @@ Route::post('/ai/prescription', function (Request $request) {
 });
 
 Route::post('/appointments/follow-up', [BookedAppointmentController::class, 'createFollowUpAppointment'])->name('appointments.follow-up');
+Route::get('/ai/symptom-checker', [HomeController::class, 'analyzeSymptoms']);
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::post('/analyze-symptoms', [HomeController::class, 'analyzeSymptoms']);
+// });
+Route::post('/analyze-symptoms', [HomeController::class, 'analyzeSymptoms']);
 
 require __DIR__.'/auth.php';

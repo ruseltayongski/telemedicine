@@ -18,9 +18,89 @@ use App\Models\LabTest;
 use App\Models\LabRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Kreait\Laravel\Firebase\Facades\Firebase;
+use OpenAI\Laravel\Facades\OpenAI;
+use App\Models\Specialization;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
+    public function analyzeSymptoms(Request $request)
+    {
+        try {
+            $specializations = Specialization::all()->pluck('name')->implode(', ');
+            $prompt = "You are a medical assistant AI. Analyze the following patient symptoms and recommend the most appropriate 3 medical specializations from this list: {$specializations}. 
+        
+            Patient symptoms: {$request->symptoms}
+            
+            Respond with a JSON format containing:
+            - recommended_specializations (array of objects with name, id, and reason)
+            - confidence_score (0-1)
+            - additional_advice (string)";
+            
+            $response = OpenAI::chat()->create([
+                'model' => 'gpt-4',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are a helpful medical assistant that recommends appropriate medical specialists based on patient symptoms.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => 0.3,
+            ]);
+            
+            $content = $response->choices[0]->message->content;
+            $result = json_decode($content, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception("Invalid JSON response from AI");
+            }
+            
+            foreach ($result['recommended_specializations'] as &$recommendation) {
+                $spec = Specialization::where('name', $recommendation['name'])->first();
+                if ($spec) {
+                    $recommendation['id'] = $spec->id;
+                }
+            }
+
+            $specialization_id = array_column($result['recommended_specializations'], 'id');
+            $doctors = User::with(['specialization'])->whereHas('specialization', function ($query) use ($specialization_id) {
+                            $query->whereIn('id', $specialization_id);
+                        })
+                        ->where('role_id', 2)
+                        ->get();
+            
+            $reasonMap = collect($result['recommended_specializations'])
+                        ->mapWithKeys(fn($item) => [$item['id'] => $item['reason']]);
+
+            $result['doctors'] = $doctors->map(function ($doctor) use ($reasonMap) {
+                $doctorArray = $doctor->toArray();
+                $doctorArray['reason'] = $reasonMap[$doctor->specialization_id] ?? null;
+                return $doctorArray;
+            });
+            
+            return response()->json([
+                'success' => true,
+                'data' => $result
+            ]);
+            // $cacheKey = 'symptoms_'.md5($request->symptoms);
+            // return Cache::remember($cacheKey, now()->addHours(6), function() use ($request) {
+                
+            // });
+        } catch (\OpenAI\Exceptions\ErrorException $e) {
+            Log::error('OpenAI API Error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'The AI service is currently unavailable. Please try again later.'
+            ], 503);
+        } catch (\Exception $e) {
+            Log::error('Symptom Analysis Error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while analyzing your symptoms.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function testFirebase()
     {
         $database = Firebase::database();

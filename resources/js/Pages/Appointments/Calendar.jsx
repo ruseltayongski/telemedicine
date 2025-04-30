@@ -104,11 +104,12 @@ export default function Calendar({ appointments }) {
                 });
             },
             onError: (errors) => {
+                console.log(errors);
                 setLoading(false);
                 setIsModalOpen(false);
                 Swal.fire({
-                    title: "Appointment Already Booked",
-                    text: "You have already booked this appointment. Please check your schedule for details.",
+                    title: errors.title,
+                    text: errors.error,
                     icon: "error"
                 });
             },
